@@ -1,0 +1,15 @@
+/.idea/
+/build*/
+/cmake-build-*/
+.ipynb_checkpoints
+**/*.engine
+**/*.engine.meta
+.vscode
+/.vs
+/out
+/source/third_party/tensorflow/lib/libtensorflow.so
+/source/third_party/tensorflow/lib/libtensorflow.so.1
+/source/third_party/tensorflow/lib/libtensorflow.so.1.15.0
+/source/third_party/tensorflow/lib/libtensorflow_framework.so
+/source/third_party/tensorflow/lib/libtensorflow_framework.so.1
+/source/third_party/tensorflow/lib/libtensorflow_framework.so.1.15.0
