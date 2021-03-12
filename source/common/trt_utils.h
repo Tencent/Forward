@@ -1,0 +1,272 @@
+// Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
+// the License.
+//
+// ╔════════════════════════════════════════════════════════════════════════════════════════╗
+// ║──█████████╗───███████╗───████████╗───██╗──────██╗───███████╗───████████╗───████████╗───║
+// ║──██╔══════╝──██╔════██╗──██╔════██╗──██║──────██║──██╔════██╗──██╔════██╗──██╔════██╗──║
+// ║──████████╗───██║────██║──████████╔╝──██║──█╗──██║──█████████║──████████╔╝──██║────██║──║
+// ║──██╔═════╝───██║────██║──██╔════██╗──██║█████╗██║──██╔════██║──██╔════██╗──██║────██║──║
+// ║──██║─────────╚███████╔╝──██║────██║──╚████╔████╔╝──██║────██║──██║────██║──████████╔╝──║
+// ║──╚═╝──────────╚══════╝───╚═╝────╚═╝───╚═══╝╚═══╝───╚═╝────╚═╝──╚═╝────╚═╝──╚═══════╝───║
+// ╚════════════════════════════════════════════════════════════════════════════════════════╝
+//
+// Authors: Aster JIAN (asterjian@qq.com)
+//          Yzx (yzxyzxyzx777@outlook.com)
+//          Ao LI (346950981@qq.com)
+//          Paul LU (lujq96@gmail.com)
+
+#pragma once
+
+#include <NvInfer.h>
+#include <cuda_fp16.h>
+#include <easylogging++.h>
+
+#include <algorithm>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#ifdef _MSC_VER
+#undef max
+#undef min
+#endif
+
+#include "common/fwd_common.h"
+
+FWD_NAMESPACE_BEGIN
+
+namespace TrtUtils {
+
+//////////////////////////////////////////
+//                                      //
+//              维度相关操作             //
+//        Dimension Manipulation        //
+//                                      //
+//////////////////////////////////////////
+
+// return true if has only one element
+static bool IsSingleElement(const nvinfer1::Dims& dims) {
+  int ele_count = 0;
+  for (int i = 0; i < dims.nbDims; ++i) {
+    if (dims.d[i] != 1) {
+      ++ele_count;
+    }
+  }
+  return ele_count <= 1;
+}
+
+// return a dimension that all dim are the same.
+static nvinfer1::Dims CreateAllSame(int nbDims, int dim) {
+  nvinfer1::Dims dims{
+      nbDims,
+  };
+  for (int i = 0; i < nbDims; ++i) {
+    dims.d[i] = dim;
+  }
+  return dims;
+}
+
+// return the volume of elements of the dimension
+inline int64_t Volume(const nvinfer1::Dims& d) {
+  return std::accumulate(d.d, d.d + d.nbDims, 1, std::multiplies<int64_t>());
+}
+
+// return the volume of elements of the given vector
+template <typename T>
+inline int64_t Volume(const std::vector<T>& vec) {
+  return std::accumulate(vec.begin(), vec.end(), 1, std::multiplies<T>());
+}
+
+static nvinfer1::Dims CreateSingleton(int nbDims) { return CreateAllSame(nbDims, 1); }
+
+static nvinfer1::Dims CreateZeros(int nbDims) { return CreateAllSame(nbDims, 0); }
+
+static bool Equal(const nvinfer1::Dims& d1, const nvinfer1::Dims& d2) {
+  if (d1.nbDims != d2.nbDims) return false;
+  for (int i = 0; i < d1.nbDims; ++i) {
+    if (d1.d[i] != d2.d[i]) return false;
+  }
+  return true;
+}
+
+// return the NHWC order transposed from a NCHW order
+template <typename T>
+static std::vector<T> NCHW2NHWC(const std::vector<T>& in_dim) {
+  if (in_dim.empty()) {
+    return in_dim;
+  }
+  CHECK_EQ(in_dim.size(), 4);
+  return {in_dim[0], in_dim[2], in_dim[3], in_dim[1]};
+}
+
+// return the NHWC order transposed from a NCHW order
+static nvinfer1::Dims NCHW2NHWC(const nvinfer1::Dims& in_dim) {
+  CHECK_EQ(in_dim.nbDims, 4);
+  return {in_dim.nbDims,
+          {
+              in_dim.d[0],
+              in_dim.d[2],
+              in_dim.d[3],
+              in_dim.d[1],
+          }};
+}
+
+// return the NCHW order transposed from a NHWC order
+template <typename T>
+static std::vector<T> NHWC2NCHW(const std::vector<T>& in_dim) {
+  if (in_dim.empty() || in_dim.size() != 4) {
+    return in_dim;
+  }
+  return {in_dim[0], in_dim[3], in_dim[1], in_dim[2]};
+}
+
+// return the NCHW dim position transposed from a NHWC dim position
+static int NHWC2NCHWDim(int dim) {
+  switch (dim) {
+    case 0:
+      return 0;
+    case 1:
+      return 2;
+    case 2:
+      return 3;
+    case 3:
+      return 1;
+    default:
+      CHECK(false);
+      return 0;
+  }
+}
+
+// return the NCHW order transposed from a NHWC order
+// Work when perms.size() = 4 only
+static std::vector<int> NHWC2NCHWDim(const std::vector<int>& perms) {
+  if (perms.size() != 4) {
+    return perms;
+  }
+
+  std::vector<int> results;
+  for (auto perm : perms) {
+    results.push_back(NHWC2NCHWDim(perm));
+  }
+  return results;
+}
+
+// return nvinfer1::Dims generated by the given vector
+template <typename T>
+static nvinfer1::Dims ToDims(const std::vector<T>& vec) {
+  CHECK_LE(vec.size(), nvinfer1::Dims::MAX_DIMS);
+  nvinfer1::Dims dims{-1};
+  dims.nbDims = static_cast<int>(vec.size());
+
+  for (size_t i = 0; i < vec.size(); ++i) {
+    dims.d[i] = static_cast<int>(vec[i]);
+  }
+  return dims;
+}
+
+// return nvinfer1::DimsHW generated by the given vector
+static nvinfer1::DimsHW ToDimsHW(const std::vector<int>& vec_hw) {
+  CHECK_EQ(vec_hw.size(), 2);
+  CHECK_GE(vec_hw[0], 0);
+  CHECK_GE(vec_hw[1], 0);
+  return {vec_hw[0], vec_hw[1]};
+}
+
+// return a vector of dimension generated by the given nvinfer1::Dims
+template <typename DataType = int>
+static std::vector<DataType> ToVector(const nvinfer1::Dims& dims) {
+  std::vector<DataType> res;
+  for (int i = 0; i < dims.nbDims; ++i) res.push_back(dims.d[i]);
+  return res;
+}
+
+// vector to nvinfer1::Permutation
+static nvinfer1::Permutation ToPermutation(const std::vector<int>& dims) {
+  nvinfer1::Permutation permutation;
+  memcpy(permutation.order, dims.data(), dims.size() * sizeof(int));
+  return permutation;
+}
+
+// nvinfer1::Dims to nvinfer1::Permutation
+static nvinfer1::Permutation ToPermutation(const nvinfer1::Dims& dims) {
+  nvinfer1::Permutation permutation;
+  memcpy(permutation.order, dims.d, dims.nbDims * sizeof(int));
+  return permutation;
+}
+
+// return string of vector
+template <typename T>
+static std::string ValueStrOf(const std::vector<T>& vec) {
+  std::stringstream ss;
+  ss << "(";
+  if (!vec.empty()) {
+    ss << vec[0];
+    for (size_t i = 1; i < vec.size(); ++i) {
+      ss << ", " << vec[i];
+    }
+  }
+  ss << ")";
+  return ss.str();
+}
+
+// return string of nvinfer1::Dims
+static std::string ShapeStrOf(const nvinfer1::Dims& dims) {
+  return ValueStrOf(std::vector<int>({dims.d, dims.d + dims.nbDims}));
+}
+
+// Broadcast nvinfer1::Dims to the new_nbDims. The nbDims of nvinfer1::Dims will be set as
+// new_nbDims. If old_nbDims < new_nbDims, for old_nbDims < i < new_nbDims,
+// nvinfer1::Dims.d[i] = 1.
+static nvinfer1::Dims BroadcastDims(const nvinfer1::Dims& record_dims, int nbDims) {
+  auto dims = record_dims;
+  for (int i = record_dims.nbDims - 1; i >= 0; i--) {
+    dims.d[nbDims - record_dims.nbDims + i] = dims.d[i];
+  }
+  for (int i = 0; i < nbDims - record_dims.nbDims; i++) {
+    dims.d[i] = 1;
+  }
+  dims.nbDims = nbDims;
+  return dims;
+}
+
+}  // namespace TrtUtils
+
+//////////////////////////////////////////
+//                                      //
+//                操作符重载             //
+//          Operator Overloading        //
+//                                      //
+//////////////////////////////////////////
+
+static nvinfer1::Dims operator-(const nvinfer1::Dims& d1, const nvinfer1::Dims& d2) {
+  CHECK_EQ(d1.nbDims, d2.nbDims);
+  nvinfer1::Dims res{d1.nbDims, {}};
+  std::transform(d1.d, d1.d + d1.nbDims, d2.d, res.d, std::minus<int>());
+  return res;
+}
+
+static bool operator==(const nvinfer1::Dims& d1, const nvinfer1::Dims& d2) {
+  if (d1.nbDims != d2.nbDims) {
+    return false;
+  }
+  for (int i = 0; i < d1.nbDims; ++i) {
+    if (d1.d[i] != d2.d[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static bool operator!=(const nvinfer1::Dims& d1, const nvinfer1::Dims& d2) { return !(d1 == d2); }
+
+FWD_NAMESPACE_END

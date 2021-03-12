@@ -1,0 +1,4 @@
+file (GLOB SIMPLE_UTILS_H_FILES *.h)
+file (GLOB SIMPLE_UTILS_CPP_FILES *.cpp)
+
+add_library(simple-utils STATIC ${SIMPLE_UTILS_H_FILES} ${SIMPLE_UTILS_CPP_FILES})
