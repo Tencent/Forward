@@ -10,7 +10,7 @@
 
 ## 简介
 
-Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了一种解析方案，可直接加载主流框架模型（Tensorflow / PyTorch / Keras）转换成 TensorRT 推理加速引擎，帮助用户节省中间繁杂的模型转换或网络构建步骤。相对于直接使用 Tensor，Forward 更易用以及更容易扩展支持更多模型和算子。目前，Forward 除了覆盖支持主流的 CV，NLP 及推荐领域的深度学习模型外，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型。
+Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了一种解析方案，可直接加载主流框架模型（Tensorflow / PyTorch / Keras）转换成 TensorRT 推理加速引擎，帮助用户节省中间繁杂的模型转换或网络构建步骤。相对于直接使用 TensorRT，Forward 更易用以及更容易扩展支持更多模型和算子。目前，Forward 除了覆盖支持主流的 CV，NLP 及推荐领域的深度学习模型外，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型。
 
 ## 特点
 
