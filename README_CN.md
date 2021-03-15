@@ -151,16 +151,23 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 ## 贡献
 
 1. 联系进入开源共建交流讨论群。
-2. 在 Issues 中提出贡献需求。
-3. 参考 [CONTRIBUTING.md](CONTRIBUTING.md) 进行开源共建。
+2. 参考 [CONTRIBUTING.md](CONTRIBUTING.md) 进行开源共建。
+
+## 贡献者
+
+<table><tbody>
+<tr><td><a target="_blank" href="https://github.com/aster2013"><img width="32px" src="https://avatars.githubusercontent.com/u/5548857?s=460&amp;v=4"> Aster JIAN </a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/yuanzexi"><img width="32px" src="https://avatars.githubusercontent.com/u/14813536?s=460&amp;v=4"> Zexi YUAN </a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/liao1995"><img width="32px" src="https://avatars.githubusercontent.com/u/12250510?s=460&amp;v=4"> Ao LI </a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/lujq96"><img width="32px" src="https://avatars.githubusercontent.com/u/34331938?s=400&amp;v=4"> Paul LU </a></td></tr>
+</tbody></table>
+
+感谢所有贡献者，欢迎更多人加入一起贡献。
 
 ## 许可证
 
 详情见 [LISENCE](LICENSE)
 
-
-
-
 ## 交流QQ群：776314438
-![qq_group_776314438](doc/img/qq_group_776314438.png)
 
+![qq_group_776314438](doc/img/qq_group_776314438.png)
