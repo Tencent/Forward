@@ -18,6 +18,7 @@ Forward 具有以下特点：
 
 - **模型性能优化高**：基于 TensorRT API 开发网络层级的支持，保证对于通用网络层级的推理性能优化处于最优级别。
 - **模型支持范围广**：除了通用的 CV，NLP，及推荐类模型，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型。
+- **多种推理模式**：支持 FLOAT / HALF / INT8 推理模式。
 - **接口简单易用**：直接导入已训练好的 Tensorflow(.pb) / PyTorch(.pth) / Keras(.h5) 导出的模型文件，隐式转换为高性能的推理 Engine 进行推理加速。
 - **支持自研扩展**：可根据业务模型[扩展支持自定义网络层级](doc/cn/usages/add_support_op_CN.md)。
 - **支持 C++ 和 Python 接口调用**。

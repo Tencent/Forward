@@ -35,6 +35,7 @@ Forward is a library for high performance deep learning inference on NVIDIA GPUs
 
 - Utilize TensorRT API and customized operators for high-performance deep learning inference.
 - Support not only mainstream deep learning models in CV, NLP and  Recommend fields, but also advanced models such as BERT, GAN, FaceSwap, StyleTransfer.
+- Support FLOAT/HALF/INT8 infer modes.
 - Easy to use: Load directly Tensorflow(.pb)/PyTorch(.pth)/Keras(.h5) models and then do inference with TensorRT.
 - Easy to expand: Register customized layers refer to [add_support_op.md](doc/en/usages/add_support_op.md).
 - Provide C++ and Python interfaces.
@@ -138,7 +139,7 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 
 **Notice**: The name of INPUT in models can be viewed by model viewers, such as [Netron](https://github.com/lutzroeder/Netron).
 
-#### More Usages 
+#### More Usages
 
 - [PyTorch usages](doc/en/usages/torch_usage.md)
 - [TensorFlow usages](doc/en/usages/tf_usage.md)
@@ -147,6 +148,10 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 ## FAQ
 
 [FAQ](doc/en/usages/FAQ.md)
+
+- [Infer modes](doc/en/usages/#Infer-modes)
+- [engine with INT8 mode cannot be built](doc/en/usages/#engine-with-INT8-mode-cannot-be-built)
+- [Core dumped in multi-thread scenarios](doc/en/usages/#Core-dumped-in-multi-thread-scenarios)
 
 ## Models & Operators
 

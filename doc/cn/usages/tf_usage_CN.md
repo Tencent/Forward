@@ -46,6 +46,8 @@ make -j
 
 ## Dynamic batch inputs
 
+**注意**: 仅当 TensorRT 版本大于 7.1.xx.xx 时，才可在 INT8 推理模式下使用动态批量输入功能。
+
 ### CMake options
 
 - 当动态批量功能开关打开 `-DENABLE_DYNAMIC_BATCH=ON` 时, Engine 可用 1 < `batch_size` < `max_batch_size` 的任意 batch_size 来进行推理. 另外, 也可以设置一个 `opt_batch_size`, 则 Engine 将会根据此批量大小进行针对性优化.

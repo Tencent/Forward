@@ -1,4 +1,4 @@
-# Forward-PyTorch 
+# Forward-PyTorch
 
 ----
 
@@ -99,6 +99,8 @@ make -j
 ```
 
 ## Dynamic batch inputs
+
+**注意**: 仅当 TensorRT 版本大于 7.1.xx.xx 时，才可在 INT8 推理模式下使用动态批量输入功能。
 
 ### CMake options
 

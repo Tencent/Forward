@@ -103,6 +103,8 @@ make -j
 
 ## Dynamic batch inputs
 
+**Notice**: Dynamic batch inputs support INT8 mode ONLY when TensorRT version > 7.1.xx.xx.
+
 ### CMake options
 
 - Set `-DENABLE_DYNAMIC_BATCH=ON` to support dynamic batch inputs, then `batch_size` between 1 and `max_batch_size` can be valid during inference periods. In this case, Forward engines will be optimized according to `opt_batch_size`.
