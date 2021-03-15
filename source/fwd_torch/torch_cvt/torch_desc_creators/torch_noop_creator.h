@@ -47,18 +47,6 @@ class TLayerDescCreator<TrtNoopDesc> : public ILayerDescCreator {
     const auto kind = node->kind();
 
     return kind == c10::prim::ListConstruct || kind == c10::prim::TupleConstruct;
-    // || kind == c10::prim::ListUnpack;
-    /*|| kind == c10::aten::contiguous
-    || kind == c10::aten::detach
-    || kind == c10::aten::device
-    || kind == c10::aten::squeeze
-    || kind == c10::aten::dropout
-    || kind == c10::Symbol::fromQualString("aten::dropout_")
-    || kind == c10::aten::feature_dropout
-    || kind == c10::aten::to
-    || kind == c10::aten::expand_as; //
-    expand_as后接element_wise时会自动broadcast
-    */
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
@@ -75,28 +63,9 @@ class TLayerDescCreator<TrtNoopDesc> : public ILayerDescCreator {
 
     const auto inputs = node->inputs();
 
-    /*if (kind == c10::aten::contiguous
-        || kind == c10::aten::detach
-        || kind == c10::aten::device
-        || kind == c10::aten::squeeze
-        || kind == c10::aten::dropout
-        || kind == c10::Symbol::fromQualString("aten::dropout_")
-        || kind == c10::aten::feature_dropout
-        || kind == c10::aten::to
-                        || kind == c10::aten::expand_as)
-    {
-        Utils::ExtractAllInputs(inputs[0], input_values);
+    for (auto input : inputs) {
+      Utils::ExtractAllInputs(input, input_values);
     }
-    else*/
-    if (kind == c10::prim::ListConstruct || kind == c10::prim::TupleConstruct) {
-      for (auto input : inputs) {
-        Utils::ExtractAllInputs(input, input_values);
-      }
-    }
-    // else if (kind == c10::prim::ListUnpack)
-    // {
-    //     input_values.push_back(node->input());
-    // }
 
     return layer_desc;
   }

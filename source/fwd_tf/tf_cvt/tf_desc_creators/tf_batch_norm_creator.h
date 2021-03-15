@@ -128,6 +128,10 @@ class TLayerDescCreator<TrtNormalizationDesc> : public ILayerDescCreator {
 
     auto layer_desc = std::make_shared<TrtNormalizationDesc>();
 
+    layer_desc->use_fp16 = graph.Mode() == InferMode::HALF || graph.Mode() == InferMode::INT8;
+    layer_desc->use_int8 = graph.Mode() == InferMode::INT8_CALIB || graph.Mode() == InferMode::INT8;
+    layer_desc->use_calib_mode = graph.Mode() == InferMode::INT8_CALIB;
+
     layer_desc->use_input_stats = true;
     layer_desc->type = TrtNormalizationType::BATCH_NORMALIZATION;
     layer_desc->scales = Utils::ToFwdWeights(weights_tensor);

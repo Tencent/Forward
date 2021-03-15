@@ -91,7 +91,7 @@ inline std::string StringOf(nvinfer1::DataType type) {
   }
 }
 
-inline nvinfer1::DataType GetMHAType(bool use_fp16, bool use_int8, bool is_calib_mode) {
+inline nvinfer1::DataType GetDataType(bool use_fp16, bool use_int8, bool is_calib_mode) {
   nvinfer1::DataType dtype = nvinfer1::DataType::kFLOAT;
   if (use_fp16) dtype = nvinfer1::DataType::kHALF;
   if (use_int8 && !is_calib_mode) dtype = nvinfer1::DataType::kINT8;

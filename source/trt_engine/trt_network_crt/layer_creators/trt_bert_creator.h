@@ -122,7 +122,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     // if use_int8, use kFLOAT here.
     const int use_fp16 = bert_desc->use_fp16 ? 1 : 0;
     const auto mha_type =
-        TrtCommon::GetMHAType(bert_desc->use_fp16, bert_desc->use_int8, bert_desc->calib_mode);
+        TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, bert_desc->calib_mode);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
         bert::EMB_LAYER_NORM_NAME, bert::EMB_LAYER_NORM_VERSION);
@@ -213,7 +213,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     // requiring that hidden_size is 768 or 1024
     if (bert_desc->hidden_size != 768 && bert_desc->hidden_size != 1024) use_int8 = false;
 
-    const auto dtype = TrtCommon::GetMHAType(bert_desc->use_fp16, use_int8, bert_desc->calib_mode);
+    const auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, use_int8, bert_desc->calib_mode);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
         bert::SKIP_LAYER_NORM_NAME, bert::SKIP_LAYER_NORM_VERSION);
@@ -273,7 +273,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     const int has_mask = input_mask != nullptr ? 1 : 0;
     // here we do not use int mode for qkv layer by default, because we found
     // that it results in large errors!
-    auto dtype = TrtCommon::GetMHAType(bert_desc->use_fp16, bert_desc->use_int8, true);
+    auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, true);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
         bert::QKV_TO_CONTEXT_PLUGIN_NAME, bert::QKV_TO_CONTEXT_PLUGIN_VERSION);

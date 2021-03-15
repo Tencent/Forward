@@ -51,7 +51,7 @@ Tensor TfEngine::ParseInput(TF_Tensor* input) const {
   Tensor input_buffer;
   if (TF_TensorType(input) == TF_INT32) {
     input_buffer.data_type = DataType::INT32;
-  } else if (engine_->GetMode() == InferMode::HALF && TF_TensorType(input) == TF_HALF) {
+  } else if (TF_TensorType(input) == TF_HALF) {
     input_buffer.data_type = DataType::HALF;
   }
 

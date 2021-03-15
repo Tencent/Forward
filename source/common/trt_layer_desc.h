@@ -191,12 +191,13 @@ struct TrtNormalizationDesc : TrtLayerDesc {
   bool affine;
   bool use_input_stats;
   TrtNormalizationType type;
+  bool use_fp16;
+  bool use_int8;
+  bool use_calib_mode;
 
   // fields below are kept for skip layer norm
   int leading_dim;
   FwdWeights zeros;
-  bool use_fp16;
-  bool use_int8;
 
   int max_batch_size{-1};
 };

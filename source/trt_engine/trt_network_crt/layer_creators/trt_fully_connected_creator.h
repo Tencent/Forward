@@ -57,11 +57,9 @@ class TLayerCreator<TrtFullyConnectedDesc> : public ILayerCreator {
       const auto shuffle = network->addShuffle(*input);
 #ifdef USE_DYNAMIC_BATCH
       dims.d[0] = 0;
-      const auto kv = fully_connected_desc->kernelWeights.Dims();
-      if (dims.nbDims == 2) dims.d[1] = kv.d[1];
-      if (dims.nbDims == 3) {
-        dims.d[2] = kv.d[1];
-      }
+      const int ld =
+          fully_connected_desc->kernelWeights.Count() / fully_connected_desc->nbOutputChannels;
+      dims.d[dims.nbDims - 1] = ld;
 #endif
       dims.d[dims.nbDims++] = 1;
       dims.d[dims.nbDims++] = 1;

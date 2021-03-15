@@ -171,6 +171,13 @@ class TorchNormalizationCreator : public ILayerDescCreator {
 
     auto layer_desc = std::make_shared<TrtNormalizationDesc>();
 
+    // Work Mode
+    layer_desc->use_fp16 =
+        (module.GetMode() == InferMode::HALF) || (module.GetMode() == InferMode::INT8);
+    layer_desc->use_int8 =
+        (module.GetMode() == InferMode::INT8_CALIB) || (module.GetMode() == InferMode::INT8);
+    layer_desc->use_calib_mode = module.GetMode() == InferMode::INT8_CALIB;
+
     input_values.push_back(inputs[0]);
     layer_desc->max_batch_size = module.GetMaxBatchSize();
 

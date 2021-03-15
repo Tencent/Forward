@@ -103,7 +103,8 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
 
     field_data.emplace_back("type", &norm_desc->type, nvinfer1::PluginFieldType::kINT32, 1);
 
-    nvinfer1::DataType input_type = network->getInput(0)->getType();
+    auto input_type =
+        TrtCommon::GetDataType(norm_desc->use_fp16, norm_desc->use_int8, norm_desc->use_calib_mode);
     field_data.emplace_back("data_type", &input_type, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("max_batch_size", &norm_desc->max_batch_size,
                             nvinfer1::PluginFieldType::kINT32, 1);
@@ -146,7 +147,7 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
     field_data.emplace_back("gamma", norm_desc->scales.Data(), nvinfer1::PluginFieldType::kFLOAT32,
                             norm_desc->scales.Count());
 
-    const auto dtype = TrtCommon::GetMHAType(norm_desc->use_fp16, norm_desc->use_int8, true);
+    const auto dtype = TrtCommon::GetDataType(norm_desc->use_fp16, norm_desc->use_int8, true);
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
 
     // fill data

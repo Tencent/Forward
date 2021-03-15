@@ -47,7 +47,8 @@ class TLayerDescCreator<TrtIdentityDesc> : public ILayerDescCreator {
             kind == c10::aten::device || kind == c10::aten::squeeze || kind == c10::aten::dropout ||
             kind == c10::Symbol::fromQualString("aten::dropout_") ||
             kind == c10::aten::feature_dropout || kind == c10::aten::to ||
-            kind == c10::aten::expand_as || kind == c10::prim::ListUnpack);
+            kind == c10::aten::expand_as || kind == c10::prim::ListUnpack ||
+            kind == c10::prim::TupleUnpack);
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
