@@ -76,10 +76,10 @@ const char* tf_root_dir = "../../../data/tf_unit_tests/";
 const char* keras_root_dir = "../../../data/keras_unit_tests/";
 const char* models_dir = "../../../models/";
 #else
-const char* torch_root_dir = "../../../../src/data/torch_unit_tests/";
-const char* tf_root_dir = "../../../../src/data/tf_unit_tests/";
-const char* keras_root_dir = "../../../../src/data/keras_unit_tests/";
-const char* models_dir = "../../../../src/models/";
+const char* torch_root_dir = "../../data/torch_unit_tests/";
+const char* tf_root_dir = "../../data/tf_unit_tests/";
+const char* keras_root_dir = "../../data/keras_unit_tests/";
+const char* models_dir = "../../models/";
 #endif
 
 template <typename T>
