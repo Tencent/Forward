@@ -21,6 +21,7 @@
     - [Models](#models)
     - [Operators](#operators)
   - [Contribution](#contribution)
+  - [Contributors](#contributors)
   - [License](#license)
 
 ----
@@ -169,6 +170,19 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 ## Contribution
 
 [CONTRIBUTING](CONTRIBUTING.md)
+
+## Contributors
+
+<table><tbody>
+<tr><td><a target="_blank" href="https://github.com/aster2013"><img width="32px" src="https://avatars.githubusercontent.com/u/5548857?s=460&amp;v=4">Aster JIAN (asterjian@qq.com)</a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/yuanzexi"><img width="32px" src="https://avatars.githubusercontent.com/u/14813536?s=460&amp;v=4">Yzx (yzxyzxyzx777@outlook.com)</a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/liao1995"><img width="32px" src="https://avatars.githubusercontent.com/u/12250510?s=460&amp;v=4">Ao LI (346950981@qq.com)</a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/lujq96"><img width="32px" src="https://avatars.githubusercontent.com/u/34331938?s=400&amp;v=4">Paul LU (lujq96@gmail.com)</a></td></tr>
+</tbody></table>
+
+Any form of contribution is welcome. The above contributors have been officially released by Tencent.
+
+We very much welcome developers to contribute to Tencent's open source, and we will also give them incentives to acknowledge and thank them. Here we provide an official description of Tencent's open source contribution. Specific contribution rules for each project are formulated by the project team. Developers can choose the appropriate project and participate according to the corresponding rules. The Tencent Project Management Committee will report regularly to qualified contributors and awards will be issued by the official contact.
 
 ## License
 
