@@ -201,44 +201,35 @@ TEST(TestTorchNodes131Fp16, Expand) {
   TestTorchInference(model_path, input_map, "float16");
 }
 
-TEST(TestTorchNodes131Fp16, MaxPooling) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/max_pooling.pth";
-  const auto x1 = ::torch::randn({1, 23, 54, 96}, device).to(c10::kHalf);
-  const auto x2 = ::torch::randn({1, 14, 23, 54, 96}, device).to(c10::kHalf);
+TEST(TestTorchNodes131Fp16, Pooling2d) {
+  const std::string& model_path = std::string(torch_root_dir) + "nodes131/pooling_2d.pth";
+  const auto x = ::torch::randn({1, 23, 54, 96}, device);
   std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = x1;
-  input_map["input0"] = x2;
+  input_map["input"] = x;
   TestTorchInference(model_path, input_map, "float16");
 }
 
-TEST(TestTorchNodes131Fp16, AvgPooling) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/avg_pooling.pth";
-  const auto x1 = ::torch::randn({1, 23, 54, 96}, device).to(c10::kHalf);
-  const auto x2 = ::torch::randn({1, 14, 23, 54, 96}, device).to(c10::kHalf);
-
+TEST(TestTorchNodes131Fp16, Pooling3d) {
+  const std::string& model_path = std::string(torch_root_dir) + "nodes131/pooling_3d.pth";
+  const auto x = torch::randn({1, 14, 23, 54, 96}, device);
   std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = x1;
-  input_map["input0"] = x2;
+  input_map["input"] = x;
   TestTorchInference(model_path, input_map, "float16");
 }
 
-TEST(TestTorchNodes131Fp16, AdaptiveMaxPooling) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/adaptive_max_pooling.pth";
-  const auto x1 = ::torch::randn({1, 64, 10, 9}, device).to(c10::kHalf);
-  const auto x2 = ::torch::randn({1, 64, 8, 9, 10}, device).to(c10::kHalf);
+TEST(TestTorchNodes131Fp16, AdaptivePooling2d) {
+  const std::string& model_path = std::string(torch_root_dir) + "nodes131/adaptive_pooling_2d.pth";
+  const auto x = torch::randn({1, 64, 10, 9}, device);
   std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = x1;
-  input_map["input0"] = x2;
+  input_map["input"] = x;
   TestTorchInference(model_path, input_map, "float16");
 }
 
-TEST(TestTorchNodes131Fp16, AdaptiveAvgPooling) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/adaptive_avg_pooling.pth";
-  const auto x1 = ::torch::randn({1, 64, 10, 9}, device).to(c10::kHalf);
-  const auto x2 = ::torch::randn({1, 64, 8, 9, 10}, device).to(c10::kHalf);
+TEST(TestTorchNodes131Fp16, AdaptivePooling3d) {
+  const std::string& model_path = std::string(torch_root_dir) + "nodes131/adaptive_pooling_3d.pth";
+  const auto x = torch::randn({1, 64, 8, 9, 10}, device);
   std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = x1;
-  input_map["input0"] = x2;
+  input_map["input"] = x;
   TestTorchInference(model_path, input_map, "float16");
 }
 
