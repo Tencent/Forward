@@ -160,6 +160,8 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 <tr><td><a target="_blank" href="https://github.com/yuanzexi"><img width="32px" src="https://avatars.githubusercontent.com/u/14813536?s=460&amp;v=4"> Zexi YUAN </a></td></tr>
 <tr><td><a target="_blank" href="https://github.com/liao1995"><img width="32px" src="https://avatars.githubusercontent.com/u/12250510?s=460&amp;v=4"> Ao LI </a></td></tr>
 <tr><td><a target="_blank" href="https://github.com/lujq96"><img width="32px" src="https://avatars.githubusercontent.com/u/34331938?s=400&amp;v=4"> Paul LU </a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/JettHu"><img width="32px" src="https://avatars.githubusercontent.com/u/35261585?s=400&amp;v=4"> JettHu </a></td></tr>
+<tr><td><a target="_blank" href="https://github.com/Ryosuke1eep"><img width="32px" src="https://avatars.githubusercontent.com/u/80682051?s=400&amp;v=4"> Ryosuke1eep </a></td></tr>
 </tbody></table>
 
 感谢所有贡献者，欢迎更多人加入一起贡献。
