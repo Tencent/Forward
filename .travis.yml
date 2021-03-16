@@ -3,32 +3,41 @@ language: cpp
 compiler:
   - gcc
 
+os: linux
+dist: bionic
+
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
+      - "python3-dev"
+
+cache:
+  packages: true
+  pip: true
+
 jobs:
   include:
   - name: "CUDA 10.0"
-    os: linux
-    dist: xenial
     env:
     - CUDA=10.0.130-1
     - CUDA_SHORT=10.0
-    - PY_CUDA=cu100
     - CUDNN_MAJOR=7
     - CUDNN=7.6.5.*
     - TENSORRT=7.0.0
-    - UBUNTU_VERSION=ubuntu1604
+    - UBUNTU_VERSION=ubuntu1804
   - name: "CUDA 10.2"
-    os: linux
-    dist: xenial
     env:
     - CUDA=10.2.89-1
     - CUDA_SHORT=10.2
-    - PY_CUDA=cu102
     - CUDNN_MAJOR=8
     - CUDNN=8.0.4.*
     - TENSORRT=7.2.3
-    - UBUNTU_VERSION=ubuntu1604
+    - UBUNTU_VERSION=ubuntu1804
 
 before_install:
+  - which pip3 || echo 'which pip3 command failed.'
   - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
   - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
   - sudo dpkg -i ${INSTALLER}
@@ -46,12 +55,15 @@ before_install:
   - CUDA_HOME=/usr/local/cuda-${CUDA_SHORT}
   - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
   - PATH=${CUDA_HOME}/bin:${PATH}
-  - sudo apt install -y python3 python3-dev python3-pip
-  - sudo pip3 install torch==1.3.1+${PY_CUDA} torchvision==0.4.2+${PY_CUDA} -f https://download.pytorch.org/whl/torch_stable.html
+
+install: 
+  - pip3 install --user $(whoami) --upgrade pip
+  - pip3 install torch==1.3.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
 before_script:
-  - wget https://github.com/Neargye/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz -o tensorflow.tar.gz
-  - tar -xzf tensorflow.tar.gz --directory tensorflow_lib 
+  - wget https://github.com/Neargye/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz -O tensorflow.tar.gz
+  - mkdir tensorflow_lib
+  - tar -xzvf tensorflow.tar.gz --directory tensorflow_lib 
   - cp -rv tensorflow_lib/lib/ source/third_party/tensorflow/ 
   - rm -rv tensorflow_lib tensorflow.tar.gz
   - mkdir build
@@ -62,7 +74,7 @@ before_script:
         -DENABLE_TORCH=ON                    \
         -DENABLE_TENSORFLOW=ON               \
         -DENABLE_KERAS=ON                    \
-        -DENABLE_RNN=OFF                     \
+        -DENABLE_RNN=ON                     \
         -DPYTHON_EXECUTABLE=$(which python3) \
 
 script: make -j
