@@ -65,7 +65,7 @@ before_script:
   - mkdir tensorflow_lib
   - tar -xzvf tensorflow.tar.gz --directory tensorflow_lib 
   - cp -rv tensorflow_lib/lib/ source/third_party/tensorflow/ 
-  - rm -rv tensorflow_lib tensorflow.tar.gz
+  - rm -rvf tensorflow_lib tensorflow.tar.gz
   - mkdir build
   - cd build
   - cmake .. -DENABLE_LOGGING=ON         \
