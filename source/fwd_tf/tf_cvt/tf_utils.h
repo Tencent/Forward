@@ -265,47 +265,55 @@ class Utils {
     return {data, data + size};
   }
 
+
   template <typename T>
   static std::shared_ptr<TF_Tensor> CastTensor(const TF_Tensor* tensor, TF_DataType dest_type) {
+    CHECK(sizeof(T) == TF_DataTypeSize(dest_type));
+
     if (tensor == nullptr) {
       return {};
     }
 
-    CHECK(sizeof(T) == TF_DataTypeSize(dest_type));
-
     const auto src_type = TF_TensorType(tensor);
-    const auto src = TF_TensorData(tensor);
-    const auto ele_size = TF_TensorElementCount(tensor);
+    const auto src_data = TF_TensorData(tensor);
+
+    const auto count = TF_TensorElementCount(tensor);
 
     auto dest_tensor = CreateEmptyTensor(dest_type, GetTensorShape(tensor));
     T* dest = reinterpret_cast<T*>(TF_TensorData(dest_tensor.get()));
 
     switch (src_type) {
-      case TF_FLOAT:
-        std::transform(reinterpret_cast<float*>(src), reinterpret_cast<float*>(src) + ele_size,
-                       dest, [](float val) { return static_cast<T>(val); });
+      case TF_FLOAT: {
+        const float* src = reinterpret_cast<const float*>(src_data);
+        std::transform(src, src + count, dest, [](float val) { return static_cast<T>(val); });
         break;
-      case TF_HALF:
-        std::transform(reinterpret_cast<uint16_t*>(src),
-                       reinterpret_cast<uint16_t*>(src) + ele_size, dest,
+      }
+      case TF_HALF: {
+        const uint16_t* src = reinterpret_cast<const uint16_t*>(src_data);
+        std::transform(src, src + count, dest,
                        [](uint16_t val) { return static_cast<T>(FwdUtils::Half2FloatFast(val)); });
         break;
-      case TF_INT64:
-        std::transform(reinterpret_cast<int64_t*>(src), reinterpret_cast<int64_t*>(src) + ele_size,
-                       dest, [](int64_t val) { return static_cast<T>(val); });
+      }
+      case TF_INT64: {
+        const int64_t* src = reinterpret_cast<const int64_t*>(src_data);
+        std::transform(src, src + count, dest, [](int64_t val) { return static_cast<T>(val); });
         break;
-      case TF_INT32:
-        std::transform(reinterpret_cast<int*>(src), reinterpret_cast<int*>(src) + ele_size, dest,
-                       [](int val) { return static_cast<T>(val); });
+      }
+      case TF_INT32: {
+        const int* src = reinterpret_cast<const int*>(src_data);
+        std::transform(src, src + count, dest, [](int val) { return static_cast<T>(val); });
         break;
-      case TF_INT16:
-        std::transform(reinterpret_cast<int16_t*>(src), reinterpret_cast<int16_t*>(src) + ele_size,
-                       dest, [](int16_t val) { return static_cast<T>(val); });
+      }
+      case TF_INT16: {
+        const int16_t* src = reinterpret_cast<const int16_t*>(src_data);
+        std::transform(src, src + count, dest, [](int16_t val) { return static_cast<T>(val); });
         break;
-      case TF_INT8:
-        std::transform(reinterpret_cast<char*>(src), reinterpret_cast<char*>(src) + ele_size, dest,
-                       [](char val) { return static_cast<T>(val); });
+      }
+      case TF_INT8: {
+        const char* src = reinterpret_cast<const char*>(src_data);
+        std::transform(src, src + count, dest, [](char val) { return static_cast<T>(val); });
         break;
+      }
       default:
         return {};
     }
