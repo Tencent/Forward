@@ -45,7 +45,7 @@ option(ENABLE_TORCH "Enable Torch" ON)
 # Enable TensorFlow
 option(ENABLE_TENSORFLOW "Enable TensorFlow" ON)
 # Enable Keras
-option(ENABLE_KERAS "Enable Keras" ON)
+option(ENABLE_KERAS "Enable Keras" OFF)
 # Enable profiling
 option(ENABLE_PROFILING "Enable profiling" ON)
 # Enable logging
