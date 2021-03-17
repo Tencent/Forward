@@ -144,7 +144,8 @@ static uint16_t Float2Half(float f) {
 
 // return the replaced string of input.
 // all src found in input will be replaced by dst.
-static std::string ReplaceAll(const std::string& input, std::string src, std::string dst) {
+static std::string ReplaceAll(const std::string& input, const std::string& src,
+                              const std::string& dst) {
   std::string::size_type pos(0);
   std::string output = input;
   while ((pos = output.find(src)) != std::string::npos) {
@@ -153,22 +154,6 @@ static std::string ReplaceAll(const std::string& input, std::string src, std::st
   return output;
 }
 
-//////////////////////////////////////////
-//                                      //
-//              操作符重载相关           //
-//          Operator Overloading        //
-//                                      //
-//////////////////////////////////////////
-
-// return the pair-wise difference vector of v1 and v2.
-template <typename T>
-inline std::vector<T> operator-(const std::vector<T>& v1, const std::vector<T>& v2) {
-  CHECK_EQ(v1.size(), v2.size());
-  std::vector<T> res(v1.size());
-  std::transform(v1.cbegin(), v1.cend(), v2.cbegin(), res.begin(),
-                 [](const T& e1, const T& e2) { return e1 - e2; });
-  return res;
-}
 }  // namespace FwdUtils
 
 FWD_NAMESPACE_END
