@@ -64,8 +64,8 @@ class TLayerDescCreator<TrtConstantDesc> : public ILayerDescCreator {
       const c10::Scalar step = module.Get(inputs[2]).toScalar();
       const c10::ScalarType dtype = module.Get(inputs[3]).toScalarType();
       at::Tensor tensor = ::torch::arange(start, end, step, dtype);
-      layer_desc->weights = Utils::ToFwdWeights(tensor);
-      layer_desc->dimensions = Utils::DimsOf(tensor);
+      layer_desc->weights = ToFwdWeights(tensor);
+      layer_desc->dimensions = DimsOf(tensor);
     }
 
     return layer_desc;

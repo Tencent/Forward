@@ -64,7 +64,7 @@ class TLayerDescCreator<TrtNoopDesc> : public ILayerDescCreator {
     const auto inputs = node->inputs();
 
     for (auto input : inputs) {
-      Utils::ExtractAllInputs(input, input_values);
+      ExtractAllInputs(input, input_values);
     }
 
     return layer_desc;

@@ -90,8 +90,8 @@ class TLayerDescCreator<TrtSliceDesc> : public ILayerDescCreator {
       }
       tensor = tensor.contiguous();  // must be contiguous
       auto constant_desc = std::make_shared<TrtConstantDesc>();
-      constant_desc->weights = Utils::ToFwdWeights(tensor);
-      constant_desc->dimensions = Utils::DimsOf(tensor);
+      constant_desc->weights = ToFwdWeights(tensor);
+      constant_desc->dimensions = DimsOf(tensor);
       input_values.push_back(nullptr);  // constant input
       return constant_desc;
     }

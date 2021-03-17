@@ -134,10 +134,10 @@ class TLayerDescCreator<TrtNormalizationDesc> : public ILayerDescCreator {
 
     layer_desc->use_input_stats = true;
     layer_desc->type = TrtNormalizationType::BATCH_NORMALIZATION;
-    layer_desc->scales = Utils::ToFwdWeights(weights_tensor);
-    layer_desc->bias = Utils::ToFwdWeights(bias_tensor);
-    layer_desc->running_mean = Utils::ToFwdWeights(mean_tensor);
-    layer_desc->running_var = Utils::ToFwdWeights(var_tensor);
+    layer_desc->scales = ToFwdWeights(weights_tensor);
+    layer_desc->bias = ToFwdWeights(bias_tensor);
+    layer_desc->running_mean = ToFwdWeights(mean_tensor);
+    layer_desc->running_var = ToFwdWeights(var_tensor);
     layer_desc->affine = layer_desc->scales.Count() > 0;
     layer_desc->epsilon = epsilon;
 

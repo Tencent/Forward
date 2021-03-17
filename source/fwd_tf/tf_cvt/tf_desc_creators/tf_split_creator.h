@@ -56,7 +56,7 @@ class TLayerDescCreator<TrtSplitDesc> : public ILayerDescCreator {
     T_CHECK_EQ(num_inputs, 2);
 
     const auto input = op.Input(1);
-    const nvinfer1::Dims dims = Utils::DimsOf(input);
+    const nvinfer1::Dims dims = DimsOf(input);
 
     op_inputs.push_back(input);
 

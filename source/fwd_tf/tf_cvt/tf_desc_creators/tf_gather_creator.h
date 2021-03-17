@@ -66,11 +66,11 @@ class TLayerDescCreator<TrtGatherDesc> : public ILayerDescCreator {
     FwdWeights const_tensor_0;
     if (graph.OperationByName(input_name) != nullptr) {
       const auto input_from_file = Output(graph.get(), graph.OperationByName(input_name), 0);
-      const_tensor_0 = Utils::ToFwdWeights(input_from_file.GetConstantTensor());
+      const_tensor_0 = ToFwdWeights(input_from_file.GetConstantTensor());
     } else {
-      const_tensor_0 = Utils::ToFwdWeights(input.GetConstantTensor());
+      const_tensor_0 = ToFwdWeights(input.GetConstantTensor());
     }
-    const auto const_tensor_1 = Utils::ToFwdWeights(indices.GetConstantTensor());
+    const auto const_tensor_1 = ToFwdWeights(indices.GetConstantTensor());
 
     auto layer_desc = std::make_shared<TrtGatherDesc>();
 
@@ -79,7 +79,7 @@ class TLayerDescCreator<TrtGatherDesc> : public ILayerDescCreator {
     if (!const_tensor_0.Empty()) {
       layer_desc->inputs[0].inUse = true;
       layer_desc->inputs[0].data = const_tensor_0;
-      layer_desc->inputs[0].dim = Utils::DimsOf(input);
+      layer_desc->inputs[0].dim = DimsOf(input);
     } else {
       op_inputs.push_back(input);
     }
@@ -87,7 +87,7 @@ class TLayerDescCreator<TrtGatherDesc> : public ILayerDescCreator {
     if (!const_tensor_1.Empty()) {
       layer_desc->inputs[1].inUse = true;
       layer_desc->inputs[1].data = const_tensor_1;
-      layer_desc->inputs[1].dim = Utils::DimsOf(indices);
+      layer_desc->inputs[1].dim = DimsOf(indices);
     } else {
       op_inputs.push_back(indices);
     }

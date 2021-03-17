@@ -107,7 +107,7 @@ bool Parser::CreateInputDescs(const std::vector<Operation>& inputs,
 
     input_desc->name = input_entry->first;
     if (!SetInputType(input, input_desc, input_entry->second)) return false;
-    input_desc->dimensions = Utils::DimsOf(input_entry->second);
+    input_desc->dimensions = DimsOf(input_entry->second);
 
     network_.inputs.push_back(input_desc);
 
@@ -173,7 +173,7 @@ void Parser::ProcessInputDesc(const Operation& input, std::shared_ptr<TrtInputDe
 
 void Parser::ProcessOutputDesc(const Operation& graph_output, TrtOutputDesc* output_desc) const {
   // TODO(Ao Li): 如果输出维度是 4，在此处将输出从 NCHW 转换为 NHWC 格式
-  if (Utils::DimsOf(graph_output).nbDims == 4) {
+  if (DimsOf(graph_output).nbDims == 4) {
     LOG(INFO) << "Parser::CreateNCHW2NHWCLayerDesc";
     auto shuffle_desc = CreateNCHW2NHWCLayerDesc();
     shuffle_desc->inputs = output_desc->inputs;

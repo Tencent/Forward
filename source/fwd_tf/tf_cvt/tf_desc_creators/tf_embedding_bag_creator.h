@@ -112,11 +112,11 @@ class TLayerDescCreator<TrtEmbeddingBagDesc> : public ILayerDescCreator {
     FwdWeights const_tensor_0;
     if (graph.OperationByName(input_name) != nullptr) {
       const auto input_from_file = Output(graph.get(), graph.OperationByName(input_name), 0);
-      const_tensor_0 = Utils::ToFwdWeights(input_from_file.GetConstantTensor());
+      const_tensor_0 = ToFwdWeights(input_from_file.GetConstantTensor());
     } else {
-      const_tensor_0 = Utils::ToFwdWeights(input.GetConstantTensor());
+      const_tensor_0 = ToFwdWeights(input.GetConstantTensor());
     }
-    const auto const_tensor_1 = Utils::ToFwdWeights(indices.GetConstantTensor());
+    const auto const_tensor_1 = ToFwdWeights(indices.GetConstantTensor());
 
     auto layer_desc = std::make_shared<TrtEmbeddingBagDesc>();
 
@@ -127,7 +127,7 @@ class TLayerDescCreator<TrtEmbeddingBagDesc> : public ILayerDescCreator {
     } else {
       T_CHECK(false);
     }
-    auto dims = Utils::DimsOf(input);
+    auto dims = DimsOf(input);
     layer_desc->count = dims.d[0];
     layer_desc->dim = dims.nbDims == 1 ? 1 : dims.d[1];
     layer_desc->offset = 0;

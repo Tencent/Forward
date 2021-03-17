@@ -39,7 +39,7 @@ bool Graph::Load(const std::string& graph_path, InferMode mode) {
     return false;
   }
 
-  const std::shared_ptr<TF_Buffer> buffer(Utils::ReadBufferFromFile(graph_path), TF_DeleteBuffer);
+  const std::shared_ptr<TF_Buffer> buffer(ReadBufferFromFile(graph_path), TF_DeleteBuffer);
   if (buffer == nullptr) {
     return false;
   }
@@ -135,7 +135,7 @@ bool Graph::LoadOuterWeightsToOp(const Operation& op) {
   TF_OperationDescription* new_op = TF_NewOperation(graph_, "Const", new_op_name.c_str());
 
   auto tensor =
-      Utils::CreateTensor(TF_DataType::TF_FLOAT, op.GetAttrShape("shape"), weights.data());
+      CreateTensor(TF_DataType::TF_FLOAT, op.GetAttrShape("shape"), weights.data());
 
   Status status;
   TF_SetAttrType(new_op, "dtype", TF_DataType::TF_FLOAT);

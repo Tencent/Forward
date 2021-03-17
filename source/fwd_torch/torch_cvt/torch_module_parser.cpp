@@ -71,7 +71,7 @@ bool Parser::Parse(const std::string& module_path,
 
 bool Parser::CreateDescs(const std::vector<c10::IValue>& inputs) {
   std::vector<c10::IValue> f_inputs(inputs);
-  if (!Utils::RegularizeIValues(f_inputs)) return false;
+  if (!RegularizeIValues(f_inputs)) return false;
 
   if (!module_.EvalAll(f_inputs)) {
     LOG(ERROR) << "TorchModule EvalAll failed: invalid graph, or invalid "
@@ -188,8 +188,8 @@ bool Parser::CreateInputDescs(const std::vector<c10::IValue>& inputs) {
   for (int i = 0; i < g_inputs.size(); ++i) {
     const auto& g_input = g_inputs[i];
     const auto name = g_input->debugNameBase();
-    const auto unpacked_inputs = Utils::UnpackIValues({inputs[i]});
-    const auto unpakced_g_inputs = Utils::UnpackJitValue(g_input);
+    const auto unpacked_inputs = UnpackIValues({inputs[i]});
+    const auto unpakced_g_inputs = UnpackJitValue(g_input);
 
     if (unpakced_g_inputs.size() != unpacked_inputs.size()) {
       LOG(ERROR) << "The number of inputs is not matched with the number of "
@@ -203,7 +203,7 @@ bool Parser::CreateInputDescs(const std::vector<c10::IValue>& inputs) {
       auto input_desc = std::make_shared<TrtInputDesc>();
       input_desc->name = name + std::to_string(j);
       if (!SetInputType(input_desc, input.scalar_type())) return false;
-      input_desc->dimensions = Utils::DimsOf(input);
+      input_desc->dimensions = DimsOf(input);
 
       created_desc_map_[unpakced_g_inputs[j]] = input_desc;
       network_.inputs.push_back(input_desc);

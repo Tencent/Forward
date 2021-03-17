@@ -60,12 +60,12 @@ class TestTfBert : public ::testing::Test {
     seq_length = 48;
     max_input_id = 18000;
 
-    const auto input_id = (fwd::tf_::Utils::CreateRandomIntTensor<int32_t>(
+    const auto input_id = (fwd::tf_::CreateRandomIntTensor<int32_t>(
         TF_INT32, {batch_size, seq_length}, max_input_id));  //  input_ids
     std::vector<int> mask = CreateInputMask(batch_size, seq_length);
-    const auto input_mask = (fwd::tf_::Utils::CreateTensor(TF_INT32, {batch_size, seq_length},
+    const auto input_mask = (fwd::tf_::CreateTensor(TF_INT32, {batch_size, seq_length},
                                                            mask.data()));  //  input_mask
-    const auto segment_ids = (fwd::tf_::Utils::CreateRandomIntTensor<int32_t>(
+    const auto segment_ids = (fwd::tf_::CreateRandomIntTensor<int32_t>(
         TF_INT32, {batch_size, seq_length}, 2));  //  segment_ids
 
     input_map_buffer["input_ids"] = input_id;

@@ -69,19 +69,19 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
         layer_desc->inputs[i].inUse = true;
         T_CHECK(module.Get(inputs[i ^ isRSub]).isTensor());
         auto tensor = module.Get(inputs[i ^ isRSub]).toTensor();
-        layer_desc->inputs[i].data = Utils::ToFwdWeights(tensor);
-        layer_desc->inputs[i].dim = Utils::DimsOf(tensor);
+        layer_desc->inputs[i].data = ToFwdWeights(tensor);
+        layer_desc->inputs[i].dim = DimsOf(tensor);
       } else if (inputs[i ^ isRSub]->node()->kind() == c10::prim::Constant) {
         layer_desc->inputs[i].inUse = true;
         const auto& input = module.Get(inputs[i ^ isRSub]);
         if (input.isTensor()) {
-          layer_desc->inputs[i].data = Utils::ToFwdWeights(input.toTensor());
-          layer_desc->inputs[i].dim = Utils::DimsOf(input.toTensor());
+          layer_desc->inputs[i].data = ToFwdWeights(input.toTensor());
+          layer_desc->inputs[i].dim = DimsOf(input.toTensor());
         } else if (input.isInt()) {
-          layer_desc->inputs[i].data = Utils::ToFwdWeights(input.toInt());
+          layer_desc->inputs[i].data = ToFwdWeights(input.toInt());
           layer_desc->inputs[i].dim = {1, 1};
         } else if (input.isDouble()) {
-          layer_desc->inputs[i].data = Utils::ToFwdWeights(input.toDouble());
+          layer_desc->inputs[i].data = ToFwdWeights(input.toDouble());
           layer_desc->inputs[i].dim = {1, 1};
         } else {
           LOG(ERROR) << "Input " << i << "'s Type " << input.type()->str() << " Not Supported yet.";
@@ -97,7 +97,7 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
     int alpha = inputs.size() > 2 ? module.Get(inputs[2]).toInt() : 1;
     if (alpha != 1) {
       float value = *(reinterpret_cast<const float*>(layer_desc->inputs[1 ^ isRSub].data.Data()));
-      layer_desc->inputs[1 ^ isRSub].data = torch_::Utils::ToFwdWeights(value * alpha);
+      layer_desc->inputs[1 ^ isRSub].data = torch_::ToFwdWeights(value * alpha);
     }
 
     layer_desc->operation = NK2EWP_MAPPING.find(kind)->second;

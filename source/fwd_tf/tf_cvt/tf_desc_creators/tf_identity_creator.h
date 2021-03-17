@@ -79,7 +79,7 @@ class TLayerDescCreator<TrtIdentityDesc> : public ILayerDescCreator {
     // Input 0, kind = input
     const auto input = op.Input(0);
 
-    auto const_tensor = Utils::ToFwdWeights(input.GetConstantTensor());
+    auto const_tensor = ToFwdWeights(input.GetConstantTensor());
 
     if (const_tensor.Empty()) {
       auto layer_desc = std::make_shared<TrtIdentityDesc>();
@@ -91,7 +91,7 @@ class TLayerDescCreator<TrtIdentityDesc> : public ILayerDescCreator {
 
     layer_desc->input.inUse = true;
     layer_desc->input.data = const_tensor;
-    layer_desc->input.dim = Utils::DimsOf(input);
+    layer_desc->input.dim = DimsOf(input);
 
     op_inputs.push_back(Output());
 
@@ -184,7 +184,7 @@ class TLayerDescCreator<TrtIdentityDesc> : public ILayerDescCreator {
 
     // find which dim info to use
     int d = oper.Input(1).GetConstantTensor().AsInt();
-    // int d = Utils::GetConstantInt(graph, TF_OperationInput(TF_Input{ oper, 1
+    // int d = GetConstantInt(graph, TF_OperationInput(TF_Input{ oper, 1
     // }));
 
     Output op = oper.Input(0);
@@ -196,7 +196,7 @@ class TLayerDescCreator<TrtIdentityDesc> : public ILayerDescCreator {
     }
 
     op = op.Input(0);
-    auto shape = Utils::DimsOf(op);
+    auto shape = DimsOf(op);
     dim_value = shape.d[d];
 
     dims = shape;

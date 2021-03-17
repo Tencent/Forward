@@ -129,7 +129,7 @@ bool Parser::CreateInputDescs(const std::vector<const Layer*>& inputs, int batch
       input_desc->type = nvinfer1::DataType::kFLOAT;
     }
 
-    input_desc->dimensions = Utils::DimsOf(dims);
+    input_desc->dimensions = DimsOf(dims);
 
     // TODO(Ao Li): 目前将 batch_size 根据传入参数固定，以后可以尝试改为动态
     if (input_desc->dimensions.d[0] == -1) {

@@ -95,13 +95,13 @@ class TorchAddmmCreator : public ILayerDescCreator {
 
     if (!bias_value.isNone()) {
       const auto bias = bias_value.toTensor();
-      layer_desc->biasWeights = Utils::ToFwdWeights(bias);
+      layer_desc->biasWeights = ToFwdWeights(bias);
       T_CHECK(bias.ndimension() == 1);
       T_CHECK_EQ(bias.numel(), weights.size(0));
     }
 
     layer_desc->nbOutputChannels = weights.size(0);
-    layer_desc->kernelWeights = Utils::ToFwdWeights(weights);
+    layer_desc->kernelWeights = ToFwdWeights(weights);
     return layer_desc;
   }
 
@@ -150,8 +150,8 @@ class TorchAddmmCreator : public ILayerDescCreator {
 
     layer_desc->nbOutputChannels = bias.numel();
 
-    layer_desc->kernelWeights = Utils::ToFwdWeights(weights);
-    layer_desc->biasWeights = Utils::ToFwdWeights(bias);
+    layer_desc->kernelWeights = ToFwdWeights(weights);
+    layer_desc->biasWeights = ToFwdWeights(bias);
 
     return layer_desc;
   }

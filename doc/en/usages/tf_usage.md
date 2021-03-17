@@ -70,7 +70,7 @@ const std::string infer_mode = "float32"; // float32 / float16 / int8_calib /int
 const int batch_size = 32;
 
 // DataTypes and Dimensions of dummy_input should be the same as those of real inputs 
-std::shared_ptr<TF_Tensor> dummy_input = fwd::tf_::Utils::CreateRandomTensor<float>(
+std::shared_ptr<TF_Tensor> dummy_input = fwd::tf_::CreateRandomTensor<float>(
       TF_FLOAT, {batch_size, 12, 24, 3});
 std::unordered_map<std::string, TF_Tensor*> dummy_input_map;
 dummy_input_map.insert({"input_name", dummy_input});

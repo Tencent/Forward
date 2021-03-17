@@ -63,9 +63,9 @@ class TLayerDescCreator<TrtGatherDesc> : public ILayerDescCreator {
     T_CHECK_EQ(module.Get(inputs[4]).toBool(), false);
 
     const auto weights = module.Get(inputs[0]).toTensor();
-    layer_desc->inputs[0].data = Utils::ToFwdWeights(weights);
+    layer_desc->inputs[0].data = ToFwdWeights(weights);
     layer_desc->inputs[0].inUse = true;
-    layer_desc->inputs[0].dim = Utils::DimsOf(weights);
+    layer_desc->inputs[0].dim = DimsOf(weights);
     layer_desc->inputs[1].inUse = false;
     layer_desc->gatherAxis = 0;  // TODO(Ao Li): 这里固定
     return layer_desc;

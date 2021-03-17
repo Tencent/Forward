@@ -129,16 +129,16 @@ class TLayerDescCreator<TrtPoolingDesc> : public ILayerDescCreator {
     const auto stride = module.Get(inputs[2]).toIntList();
     const auto padding = module.Get(inputs[3]).toIntList();
 
-    layer_desc->windowSize = Utils::ToDims(kernel_size);
+    layer_desc->windowSize = ToDims(kernel_size);
 
     if (!stride.empty()) {
-      layer_desc->stride = Utils::ToDims(stride);
+      layer_desc->stride = ToDims(stride);
     }
 
     if (padding.size() == 1 && padding[0] == 0) {
       layer_desc->padding = nvinfer1::Dims({0});
     } else {
-      layer_desc->padding = Utils::ToDims(padding);
+      layer_desc->padding = ToDims(padding);
     }
 
     return layer_desc;

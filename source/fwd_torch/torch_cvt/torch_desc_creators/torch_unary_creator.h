@@ -59,8 +59,8 @@ class TLayerDescCreator<TrtUnaryDesc> : public ILayerDescCreator {
       const auto input_tensor = module.Get(inputs[0]).toTensor();
       input_values.push_back(nullptr);
       layer_desc->input.inUse = true;
-      layer_desc->input.data = Utils::ToFwdWeights(input_tensor);
-      layer_desc->input.dim = Utils::DimsOf(input_tensor);
+      layer_desc->input.data = ToFwdWeights(input_tensor);
+      layer_desc->input.dim = DimsOf(input_tensor);
     } else {
       input_values.push_back(inputs[0]);
     }

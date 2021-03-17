@@ -127,8 +127,8 @@ class TorchNormalizationCreator : public ILayerDescCreator {
       const auto weights = module.Get(inputs[2]).toTensor().toType(c10::kFloat);
       const auto bias = module.Get(inputs[3]).toTensor().toType(c10::kFloat);
       layer_desc->affine = true;
-      layer_desc->scales = Utils::ToFwdWeights(weights);
-      layer_desc->bias = Utils::ToFwdWeights(bias);
+      layer_desc->scales = ToFwdWeights(weights);
+      layer_desc->bias = ToFwdWeights(bias);
     } else {
       layer_desc->affine = false;
     }
@@ -145,7 +145,7 @@ class TorchNormalizationCreator : public ILayerDescCreator {
       layer_desc->leading_dim = normalized_shape[0];
       // TODO(Ao Li): 注意这里没有 skip 直接使用 skip layer norm 的效率
       auto zeros = ::torch::zeros(dummy.sizes(), c10::ScalarType::Float);
-      layer_desc->zeros = Utils::ToFwdWeights(zeros);
+      layer_desc->zeros = ToFwdWeights(zeros);
       layer_desc->use_fp16 =
           module.GetMode() == InferMode::HALF || module.GetMode() == InferMode::INT8;
       layer_desc->use_int8 = module.GetMode() == InferMode::INT8;
@@ -202,16 +202,16 @@ class TorchNormalizationCreator : public ILayerDescCreator {
       const auto scales = module.Get(inputs[1]).toTensor();
       const auto bias = module.Get(inputs[2]).toTensor();
 
-      layer_desc->scales = Utils::ToFwdWeights(scales);
-      layer_desc->bias = Utils::ToFwdWeights(bias);
+      layer_desc->scales = ToFwdWeights(scales);
+      layer_desc->bias = ToFwdWeights(bias);
     }
 
     if (!layer_desc->use_input_stats) {
       const auto running_mean = module.Get(inputs[3]).toTensor();
       const auto running_var = module.Get(inputs[4]).toTensor();
 
-      layer_desc->running_mean = Utils::ToFwdWeights(running_mean);
-      layer_desc->running_var = Utils::ToFwdWeights(running_var);
+      layer_desc->running_mean = ToFwdWeights(running_mean);
+      layer_desc->running_var = ToFwdWeights(running_var);
     }
 
     return layer_desc;
@@ -256,8 +256,8 @@ class TorchNormalizationCreator : public ILayerDescCreator {
       return nullptr;
     }
 
-    layer_desc->shift = Utils::ToFwdWeights(shift_tensor);
-    layer_desc->scale = Utils::ToFwdWeights(scale_tensor);
+    layer_desc->shift = ToFwdWeights(shift_tensor);
+    layer_desc->scale = ToFwdWeights(scale_tensor);
     layer_desc->mode = nvinfer1::ScaleMode::kCHANNEL;
 
     return layer_desc;

@@ -81,7 +81,7 @@ class TorchInfer {
       UTILS_PROFILE(TorchForward);
 
       std::vector<c10::IValue> f_inputs(inputs);
-      if (!torch_::Utils::RegularizeIValues(f_inputs)) return {};
+      if (!torch_::RegularizeIValues(f_inputs)) return {};
 
       outputs = module_.forward(f_inputs);
 
@@ -92,7 +92,7 @@ class TorchInfer {
 #endif  // TRT_INFER_ENABLE_PROFILING
     }
 
-    return torch_::Utils::ToTensors({outputs});
+    return torch_::ToTensors({outputs});
   }
 
   std::vector<at::Tensor> Forward(const std::unordered_map<std::string, c10::IValue>& input_map,

@@ -63,7 +63,7 @@ class TFInfer {
       return false;
     }
 
-    session_ = tf_::Utils::CreateSession(graph_);
+    session_ = tf_::CreateSession(graph_);
 
     return session_ != nullptr;
   }
@@ -81,11 +81,11 @@ class TFInfer {
       input_ops.push_back({input, 0});
       const auto dtype = TF_OperationOutputType(input_ops.back());
       if (dtype == TF_DataType::TF_INT64 && TF_TensorType(tensor) == TF_DataType::TF_INT32) {
-        auto f_tensor = tf_::Utils::CastTensor<int64_t>(tensor, TF_INT64);
+        auto f_tensor = tf_::CastTensor<int64_t>(tensor, TF_INT64);
         inputs.push_back(f_tensor.get());
         buffers_.push_back(f_tensor);
       } else if (TF_TensorType(tensor) == TF_DataType::TF_HALF) {
-        auto f_tensor = tf_::Utils::CastTensor<float>(tensor, TF_FLOAT);
+        auto f_tensor = tf_::CastTensor<float>(tensor, TF_FLOAT);
         inputs.push_back(f_tensor.get());
         buffers_.push_back(f_tensor);
       } else {
@@ -124,7 +124,7 @@ class TFInfer {
     {
       UTILS_PROFILE(RunSession);
       tf_::Status status;
-      if (!tf_::Utils::RunSession(session_.get(), input_ops.data(), inputs.data(), inputs.size(),
+      if (!tf_::RunSession(session_.get(), input_ops.data(), inputs.data(), inputs.size(),
                                   output_ops.data(), output_ptrs.data(), output_ptrs.size(),
                                   status)) {
         LOG(ERROR) << "Error when RunSession : " << status.Message();

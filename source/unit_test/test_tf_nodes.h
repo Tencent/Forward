@@ -38,7 +38,7 @@ TEST(TestTfNodes, Softmax) {
   const std::string filename = std::string(tf_root_dir) + "softmax.pb";
 
   const int batch_size = 16;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_11"] = input.get();
@@ -51,7 +51,7 @@ TEST(TestTfNodes, Activation) {
   const std::string filename = std::string(tf_root_dir) + "activation.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input"] = input.get();
@@ -65,7 +65,7 @@ TEST(TestTfNodes, BatchNorm) {
   const std::string filename = std::string(tf_root_dir) + "batch_norm.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -78,8 +78,8 @@ TEST(TestTfNodes, Arithmetic) {
   const std::string filename = std::string(tf_root_dir) + "arithmetic.pb";
 
   const int batch_size = 1;
-  const auto input1 = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
-  const auto input2 = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
+  const auto input1 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
+  const auto input2 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input1"] = input1.get();
@@ -93,9 +93,9 @@ TEST(TestTfNodes, Concatenate) {
   const std::string filename = std::string(tf_root_dir) + "concatenate.pb";
 
   const int batch_size = 1;
-  const auto input1 = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
-  const auto input2 = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
-  const auto input3 = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
+  const auto input1 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
+  const auto input2 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
+  const auto input3 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input1"] = input1.get();
@@ -111,7 +111,7 @@ TEST(TestTfNodes, Convolution1d) {
   const std::string filename = std::string(tf_root_dir) + "conv1d.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_9"] = input.get();
@@ -124,7 +124,7 @@ TEST(TestTfNodes, Convolution2d) {
   const std::string filename = std::string(tf_root_dir) + "conv2d.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_2"] = input.get();
@@ -137,7 +137,7 @@ TEST(TestTfNodes, Split) {
   const std::string filename = std::string(tf_root_dir) + "split.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 13, 20});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 13, 20});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -151,7 +151,7 @@ TEST(TestTfNodes, SeparableConv2d) {
   const std::string filename = std::string(tf_root_dir) + "separable_conv2d.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 11});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 11});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -165,7 +165,7 @@ TEST(TestTfNodes, DepthwiseConv2d) {
   const std::string filename = std::string(tf_root_dir) + "depthwise_conv2d.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 11});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 11});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -178,7 +178,7 @@ TEST(TestTfNodes, MaxPool) {
   const std::string filename = std::string(tf_root_dir) + "max_pooling.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 13, 33, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 13, 33, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input"] = input.get();
@@ -191,7 +191,7 @@ TEST(TestTfNodes, AvgPool) {
   const std::string filename = std::string(tf_root_dir) + "average_pooling.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 29, 17, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 29, 17, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input"] = input.get();
@@ -204,7 +204,7 @@ TEST(TestTfNodes, AvgPool) {
 TEST(TestTfNodes, FullyConnected) {
   const std::string filename = std::string(tf_root_dir) + "dense.pb";
 
-  auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {1, 784});
+  auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {1, 784});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_4"] = input.get();
@@ -217,7 +217,7 @@ TEST(TestTfNodes, Permute) {
   const std::string filename = std::string(tf_root_dir) + "permute.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_8"] = input.get();
@@ -230,7 +230,7 @@ TEST(TestTfNodes, Reduce) {
   const std::string filename = std::string(tf_root_dir) + "reduce.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input1"] = input.get();
@@ -244,7 +244,7 @@ TEST(TestTfNodes, SliceStride) {
   const std::string filename = std::string(tf_root_dir) + "cropping2d.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -257,7 +257,7 @@ TEST(TestTfNodes, ZeroPadding) {
   const std::string filename = std::string(tf_root_dir) + "zero_padding_2d.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -271,7 +271,7 @@ TEST(TestTfNodes, Embedding) {
   const std::string filename = std::string(tf_root_dir) + "embedding.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 10}, 1000);
+  const auto input = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 10}, 1000);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input1_1"] = input.get();
@@ -287,7 +287,7 @@ TEST(TestTfNodes, EmbeddingBag) {
   const int emb_size = 5;
 
   const auto indices =
-      fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size, emb_size}, 50);
+      fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, emb_size}, 50);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["Placeholder"] = indices.get();

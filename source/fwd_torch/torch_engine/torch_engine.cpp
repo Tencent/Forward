@@ -56,7 +56,7 @@ std::vector<at::Tensor> TorchEngine::ForwardWithName(
   std::unordered_map<std::string, at::Tensor> t_input_map;
   // Parse inputs
   for (auto& entry : input_map) {
-    const auto tensors = torch_::Utils::UnpackIValues({entry.second});
+    const auto tensors = torch_::UnpackIValues({entry.second});
     for (int i = 0; i < tensors.size(); ++i) {
       const auto& name = entry.first + std::to_string(i);
       t_input_map[name] = tensors[i].toTensor();
@@ -78,7 +78,7 @@ std::vector<at::Tensor> TorchEngine::ForwardWithName(
   return CopyFromBuffers(raw_buffers, use_cuda);
 }
 std::vector<at::Tensor> TorchEngine::Forward(const std::vector<torch::jit::IValue>& inputs) const {
-  std::vector<at::Tensor> input_tensors = torch_::Utils::ToTensors(inputs);
+  std::vector<at::Tensor> input_tensors = torch_::ToTensors(inputs);
   if (input_tensors.empty()) {
     LOG(ERROR) << "Input Value Error!";
     return {};
@@ -145,7 +145,7 @@ Tensor TorchEngine::ParseInput(at::Tensor& input_tensor) const {
 
   input_buffer.device_type = input_tensor.device().is_cuda() ? DeviceType::CUDA : DeviceType::CPU;
   input_buffer.data = input_tensor.data_ptr();
-  input_buffer.dims = TrtUtils::ToVector(torch_::Utils::DimsOf(input_tensor));
+  input_buffer.dims = TrtUtils::ToVector(torch_::DimsOf(input_tensor));
   return input_buffer;
 }
 

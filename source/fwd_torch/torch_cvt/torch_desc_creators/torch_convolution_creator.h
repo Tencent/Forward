@@ -63,7 +63,7 @@ class TorchConvolutionCreator : public ILayerDescCreator {
       auto layer_desc = TCreate<TrtConvolutionDesc>(node, module, input_values);
 
       const auto dilation = module.Get(inputs[5]).toIntList();
-      layer_desc->dilation = Utils::ToDims(dilation);
+      layer_desc->dilation = ToDims(dilation);
 
       return layer_desc;
     } else {
@@ -122,22 +122,22 @@ class TorchConvolutionCreator : public ILayerDescCreator {
           {static_cast<int>(weights.size(2)), static_cast<int>(weights.size(3)),
            static_cast<int>(weights.size(4))}};
     }
-    layer_desc->kernelWeights = Utils::ToFwdWeights(weights);
+    layer_desc->kernelWeights = ToFwdWeights(weights);
 
     const auto& bias_value = module.Get(inputs[2]);
     if (!bias_value.isNone()) {
       const auto bias = bias_value.toTensor();
-      layer_desc->biasWeights = Utils::ToFwdWeights(bias);
+      layer_desc->biasWeights = ToFwdWeights(bias);
     }
 
     const auto stride = module.Get(inputs[3]).toIntList();
-    layer_desc->stride = Utils::ToDims(stride);
+    layer_desc->stride = ToDims(stride);
 
     // 实际只有deconvolution时 output_padding 可能非0
     const auto padding = module.Get(inputs[4]).toIntList();
     const auto output_padding = module.Get(inputs[7]).toIntList();
-    layer_desc->prePadding = Utils::ToDims(padding);
-    layer_desc->postPadding = Utils::ToDims(padding) - Utils::ToDims(output_padding);
+    layer_desc->prePadding = ToDims(padding);
+    layer_desc->postPadding = ToDims(padding) - ToDims(output_padding);
 
     layer_desc->nbGroups = module.Get(inputs[8]).toInt();
     if (transposed && layer_desc->nbOutputMaps % layer_desc->nbGroups != 0) {

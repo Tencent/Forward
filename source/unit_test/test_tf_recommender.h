@@ -38,10 +38,10 @@ TEST(TestTfRecommender, LastFM) {
 
   const int batch_size = 100;
   const auto seq_item_id =
-      fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 20}, 14598);
-  const auto seq_len = fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size}, 50);
-  const auto user_gender = fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size}, 3);
-  const auto user_geo = fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size}, 67);
+      fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 20}, 14598);
+  const auto seq_len = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size}, 50);
+  const auto user_gender = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size}, 3);
+  const auto user_geo = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size}, 67);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["inputgraph/seq_item_id"] = seq_item_id.get();
@@ -60,9 +60,9 @@ TEST(TestTfRecommender, DeepFM) {
   const int batch_size = 1;
   std::vector<float> input_vec(1706, 0);
   input_vec[0] = 1;
-  const auto input = fwd::tf_::Utils::CreateTensor(TF_FLOAT, {batch_size, 1706}, input_vec.data());
+  const auto input = fwd::tf_::CreateTensor(TF_FLOAT, {batch_size, 1706}, input_vec.data());
   const auto indices =
-      fwd::tf_::Utils::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 21}, 1706);
+      fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 21}, 1706);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["Placeholder"] = input.get();

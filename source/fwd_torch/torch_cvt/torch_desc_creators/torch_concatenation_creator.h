@@ -72,7 +72,7 @@ class TLayerDescCreator<TrtConcatenationDesc> : public ILayerDescCreator {
       T_CHECK(tensors_node->kind() == c10::prim::ListConstruct);
 
       for (auto input : tensors_node->inputs()) {
-        Utils::ExtractAllInputs(input, input_values);
+        ExtractAllInputs(input, input_values);
       }
     }
 
@@ -116,7 +116,7 @@ class TLayerDescCreator<TrtConcatenationDesc> : public ILayerDescCreator {
 
     // reshape
     const auto& dummy = module.Get(split_node_->inputs()[0]).toTensor();
-    const nvinfer1::Dims input_dim = Utils::DimsOf(dummy);
+    const nvinfer1::Dims input_dim = DimsOf(dummy);
     const auto sections = input_dim.d[split_dim] / split_size;
     nvinfer1::Dims reshape_dim{input_dim.nbDims + 1,
                                {

@@ -92,7 +92,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
                   const std::string& name) const {
     // Get num_heads from SOFTMAX node
     if (name.find(NAME_MAP.at("SOFTMAX")) != std::string::npos) {
-      const auto op_shape = Utils::DimsOf(Output{op.Graph(), op.Op(), 0});
+      const auto op_shape = DimsOf(Output{op.Graph(), op.Op(), 0});
       layer_desc->num_heads = op_shape.d[1];
     }
 
@@ -128,7 +128,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
 
     const auto output = Output(op.Graph(), op.Op(), 0);
     const auto tf_weight = output.GetConstantTensor();
-    layer_desc->weight_map[layer_name] = Utils::ToFwdWeights(tf_weight);
+    layer_desc->weight_map[layer_name] = ToFwdWeights(tf_weight);
 
     const int offset = layer_name.find("layernorm");
     if (offset > 0) {
@@ -139,9 +139,9 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
 
     // 对Kernel类的数据做转置，把未转置的数据放在后面
     if (layer_name.find("kernel") != std::string::npos) {
-      layer_desc->weight_map[layer_name + "_notrans"] = Utils::ToFwdWeights(tf_weight);
+      layer_desc->weight_map[layer_name + "_notrans"] = ToFwdWeights(tf_weight);
 
-      layer_desc->weight_map[layer_name].Transpose(Utils::DimsOf(output), {1, 0});
+      layer_desc->weight_map[layer_name].Transpose(DimsOf(output), {1, 0});
     }
 
     // 对Conv1d卷积参数进行转置，[H,W,in,out]->[out,in,H,W]

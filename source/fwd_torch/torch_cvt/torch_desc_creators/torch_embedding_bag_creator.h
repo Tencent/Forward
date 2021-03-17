@@ -66,7 +66,7 @@ class TLayerDescCreator<TrtEmbeddingBagDesc> : public ILayerDescCreator {
     layer_desc->count = weight.sizes()[0];
     layer_desc->dim = weight.sizes()[1];
     layer_desc->offset = 0;
-    layer_desc->data = Utils::ToFwdWeights(weight);
+    layer_desc->data = ToFwdWeights(weight);
 
     return layer_desc;
   }

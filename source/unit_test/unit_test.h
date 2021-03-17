@@ -97,7 +97,7 @@ double GetRelativeError(T res, T gt) {
 inline std::vector<int64_t> InputVolume(const std::vector<c10::IValue>& inputs) {
   std::vector<int64_t> inputSize;
   for (int i = 0; i < inputs.size(); ++i) {
-    auto dims = fwd::TrtUtils::ToVector(fwd::torch_::Utils::DimsOf(inputs[i].toTensor()));
+    auto dims = fwd::TrtUtils::ToVector(fwd::torch_::DimsOf(inputs[i].toTensor()));
     inputSize.push_back(std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<int>()));
   }
   return inputSize;
@@ -110,7 +110,7 @@ inline std::vector<int64_t> InputVolume(
     const std::unordered_map<std::string, c10::IValue>& input_map) {
   std::vector<int64_t> inputSize;
   for (auto& entry : input_map) {
-    auto dims = fwd::TrtUtils::ToVector(fwd::torch_::Utils::DimsOf(entry.second.toTensor()));
+    auto dims = fwd::TrtUtils::ToVector(fwd::torch_::DimsOf(entry.second.toTensor()));
     inputSize.push_back(std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<int>()));
   }
   return inputSize;
@@ -272,7 +272,7 @@ inline void TestTorchTime(const std::string& model_path,
 inline std::vector<int64_t> InputVolume(const std::vector<std::shared_ptr<TF_Tensor>>& inputs) {
   std::vector<int64_t> inputSize;
   for (int i = 0; i < inputs.size(); ++i) {
-    auto dims = fwd::tf_::Utils::GetTensorShape(inputs[i].get());
+    auto dims = fwd::tf_::GetTensorShape(inputs[i].get());
     inputSize.push_back(std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<int64_t>()));
   }
   return inputSize;
@@ -331,7 +331,7 @@ inline void TestTFInference(const std::string& graph_path, const std::string& mo
     ASSERT_TRUE(tf_infer.LoadGraph(graph_path));
     std::vector<std::shared_ptr<TF_Tensor>> outputs;
     ASSERT_TRUE(tf_infer.Forward(input_map, output_names, outputs));
-    gt_res = fwd::tf_::Utils::GetTensorsData<float>(outputs);
+    gt_res = fwd::tf_::GetTensorsData<float>(outputs);
   }
 
   const std::string engine_path = graph_path + ".engine";
@@ -359,12 +359,12 @@ inline void TestTFInference(const std::string& graph_path, const std::string& mo
       ASSERT_TRUE(tf_engine.Load(engine_path));
       outputs = tf_engine.ForwardWithName(input_map);
       for (auto& output : outputs) {
-        output.second = fwd::tf_::Utils::CastTensor<float>(output.second.get(), TF_FLOAT);
+        output.second = fwd::tf_::CastTensor<float>(output.second.get(), TF_FLOAT);
       }
     }
 
     for (auto& output : outputs) {
-      results.push_back(fwd::tf_::Utils::GetTensorData<float>(output.second.get()));
+      results.push_back(fwd::tf_::GetTensorData<float>(output.second.get()));
     }
   }
 
@@ -405,7 +405,7 @@ inline void TestKerasInference(const std::string& pb_path, const std::string& ke
       ASSERT_TRUE(false);
     }
     // TODO(Ao Li): 这里假设输出一定是 float 类型
-    ground_truth = fwd::tf_::Utils::GetTensorsData<float>(outputs);
+    ground_truth = fwd::tf_::GetTensorsData<float>(outputs);
   }
 
   // calculate TensorRT infer results

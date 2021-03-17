@@ -68,7 +68,7 @@ std::shared_ptr<fwd::TfEngine> TfBuilderBuild(
     auto& arr = entry.second;
     std::vector<int64_t> shape(arr.shape(), arr.shape() + arr.ndim());
     // TODO(Ao Li): 消除这里的内存拷贝
-    auto input = fwd::tf_::Utils::CreateTensor(GetDataTypeFromDtype(arr), shape, arr.data());
+    auto input = fwd::tf_::CreateTensor(GetDataTypeFromDtype(arr), shape, arr.data());
     dummy_input_map_tmp[entry.first] = input;
   }
 
@@ -86,7 +86,7 @@ std::vector<py::array_t<float>> TfEngineForward(fwd::TfEngine& engine,
   for (auto& arr : data) {
     std::vector<int64_t> shape(arr.shape(), arr.shape() + arr.ndim());
     // TODO(Ao Li): 消除这里的内存拷贝
-    auto input = fwd::tf_::Utils::CreateTensor(GetDataTypeFromDtype(arr), shape, arr.data());
+    auto input = fwd::tf_::CreateTensor(GetDataTypeFromDtype(arr), shape, arr.data());
     inputs.push_back(input);
   }
 
@@ -99,7 +99,7 @@ std::vector<py::array_t<float>> TfEngineForward(fwd::TfEngine& engine,
 
   std::vector<py::array_t<float>> results;
   for (auto& output : outputs) {
-    auto out_shape = fwd::tf_::Utils::GetTensorShape(output.get());
+    auto out_shape = fwd::tf_::GetTensorShape(output.get());
     results.push_back(
         py::array_t<float>(out_shape, static_cast<const float*>(TF_TensorData(output.get()))));
   }
@@ -114,7 +114,7 @@ std::unordered_map<std::string, py::array> TfEngineForwardWithName(
     auto& arr = entry.second;
     std::vector<int64_t> shape(arr.shape(), arr.shape() + arr.ndim());
     // TODO(Ao Li): 消除这里的内存拷贝
-    auto input = fwd::tf_::Utils::CreateTensor(GetDataTypeFromDtype(arr), shape, arr.data());
+    auto input = fwd::tf_::CreateTensor(GetDataTypeFromDtype(arr), shape, arr.data());
     input_map_tmp[entry.first] = input;
   }
 
@@ -128,7 +128,7 @@ std::unordered_map<std::string, py::array> TfEngineForwardWithName(
   std::unordered_map<std::string, py::array> results;
   for (auto& output : outputs) {
     auto* tensor = output.second.get();
-    results[output.first] = py::array_t<float>(fwd::tf_::Utils::GetTensorShape(tensor),
+    results[output.first] = py::array_t<float>(fwd::tf_::GetTensorShape(tensor),
                                                static_cast<const float*>(TF_TensorData(tensor)));
   }
   return results;

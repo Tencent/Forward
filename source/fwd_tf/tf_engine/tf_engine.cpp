@@ -56,7 +56,7 @@ Tensor TfEngine::ParseInput(TF_Tensor* input) const {
   }
 
   input_buffer.data = TF_TensorData(input);
-  input_buffer.dims = TrtUtils::ToVector(tf_::Utils::DimsOf(input));
+  input_buffer.dims = TrtUtils::ToVector(tf_::DimsOf(input));
 
   return input_buffer;
 }
@@ -135,7 +135,7 @@ std::vector<std::shared_ptr<TF_Tensor>> TfEngine::CopyFromBuffers(
 
     std::vector<int64_t> dims_vec(buffers[i].dims.begin(), buffers[i].dims.end());
 
-    std::shared_ptr<TF_Tensor> output = tf_::Utils::CreateEmptyTensor(data_type, dims_vec);
+    std::shared_ptr<TF_Tensor> output = tf_::CreateEmptyTensor(data_type, dims_vec);
 
     CUDA_CHECK(cudaMemcpy(TF_TensorData(output.get()), buffers[i].data,
                           TF_TensorByteSize(output.get()), cudaMemcpyDeviceToHost));

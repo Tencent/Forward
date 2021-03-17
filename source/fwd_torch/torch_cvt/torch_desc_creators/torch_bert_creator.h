@@ -218,14 +218,14 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
     const std::string layer_name = GetWeightFullName(node);
 
     // 与tf的kernel存储方式相反，这里应该不需要转置
-    layer_desc->weight_map[layer_name] = Utils::ToFwdWeights(weight);
+    layer_desc->weight_map[layer_name] = ToFwdWeights(weight);
   }
 
   void TrySetDesc(const JitNode* node, const TorchModule& module,
                   std::shared_ptr<TrtBertDesc> layer_desc) {
     if (layer_desc->num_heads == 0 && node->kind() == c10::aten::softmax) {
       auto t = module.Get(node->output()).toTensor();
-      auto d = Utils::DimsOf(t);
+      auto d = DimsOf(t);
       layer_desc->num_heads = d.d[1];
     }
 

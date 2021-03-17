@@ -88,7 +88,7 @@ class TLayerDescCreator<TrtConvolutionDesc> : public ILayerDescCreator {
       const std::string data_format = op.GetAttrString("data_format");
       T_CHECK_EQ(data_format, "NHWC");
 
-      layer_desc->biasWeights = Utils::ToFwdWeights(bias.GetConstantTensor());
+      layer_desc->biasWeights = ToFwdWeights(bias.GetConstantTensor());
 
       // op 转移到卷积层
       op = input;
@@ -126,10 +126,10 @@ class TLayerDescCreator<TrtConvolutionDesc> : public ILayerDescCreator {
     // tensorflow 卷积核维度为 [kH, kW, in_c, out_c]
     // 而 TensorRT 卷积核参数维度为  [out_c, in_c, kH, kW], 因此这里需要
     // (3,2,0,1) 转置
-    const auto filter_dims = Utils::DimsOf(filter);
+    const auto filter_dims = DimsOf(filter);
     T_CHECK_EQ(filter_dims.nbDims, 4);
     layer_desc->kernelSize = TrtUtils::ToDims(std::vector<int>{filter_dims.d[0], filter_dims.d[1]});
-    layer_desc->kernelWeights = Utils::ToFwdWeights(filter.GetConstantTensor());
+    layer_desc->kernelWeights = ToFwdWeights(filter.GetConstantTensor());
     layer_desc->kernelWeights.Transpose(filter_dims, {3, 2, 0, 1});
 
     if (op_type == "DepthwiseConv2dNative") {

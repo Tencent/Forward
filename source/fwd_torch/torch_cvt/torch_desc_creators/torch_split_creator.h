@@ -60,7 +60,7 @@ class TLayerDescCreator<TrtSplitDesc> : public ILayerDescCreator {
 
     layer_desc->splitSize.clear();
     layer_desc->dim = module.Get(inputs[2]).toInt();
-    const auto input_dims = Utils::DimsOf(module.Get(inputs[0]).toTensor());
+    const auto input_dims = DimsOf(module.Get(inputs[0]).toTensor());
 
     if (node->kind() == c10::aten::split_with_sizes) {
       const auto split_size = module.Get(inputs[1]).toIntList();

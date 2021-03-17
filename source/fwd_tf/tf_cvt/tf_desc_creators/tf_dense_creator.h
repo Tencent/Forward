@@ -83,13 +83,13 @@ class TLayerDescCreator<TrtFullyConnectedDesc> : public ILayerDescCreator {
     // TODO(Paul Lu): fc层未遇到过此处为true的情形; 如果出现了再做处理。
     T_CHECK(!transpose_a);
 
-    layer_desc->kernelWeights = Utils::ToFwdWeights(weights.GetConstantTensor());
-    const auto dims = Utils::DimsOf(weights);
+    layer_desc->kernelWeights = ToFwdWeights(weights.GetConstantTensor());
+    const auto dims = DimsOf(weights);
     if (!transpose_b) {
       layer_desc->kernelWeights.Transpose(dims, {1, 0});
     }
 
-    layer_desc->biasWeights = Utils::ToFwdWeights(bias.GetConstantTensor());
+    layer_desc->biasWeights = ToFwdWeights(bias.GetConstantTensor());
 
     layer_desc->nbOutputChannels = layer_desc->biasWeights.Count();
 

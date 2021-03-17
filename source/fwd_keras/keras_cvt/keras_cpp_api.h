@@ -53,20 +53,17 @@ using json = nlohmann::json;
 /**
  * \brief 辅助工具类
  */
-class Utils {
- public:
-  static nvinfer1::Dims DimsOf(const json& dims_json) {
-    nvinfer1::Dims dims;
-    dims.nbDims = dims_json.size();
-    for (int i = 0; i < dims.nbDims; ++i) {
-      const auto item = dims_json[i];
-      // std::cout << item.type_name() <<std::endl;
-      dims.d[i] = item == nullptr ? -1 : item.get<int>();
-    }
-
-    return dims;
+inline nvinfer1::Dims DimsOf(const json& dims_json) {
+  nvinfer1::Dims dims;
+  dims.nbDims = dims_json.size();
+  for (int i = 0; i < dims.nbDims; ++i) {
+    const auto item = dims_json[i];
+    // std::cout << item.type_name() <<std::endl;
+    dims.d[i] = item == nullptr ? -1 : item.get<int>();
   }
-};
+
+  return dims;
+}
 
 class Layer {
  public:

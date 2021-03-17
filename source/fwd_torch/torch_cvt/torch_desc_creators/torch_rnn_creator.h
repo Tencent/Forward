@@ -80,7 +80,7 @@ class TLayerDescCreator<TrtRNNv2Desc> : public ILayerDescCreator {
     const auto batch_first = module.Get(inputs[8]).toBool();
     layer_desc->batchFirst = batch_first;
 
-    const auto trt_type = Utils::ConvertTorch2TrtDtype(params.get(0).scalar_type());
+    const auto trt_type = ConvertTorch2TrtDtype(params.get(0).scalar_type());
 
     // params 排布顺序 : layer0
     //     : input_weights,
@@ -94,12 +94,12 @@ class TLayerDescCreator<TrtRNNv2Desc> : public ILayerDescCreator {
     int64_t i = 0;
     while (i < params.size()) {
       for (int j = 0; j < 1 + bidirectional; j++) {
-        layer_desc->weightsForGate.push_back(Utils::ToFwdWeights(params.get(i)));
-        layer_desc->weightsForGate.push_back(Utils::ToFwdWeights(params.get(i + 1)));
+        layer_desc->weightsForGate.push_back(ToFwdWeights(params.get(i)));
+        layer_desc->weightsForGate.push_back(ToFwdWeights(params.get(i + 1)));
         i += 2;
         if (has_biases) {
-          layer_desc->biasForGate.push_back(Utils::ToFwdWeights(params.get(i)));
-          layer_desc->biasForGate.push_back(Utils::ToFwdWeights(params.get(i + 1)));
+          layer_desc->biasForGate.push_back(ToFwdWeights(params.get(i)));
+          layer_desc->biasForGate.push_back(ToFwdWeights(params.get(i + 1)));
           i += 2;
         }
       }

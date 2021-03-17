@@ -65,7 +65,7 @@ class TLayerDescCreator<TrtConcatenationDesc> : public ILayerDescCreator {
     auto layer_desc = std::make_shared<TrtConcatenationDesc>();
 
     const int axis = op.Input(num_inputs - 1).GetConstantTensor().AsInt();
-    // const int axis = Utils::GetConstantInt(graph, op.Input(num_inputs - 1));
+    // const int axis = GetConstantInt(graph, op.Input(num_inputs - 1));
 
     auto input0 = op.Input(0);
     const auto nbDims = input0.GetTensorNumDims();

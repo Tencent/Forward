@@ -66,10 +66,10 @@ class TLayerDescCreator<TrtParametricReLUDesc> : public ILayerDescCreator {
 
     layer_desc->slopDims = TrtUtils::CreateSingleton(dummy.ndimension());
     layer_desc->slopDims.d[1] = weight.size(0);  // input channel
-    layer_desc->slopWeights = Utils::ToFwdWeights(weight);
+    layer_desc->slopWeights = ToFwdWeights(weight);
 
     // LOG(INFO) << "Slop Dimensions: " <<
-    // Utils::ShapeStrOf(layer_desc->slopDims);
+    // ShapeStrOf(layer_desc->slopDims);
 
     return layer_desc;
   }

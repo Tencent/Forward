@@ -45,7 +45,6 @@
 
 FWD_TORCH_NAMESPACE_BEGIN
 
-namespace Utils {
 /**
  * \brief 获取 at::Tensor 维度
  * \param tensor
@@ -467,5 +466,5 @@ inline void WriteToText(at::Tensor tensor, const std::string& filename) {
   fout << tensor << std::endl;
   fout.close();
 }
-};  // namespace Utils
+
 FWD_TORCH_NAMESPACE_END

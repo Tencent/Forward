@@ -57,8 +57,8 @@ class TLayerDescCreator<TrtMatrixMultiplyDesc> : public ILayerDescCreator {
     const auto input0 = op.Input(0);
     const auto input1 = op.Input(1);
 
-    const auto const_tensor_0 = Utils::ToFwdWeights(input0.GetConstantTensor());
-    const auto const_tensor_1 = Utils::ToFwdWeights(input1.GetConstantTensor());
+    const auto const_tensor_0 = ToFwdWeights(input0.GetConstantTensor());
+    const auto const_tensor_1 = ToFwdWeights(input1.GetConstantTensor());
 
     auto layer_desc = std::make_shared<TrtMatrixMultiplyDesc>();
 
@@ -67,7 +67,7 @@ class TLayerDescCreator<TrtMatrixMultiplyDesc> : public ILayerDescCreator {
     if (!const_tensor_0.Empty()) {
       layer_desc->inputs[0].inUse = true;
       layer_desc->inputs[0].data = const_tensor_0;
-      layer_desc->inputs[0].dim = Utils::DimsOf(input0);
+      layer_desc->inputs[0].dim = DimsOf(input0);
     } else {
       op_inputs.push_back(input0);
     }
@@ -75,7 +75,7 @@ class TLayerDescCreator<TrtMatrixMultiplyDesc> : public ILayerDescCreator {
     if (!const_tensor_1.Empty()) {
       layer_desc->inputs[1].inUse = true;
       layer_desc->inputs[1].data = const_tensor_1;
-      layer_desc->inputs[1].dim = Utils::DimsOf(input1);
+      layer_desc->inputs[1].dim = DimsOf(input1);
     } else {
       op_inputs.push_back(input1);
     }

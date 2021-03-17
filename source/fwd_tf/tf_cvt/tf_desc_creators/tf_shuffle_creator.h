@@ -107,10 +107,10 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       const auto input = op.Input(0);
       const auto dim = op.Input(1);
 
-      auto dims = Utils::DimsOf(input);
+      auto dims = DimsOf(input);
       dims.nbDims += 1;
 
-      // int expand_dim = Utils::GetConstantInt(graph, dim);
+      // int expand_dim = GetConstantInt(graph, dim);
       int expand_dim = dim.GetConstantTensor().AsInt();
       if (expand_dim < 0) {
         expand_dim += dims.nbDims;
@@ -134,7 +134,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       const auto input = op.Input(0);
       const auto squeeze_dim = op.GetAttrIntList("squeeze_dims");
 
-      const auto dims = Utils::DimsOf(input);
+      const auto dims = DimsOf(input);
 
       nvinfer1::Dims real_dims;
       real_dims.nbDims = 0;

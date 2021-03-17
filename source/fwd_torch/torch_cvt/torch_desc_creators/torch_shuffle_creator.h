@@ -167,7 +167,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     for (int i = 0; i < dummy.ndimension(); ++i) {
       permutes.order[i] = i;
     }
-    // auto permutes = TrtUtils::ToPermutation(Utils::DimsOf(dummy));
+    // auto permutes = TrtUtils::ToPermutation(DimsOf(dummy));
     std::swap(permutes.order[dim0], permutes.order[dim1]);
 
     layer_desc->doFirstTrans = true;
@@ -195,8 +195,8 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
         inputs[0]->node()->kind() == c10::prim::Constant) {
       const at::Tensor input = module.Get(inputs[0]).toTensor().contiguous();
       auto constant_desc = std::make_shared<TrtConstantDesc>();
-      constant_desc->weights = Utils::ToFwdWeights(input);
-      constant_desc->dimensions = Utils::DimsOf(input);
+      constant_desc->weights = ToFwdWeights(input);
+      constant_desc->dimensions = DimsOf(input);
       input_values.push_back(nullptr);  // constant input
       return constant_desc;
     }
@@ -213,7 +213,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     layer_desc->doFirstTrans = false;
     layer_desc->doReshape = true;
     layer_desc->doSecondTrans = false;
-    layer_desc->reshapeDimensions = Utils::ToDims(value.toIntList());
+    layer_desc->reshapeDimensions = ToDims(value.toIntList());
 
     return layer_desc;
   }
@@ -240,8 +240,8 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       input = input.unsqueeze(dim).contiguous();
 
       auto layer_desc = std::make_shared<TrtConstantDesc>();
-      layer_desc->weights = torch_::Utils::ToFwdWeights(input);
-      layer_desc->dimensions = torch_::Utils::DimsOf(input);
+      layer_desc->weights = torch_::ToFwdWeights(input);
+      layer_desc->dimensions = torch_::DimsOf(input);
 
       input_values.push_back(nullptr);
       return layer_desc;
@@ -250,7 +250,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     // 处理输入不是常量的情况
     input_values.push_back(inputs[0]);
 
-    auto input_shape = torch_::Utils::ShapeOf(module.Get(inputs[0]).toTensor());
+    auto input_shape = torch_::ShapeOf(module.Get(inputs[0]).toTensor());
     if (dim < 0) {
       dim += input_shape.size() + 1;
     }
@@ -294,8 +294,8 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       input = input.expand(size).contiguous();
 
       auto layer_desc = std::make_shared<TrtConstantDesc>();
-      layer_desc->weights = torch_::Utils::ToFwdWeights(input);
-      layer_desc->dimensions = torch_::Utils::DimsOf(input);
+      layer_desc->weights = torch_::ToFwdWeights(input);
+      layer_desc->dimensions = torch_::DimsOf(input);
 
       input_values.push_back(nullptr);
       return layer_desc;

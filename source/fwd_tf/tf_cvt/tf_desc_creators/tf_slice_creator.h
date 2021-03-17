@@ -77,7 +77,7 @@ class TLayerDescCreator<TrtSliceDesc> : public ILayerDescCreator {
     auto strides_list = stride_op.GetConstantTensor().AsIntList();
 
     auto layer_desc = std::make_shared<TrtSliceDesc>();
-    auto dims = Utils::DimsOf(input);
+    auto dims = DimsOf(input);
 
     for (int i = 0; i < dims.nbDims; ++i) {
       if (begin_mask & (1ll << i)) begin_list[i] = 0;
