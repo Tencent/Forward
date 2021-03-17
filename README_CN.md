@@ -139,9 +139,9 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 
 ### 模型
 
-- [CV 模型](doc/operator_support.md#cv-%E6%A8%A1%E5%9E%8B)
-- [语言模型](doc/operator_support.md#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B)
-- [推荐模型](doc/operator_support.md#%E6%8E%A8%E8%8D%90%E6%A8%A1%E5%9E%8B)
+- [CV 模型](doc/operator_support.md#cv)
+- [语言模型](doc/operator_support.md#nlp)
+- [推荐模型](doc/operator_support.md#recommender)
 
 ### 算子
 

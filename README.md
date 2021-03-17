@@ -158,9 +158,9 @@ outputs = tf_engine.forward(inputs) # dict_type outputs
 
 ### Models
 
-- [CV](doc/operator_support.md#cv-%E6%A8%A1%E5%9E%8B)
-- [NLP](doc/operator_support.md#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B)
-- [Recommender](doc/operator_support.md#%E6%8E%A8%E8%8D%90%E6%A8%A1%E5%9E%8B)
+- [CV](doc/operator_support.md#cv)
+- [NLP](doc/operator_support.md#nlp)
+- [Recommender](doc/operator_support.md#recommender)
 
 ### Operators
 
