@@ -32,7 +32,7 @@
 #include "unit_test/unit_test.h"
 
 TEST(TestTorchNodes131Int8, Arithmetic) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/arithmetic.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/arithmetic.pth";
   const auto a = ::torch::randn({1, 3, 64, 32}, device).to(c10::kHalf);
   const auto b = ::torch::randn({1, 3, 64, 32}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -44,7 +44,7 @@ TEST(TestTorchNodes131Int8, Arithmetic) {
 }
 
 TEST(TestTorchNodes131Int8, Addmm) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/addmm.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/addmm.pth";
   const auto M = ::torch::randn({3, 3}, device).to(c10::kHalf);
   const auto mat1 = ::torch::randn({3, 3}, device).to(c10::kHalf);
   const auto mat2 = ::torch::randn({3, 3}, device).to(c10::kHalf);
@@ -59,7 +59,7 @@ TEST(TestTorchNodes131Int8, Addmm) {
 }
 
 TEST(TestTorchNodes131Int8, FullyConnected) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/fully_connected.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/fully_connected.pth";
   const auto input = ::torch::randn({1, 10}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -70,7 +70,7 @@ TEST(TestTorchNodes131Int8, FullyConnected) {
 }
 
 TEST(TestTorchNodes131Int8, Activation) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/activation.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/activation.pth";
   const auto input = ::torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -81,7 +81,7 @@ TEST(TestTorchNodes131Int8, Activation) {
 }
 
 TEST(TestTorchNodes131Int8, PRelu) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/prelu.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/prelu.pth";
   const auto input = torch::randn({1, 3, 11, 13}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -92,7 +92,7 @@ TEST(TestTorchNodes131Int8, PRelu) {
 }
 
 TEST(TestTorchNodes131Int8, Inplace) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/inplace.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/inplace.pth";
   const auto input = torch::randn({1, 3, 64, 32}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -103,7 +103,7 @@ TEST(TestTorchNodes131Int8, Inplace) {
 }
 
 TEST(TestTorchNodes131Int8, InstanceNorm2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/instance_norm.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/instance_norm.pth";
   const auto input = torch::randn({3, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -114,7 +114,7 @@ TEST(TestTorchNodes131Int8, InstanceNorm2d) {
 }
 
 TEST(TestTorchNodes131Int8, InstanceNorm2dTrack) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/instance_norm_track.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/instance_norm_track.pth";
   const auto input = torch::randn({4, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -125,7 +125,7 @@ TEST(TestTorchNodes131Int8, InstanceNorm2dTrack) {
 }
 
 TEST(TestTorchNodes131Int8, InstanceNorm2dAffine) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/instance_norm_aff.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/instance_norm_aff.pth";
   const auto input = torch::randn({5, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -136,7 +136,7 @@ TEST(TestTorchNodes131Int8, InstanceNorm2dAffine) {
 }
 
 TEST(TestTorchNodes131Int8, InstanceNorm2dAffineTrack) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/instance_norm_aff_track.pth";
   const auto input = torch::randn({6, 3, 7, 7}, device).to(c10::kHalf);
 
@@ -148,7 +148,7 @@ TEST(TestTorchNodes131Int8, InstanceNorm2dAffineTrack) {
 }
 
 TEST(TestTorchNodes131Int8, Norm) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/norm.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/norm.pth";
   const auto input = torch::randn({1, 32, 1, 1}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -159,7 +159,7 @@ TEST(TestTorchNodes131Int8, Norm) {
 }
 
 TEST(TestTorchNodes131Int8, ReflectionPad2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/reflection_pad_2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/reflection_pad_2d.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -170,7 +170,7 @@ TEST(TestTorchNodes131Int8, ReflectionPad2d) {
 }
 
 TEST(TestTorchNodes131Int8, Conv2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/conv2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/conv2d.pth";
   const auto input = torch::randn({2, 3, 32, 64}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -181,7 +181,7 @@ TEST(TestTorchNodes131Int8, Conv2d) {
 }
 
 TEST(TestTorchNodes131Int8, Deconv2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/deconv2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/deconv2d.pth";
   const auto input = torch::randn({1, 8, 32, 64}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -192,7 +192,7 @@ TEST(TestTorchNodes131Int8, Deconv2d) {
 }
 
 TEST(TestTorchNodes131Int8, Expand) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/expand.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/expand.pth";
   const auto input = torch::randn({1, 3, 2}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -203,7 +203,7 @@ TEST(TestTorchNodes131Int8, Expand) {
 }
 
 TEST(TestTorchNodes131Int8, Pooling2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/pooling_2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/pooling_2d.pth";
   const auto x = ::torch::randn({1, 23, 54, 96}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
@@ -212,7 +212,7 @@ TEST(TestTorchNodes131Int8, Pooling2d) {
 }
 
 TEST(TestTorchNodes131Int8, Pooling3d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/pooling_3d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/pooling_3d.pth";
   const auto x = torch::randn({1, 14, 23, 54, 96}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
@@ -221,7 +221,7 @@ TEST(TestTorchNodes131Int8, Pooling3d) {
 }
 
 TEST(TestTorchNodes131Int8, AdaptivePooling2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/adaptive_pooling_2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/adaptive_pooling_2d.pth";
   const auto x = torch::randn({1, 64, 10, 9}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
@@ -230,7 +230,7 @@ TEST(TestTorchNodes131Int8, AdaptivePooling2d) {
 }
 
 TEST(TestTorchNodes131Int8, AdaptivePooling3d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/adaptive_pooling_3d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/adaptive_pooling_3d.pth";
   const auto x = torch::randn({1, 64, 8, 9, 10}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
@@ -239,7 +239,7 @@ TEST(TestTorchNodes131Int8, AdaptivePooling3d) {
 }
 
 TEST(TestTorchNodes131Int8, Cat) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/cat.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/cat.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -250,7 +250,7 @@ TEST(TestTorchNodes131Int8, Cat) {
 }
 
 TEST(TestTorchNodes131Int8, Stack) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/stack.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/stack.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -261,7 +261,7 @@ TEST(TestTorchNodes131Int8, Stack) {
 }
 
 TEST(TestTorchNodes131Int8, Softmax) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/softmax.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/softmax.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -272,7 +272,7 @@ TEST(TestTorchNodes131Int8, Softmax) {
 }
 
 TEST(TestTorchNodes131Int8, BatchNorm2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/batch_norm_2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/batch_norm_2d.pth";
   const auto input = torch::randn({3, 3, 14, 32}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -283,7 +283,7 @@ TEST(TestTorchNodes131Int8, BatchNorm2d) {
 }
 
 TEST(TestTorchNodes131Int8, LayerNorm) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/layer_norm.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/layer_norm.pth";
   const auto input = torch::randn({3, 3, 14, 32}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -294,7 +294,7 @@ TEST(TestTorchNodes131Int8, LayerNorm) {
 }
 
 TEST(TestTorchNodes131Int8, LayerNormWithWeights) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/layer_norm_with_weights.pth";
   const auto input = torch::randn({20, 5, 10}, device);
 
@@ -309,7 +309,7 @@ TEST(TestTorchNodes131Int8, LayerNormWithWeights) {
 }
 
 TEST(TestTorchNodes131Int8, Bmm) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/bmm.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/bmm.pth";
   const auto mat1 = ::torch::randn({3, 4, 5}, device).to(c10::kHalf);
   const auto mat2 = ::torch::randn({3, 5, 6}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -321,7 +321,7 @@ TEST(TestTorchNodes131Int8, Bmm) {
 }
 
 TEST(TestTorchNodes131Int8, Clamp) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/clamp.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/clamp.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -332,7 +332,7 @@ TEST(TestTorchNodes131Int8, Clamp) {
 }
 
 TEST(TestTorchNodes131Int8, ConstantPad2d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/constant_pad_2d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/constant_pad_2d.pth";
   const auto input = torch::randn({1, 13, 7, 9}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -343,7 +343,7 @@ TEST(TestTorchNodes131Int8, ConstantPad2d) {
 }
 
 TEST(TestTorchNodes131Int8, ConstantPad3d) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/constant_pad_3d.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/constant_pad_3d.pth";
   const auto input = torch::randn({1, 3, 11, 22, 33}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -354,7 +354,7 @@ TEST(TestTorchNodes131Int8, ConstantPad3d) {
 }
 
 TEST(TestTorchNodes131Int8, Floor) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/floor.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/floor.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -365,7 +365,7 @@ TEST(TestTorchNodes131Int8, Floor) {
 }
 
 TEST(TestTorchNodes131Int8, Permute) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/permute.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/permute.pth";
   const auto input = torch::randn({3, 5, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -376,7 +376,7 @@ TEST(TestTorchNodes131Int8, Permute) {
 }
 
 TEST(TestTorchNodes131Int8, Repeat) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/repeat.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/repeat.pth";
   const auto input = torch::randn({2, 3}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -387,7 +387,7 @@ TEST(TestTorchNodes131Int8, Repeat) {
 }
 
 TEST(TestTorchNodes131Int8, Slice) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/slice.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/slice.pth";
   const auto input = torch::randn({4, 64, 64, 64}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -398,7 +398,7 @@ TEST(TestTorchNodes131Int8, Slice) {
 }
 
 TEST(TestTorchNodes131Int8, Split) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/split.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/split.pth";
   const auto input = torch::randn({1, 4, 10, 9}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -409,7 +409,7 @@ TEST(TestTorchNodes131Int8, Split) {
 }
 
 TEST(TestTorchNodes131Int8, SplitStack) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/split_stack.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/split_stack.pth";
   const auto input = torch::randn({1, 8, 2, 3}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -420,7 +420,7 @@ TEST(TestTorchNodes131Int8, SplitStack) {
 }
 
 TEST(TestTorchNodes131Int8, View) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/view_and_reshape.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/view_and_reshape.pth";
   const auto input = torch::randn({5, 4, 3}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -431,7 +431,7 @@ TEST(TestTorchNodes131Int8, View) {
 }
 
 TEST(TestTorchNodes131Int8, UpsamplingBilinear2dWithSize) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/upsampling_bilinear_2d_with_size.pth";
   const auto input = torch::randn({1, 128, 20, 20}, device).to(c10::kHalf);
 
@@ -443,7 +443,7 @@ TEST(TestTorchNodes131Int8, UpsamplingBilinear2dWithSize) {
 }
 
 TEST(TestTorchNodes131Int8, UpsamplingNearest2dWithSize) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/upsampling_nearest_2d_with_size.pth";
   const auto input = torch::randn({1, 1, 2, 2}, device).to(c10::kHalf);
 
@@ -455,7 +455,7 @@ TEST(TestTorchNodes131Int8, UpsamplingNearest2dWithSize) {
 }
 
 TEST(TestTorchNodes131Int8, UpsamplingBilinear2dWithScale) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/upsampling_bilinear_2d_with_scale.pth";
   const auto input = torch::randn({1, 128, 20, 20}, device).to(c10::kHalf);
 
@@ -467,7 +467,7 @@ TEST(TestTorchNodes131Int8, UpsamplingBilinear2dWithScale) {
 }
 
 TEST(TestTorchNodes131Int8, UpsamplingNearest2dWithScale) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/upsampling_nearest_2d_with_scale.pth";
   const auto input = torch::randn({1, 1, 2, 2}, device).to(c10::kHalf);
 
@@ -479,7 +479,7 @@ TEST(TestTorchNodes131Int8, UpsamplingNearest2dWithScale) {
 }
 
 TEST(TestTorchNodes131Int8, Unsqueeze) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/unsqueeze.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/unsqueeze.pth";
   const auto input = torch::randn({1, 3}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -490,7 +490,7 @@ TEST(TestTorchNodes131Int8, Unsqueeze) {
 }
 
 TEST(TestTorchNodes131Int8, Var) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/var.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/var.pth";
   const auto input = torch::randn({3, 13, 41, 39}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -501,7 +501,7 @@ TEST(TestTorchNodes131Int8, Var) {
 }
 
 TEST(TestTorchNodes131Int8, GridSamplerBilinearModule) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/grid_sampler_bilinear.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device).to(c10::kHalf);
   const auto T = ::torch::randn({1, 5, 10, 2}, device).to(c10::kHalf);
@@ -514,7 +514,7 @@ TEST(TestTorchNodes131Int8, GridSamplerBilinearModule) {
 }
 
 TEST(TestTorchNodes131Int8, GridSamplerNearestModule) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/grid_sampler_nearest.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/grid_sampler_nearest.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device).to(c10::kHalf);
   const auto T = ::torch::randn({1, 6, 7, 2}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -526,7 +526,7 @@ TEST(TestTorchNodes131Int8, GridSamplerNearestModule) {
 }
 
 TEST(TestTorchNodes131Int8, LrnModule) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/lrn.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/lrn.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -554,7 +554,7 @@ TEST(TestTorchNodes131Int8, ReduceModule) {
 }
 
 // TEST(TestTorchNodes131Int8, EmbeddingBagModule) {
-//   const std::string& model_path =
+//   const auto model_path =
 //       std::string(torch_root_dir) + "nodes131/embedding_bag.pth";
 //   auto input = ::torch::tensor({1, 0, 3, 1, 4},
 //                                torch::requires_grad(false).dtype(c10::kLong));
@@ -569,7 +569,7 @@ TEST(TestTorchNodes131Int8, ReduceModule) {
 // }
 
 TEST(TestTorchNodes131Int8, IndexModule) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/index.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/index.pth";
   auto input = ::torch::randn({3, 10, 10}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
   input_map["X"] = input;
@@ -578,7 +578,7 @@ TEST(TestTorchNodes131Int8, IndexModule) {
 }
 
 TEST(TestTorchNodes131Int8, ILN) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/ILN.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/ILN.pth";
   const auto input = ::torch::randn({1, 7, 231, 343}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -588,7 +588,7 @@ TEST(TestTorchNodes131Int8, ILN) {
 }
 
 TEST(TestTorchNodes131Int8, AdaILN) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/AdaILN.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/AdaILN.pth";
   const auto input = ::torch::randn({1, 7, 231, 343}, device).to(c10::kHalf);
   const auto gamma = ::torch::randn({1, 7}, device).to(c10::kHalf);
   const auto beta = ::torch::randn({1, 7}, device).to(c10::kHalf);
@@ -604,7 +604,7 @@ TEST(TestTorchNodes131Int8, AdaILN) {
 
 #ifdef SUPPORT_RNN
 TEST(TestTorchNodes131Int8, RnnModuleTanHBid) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/rnn_tanh_bidirectional.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
 
@@ -616,7 +616,7 @@ TEST(TestTorchNodes131Int8, RnnModuleTanHBid) {
 }
 
 TEST(TestTorchNodes131Int8, BidirectionRNN) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(torch_root_dir) + "nodes131/rnn_tanh_bidirectional.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
 
@@ -628,7 +628,7 @@ TEST(TestTorchNodes131Int8, BidirectionRNN) {
 }
 
 TEST(TestTorchNodes131Int8, RnnModuleRelu) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/rnn_relu.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/rnn_relu.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -639,7 +639,7 @@ TEST(TestTorchNodes131Int8, RnnModuleRelu) {
 }
 
 TEST(TestTorchNodes131Int8, LstmModule) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/lstm.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/lstm.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
   const auto h_0 = ::torch::randn({1, 2, 128}, device).to(c10::kHalf);
   const auto c_0 = ::torch::randn({1, 2, 128}, device).to(c10::kHalf);
@@ -654,7 +654,7 @@ TEST(TestTorchNodes131Int8, LstmModule) {
 }
 
 TEST(TestTorchNodes131Int8, Lstm2Module) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/lstm2.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/lstm2.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
   const auto h_0 = ::torch::randn({1, 2, 128}, device).to(c10::kHalf);
   const auto c_0 = ::torch::randn({1, 2, 128}, device).to(c10::kHalf);
@@ -669,7 +669,7 @@ TEST(TestTorchNodes131Int8, Lstm2Module) {
 }
 
 TEST(TestTorchNodes131Int8, GruModule) {
-  const std::string& model_path = std::string(torch_root_dir) + "nodes131/gru.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/gru.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
   const auto h_0 = ::torch::randn({1, 2, 128}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;

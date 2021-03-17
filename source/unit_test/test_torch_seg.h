@@ -32,7 +32,7 @@
 #include "unit_test/unit_test.h"
 
 TEST(TestTorchSeg, TorchSegFp32) {
-  const std::string model_path = std::string(models_dir) + "seg.jit.pth";
+  const auto model_path = std::string(models_dir) + "seg.jit.pth";
   const auto input = ::torch::randn({1, 3, 512, 512}, device);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -42,7 +42,7 @@ TEST(TestTorchSeg, TorchSegFp32) {
 }
 
 TEST(TestTorchSeg, TorchSegFp16) {
-  const std::string model_path = std::string(models_dir) + "seg.jit.pth";
+  const auto model_path = std::string(models_dir) + "seg.jit.pth";
   const auto input = ::torch::randn({1, 3, 512, 512}, device);
 
   std::unordered_map<std::string, c10::IValue> input_map;

@@ -32,7 +32,7 @@
 #include "unit_test/unit_test.h"
 
 TEST(TestTorchTupleInputs, Conv2DNetwork) {
-  const std::string& model_path = std::string(torch_root_dir) + "model_tuple_inputs.pth";
+  const auto model_path = std::string(torch_root_dir) + "model_tuple_inputs.pth";
   const std::vector<c10::IValue> input1{::torch::randn({1, 3, 2, 2}, device),
                                         ::torch::randn({1, 2, 2, 2}, device),
                                         ::torch::randn({1, 3, 3, 3}, device)};

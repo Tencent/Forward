@@ -32,7 +32,7 @@
 #include "unit_test/unit_test.h"
 
 TEST(TestTorchVision131Fp16, AlexNet) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/alexnet.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/alexnet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -42,7 +42,7 @@ TEST(TestTorchVision131Fp16, AlexNet) {
 }
 
 TEST(TestTorchVision131Fp16, GoogLeNet) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/googlenet.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/googlenet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -52,7 +52,7 @@ TEST(TestTorchVision131Fp16, GoogLeNet) {
 }
 
 TEST(TestTorchVision131Fp16, Inception_v3) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/inception_v3.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/inception_v3.pth";
   const auto input = torch::randn({1, 3, 299, 299}, device);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -62,7 +62,7 @@ TEST(TestTorchVision131Fp16, Inception_v3) {
 }
 
 TEST(TestTorchVision131Fp16, ResNet50) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/resnet50.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/resnet50.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -72,7 +72,7 @@ TEST(TestTorchVision131Fp16, ResNet50) {
 }
 
 TEST(TestTorchVision131Fp16, WideResNet50_2) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(models_dir) + "torch_vision_models/wide_resnet50_2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -83,7 +83,7 @@ TEST(TestTorchVision131Fp16, WideResNet50_2) {
 }
 
 TEST(TestTorchVision131Fp16, DenseNet121) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/densenet121.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/densenet121.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -93,7 +93,7 @@ TEST(TestTorchVision131Fp16, DenseNet121) {
 }
 
 TEST(TestTorchVision131Fp16, MNASNet0_75) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/mnasnet0_75.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/mnasnet0_75.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -103,7 +103,7 @@ TEST(TestTorchVision131Fp16, MNASNet0_75) {
 }
 
 TEST(TestTorchVision131Fp16, Mobilenet_v2) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/mobilenet_v2.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/mobilenet_v2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -113,7 +113,7 @@ TEST(TestTorchVision131Fp16, Mobilenet_v2) {
 }
 
 TEST(TestTorchVision131Fp16, ShuffleNet_v2_x1_5) {
-  const std::string& model_path =
+  const auto model_path =
       std::string(models_dir) + "torch_vision_models/shufflenet_v2_x1_5.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -124,7 +124,7 @@ TEST(TestTorchVision131Fp16, ShuffleNet_v2_x1_5) {
 }
 
 TEST(TestTorchVision131Fp16, SqueezeNet1_1) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/squeezenet1_1.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/squeezenet1_1.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -134,7 +134,7 @@ TEST(TestTorchVision131Fp16, SqueezeNet1_1) {
 }
 
 TEST(TestTorchVision131Fp16, VGG11_bn) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/vgg11_bn.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/vgg11_bn.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -144,7 +144,7 @@ TEST(TestTorchVision131Fp16, VGG11_bn) {
 }
 
 TEST(TestTorchVision131Fp16, EfficientNet) {
-  const std::string& model_path = std::string(models_dir) + "torch_vision_models/effnet.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/effnet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;

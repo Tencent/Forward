@@ -32,7 +32,7 @@
 #include "unit_test/unit_test.h"
 
 TEST(TestTorchDlrm, DLRM) {
-  const std::string& model_path = std::string(torch_root_dir) + "dlrm.pth";
+  const auto model_path = std::string(torch_root_dir) + "dlrm.pth";
 
   std::vector<size_t> offset(6, 0);
   offset[1] = 1;
