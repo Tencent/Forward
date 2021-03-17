@@ -14,7 +14,6 @@ addons:
       - "python3-dev"
 
 cache:
-  packages: true
   pip: true
 
 jobs:
@@ -37,7 +36,6 @@ jobs:
     - UBUNTU_VERSION=ubuntu1804
 
 before_install:
-  - which pip3 || echo 'which pip3 command failed.'
   - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
   - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
   - sudo dpkg -i ${INSTALLER}
@@ -46,7 +44,7 @@ before_install:
   - wget https://developer.download.nvidia.com/compute/machine-learning/repos/${UBUNTU_VERSION}/x86_64/nvidia-machine-learning-repo-${UBUNTU_VERSION}_1.0.0-1_amd64.deb
   - sudo dpkg -i nvidia-machine-learning-repo-*.deb
   - sudo apt update -qq
-  - sudo apt install -y cuda-core-${CUDA_SHORT/./-} cuda-cudart-dev-${CUDA_SHORT/./-} cuda-cufft-dev-${CUDA_SHORT/./-}
+  - sudo apt install -y cuda-core-${CUDA_SHORT/./-} cuda-cudart-dev-${CUDA_SHORT/./-} cuda-cufft-dev-${CUDA_SHORT/./-} cuda-compiler-${CUDA_SHORT/./-} cuda-libraries-dev-${CUDA_SHORT/./-} cuda-nvtx-${CUDA_SHORT/./-} cuda-compat-${CUDA_SHORT/./-}
   - CUDNN_VERSION=${CUDNN}-1+cuda${CUDA_SHORT}
   - sudo apt install -y libcudnn${CUDNN_MAJOR}=${CUDNN_VERSION} libcudnn${CUDNN_MAJOR}-dev=${CUDNN_VERSION}
   - TENSORRT_VERSION=${TENSORRT}-1+cuda${CUDA_SHORT}
@@ -68,13 +66,6 @@ before_script:
   - rm -rvf tensorflow_lib tensorflow.tar.gz
   - mkdir build
   - cd build
-  - cmake .. -DENABLE_LOGGING=ON         \
-        -DENABLE_PROFILING=ON               \
-        -DBUILD_PYTHON_LIB=ON                \
-        -DENABLE_TORCH=ON                    \
-        -DENABLE_TENSORFLOW=ON               \
-        -DENABLE_KERAS=ON                    \
-        -DENABLE_RNN=ON                     \
-        -DPYTHON_EXECUTABLE=$(which python3) \
+  - cmake .. -DENABLE_LOGGING=ON -DENABLE_PROFILING=ON -DBUILD_PYTHON_LIB=ON -DENABLE_TORCH=ON -DENABLE_TENSORFLOW=ON -DENABLE_KERAS=OFF -DENABLE_RNN=ON -DPYTHON_EXECUTABLE=$(which python3)
 
 script: make -j
