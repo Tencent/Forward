@@ -20,7 +20,7 @@
 ## Prerequisites
 
 - NVIDIA CUDA >= 10.0, CuDNN >= 7 (Recommended version: CUDA 10.2 )
-- TensorRT >= 6.0.1.5,  (Recommended version: TensorRT-7.2.1.6)
+- TensorRT >= 7.0.0.11,  (Recommended version: TensorRT-7.2.1.6)
 - CMake >= 3.10.1
 - GCC >= 5.4.0, ld >= 2.26.1
 - (Tensorflow) TensorFlow == 1.15.0 (download [Tensorflow 1.15.0](https://github.com/neargye-forks/tensorflow/releases) and unzip it to `source/third_party/tensorflow/lib`)
