@@ -52,7 +52,11 @@ struct type_caster<torch::jit::IValue> {
 
   bool load(handle src, bool) {
     try {
+#ifdef NEW_TORCH_API
+      value = torch::jit::toTypeInferredIValue(src);
+#else
       value = torch::jit::toIValue(src);
+#endif
       return true;
     } catch (std::exception& e) {
       return false;
