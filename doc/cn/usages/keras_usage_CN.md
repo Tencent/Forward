@@ -41,7 +41,7 @@ make -j
 ## Cpp Example
 
 ```c++
-KerasBuilder keras_builder;
+fwd::KerasBuilder keras_builder;
 
 // 1. 构建 Engine
 std::string model_path = "path/to/keras.h5";
@@ -49,13 +49,13 @@ const int input_batch_size = 1;
 const string infer_mode = "float32";
 
 keras_builder.SetInferMode(infer_mode); 
-std::shared_ptr<KerasEngine> engine = keras_builder.Build(model_path, input_batch_size);
+std::shared_ptr<fwd::KerasEngine> engine = keras_builder.Build(model_path, input_batch_size);
 
 bool need_save = true;
 if (need_save) {
   std::string engine_file = "path/to/out/engine";
   engine->Save(engine_file);
-  eninge = std::make_shared<KerasEngine>();
+  eninge = std::make_shared<fwd::KerasEngine>();
   engine->Load(engine_file);
 }
 
@@ -90,11 +90,11 @@ class ImgBatchStream : public IBatchStream {
 std::shared_ptr<IBatchStream> ibs = std::make_shared<ImgBatchStream>();
 // 创建量化器实例, 参数分别为BatchStream, 缓存名, 量化算法名[entropy | entropy_2 | minmax]
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "entropy");
-KerasBuilder keras_builder;
+fwd::KerasBuilder keras_builder;
 keras_builder.SetCalibrator(calib);
 
 keras_builder.SetInferMode( 'int8');
-std::shared_ptr<KerasEngine> engine = keras_builder.Build(model_path, input_batch_size);
+std::shared_ptr<fwd::KerasEngine> engine = keras_builder.Build(model_path, input_batch_size);
 ```
 
 ## Python Example

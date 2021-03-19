@@ -119,18 +119,13 @@ make -j
 ## Cpp Example
 
 ```c++
-// 1. build Engine
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 
 std::string model_path = "path/to/jit/module";
 const std::string infer_mode = "float32"; // float32 / float16 / int8_calib / int8
 const c10::DeviceType device = c10::kCPU; // c10::kCPU / c10::kCUDA
 // DataTypes and Dimensions of dummy_input should be the same as those of real inputs 
-std::vector<torch::jit::IValue*> dummy_inputs = torch::randn({1, 3, 224, 224}, device);
-
-torch_builder.SetInferMode(infer_mode);
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
-
+std::vector<c10::IValue> dummy_inputs {torch::randn({1, 3, 224, 224}, device)};
 // // build with input names
 //
 // std::unordered_map<std::string, c10::IValue> dummy_inputs;
@@ -138,17 +133,19 @@ std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dumm
 // dummy_inputs["input"] =  torch::randn({1, 3, 224, 224}, device); 
 //
 
-std::vector<torch::jit::IValue*> inputs = dummy_inputs; 
+torch_builder.SetInferMode(infer_mode);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+
+std::vector<torch::jit::IValue> inputs = dummy_inputs;
 bool need_save = true;
 if (!need_save){
     std::vector<torch::Tensor> outputs = torch_engine->Forward(inputs);
     // std::vector<torch::Tensor> outputs = torch_engine->ForwardWithName(dummy_inputs); 
-
 }else{
     std::string engine_file = "path/to/out/engine";
     torch_engine->Save(engine_file);
 
-    TorchEngine torch_engine;
+    fwd::TorchEngine torch_engine;
     torch_engine.Load(engine_file);
     std::vector<torch::Tensor> outputs = torch_engine.Forward(inputs);
     // std::vector<torch::Tensor> outputs = torch_engine.ForwardWithName(dummy_inputs);
@@ -175,10 +172,10 @@ std::shared_ptr<IBatchStream> ibs = std::make_shared<ImgBatchStream>();
 // create TrtInt8Calibrator, algorithm can be [entropy | entropy_2 | minmax]
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "entropy");
 
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8"); 
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 ```
 
 ### Cpp BERT INT8 Example
@@ -245,16 +242,16 @@ std::shared_ptr<IBatchStream> ibs = std::make_shared<BertBatchStream>();
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "minmax");
 
 // build with int8_calib mode to generate a calibration cache file
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8_calib");
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 
 // build int8 engine with the saved calibration cache file
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8");
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 ```
 
 ## Python Example
@@ -295,7 +292,7 @@ outputs = engine.forward(inputs)
 
 # forward_with_name interface
 '''
-outputs = engine.forward_with_name(dummy_inputs) # dummy_inputs 须为 dict 类型, 输入名通过 Netron 查看模型获知
+outputs = engine.forward_with_name(dummy_inputs) # dict_type inputs
 '''
 ```
 
@@ -469,10 +466,10 @@ const std::string customized_cache_file = "path/to/scale_file.txt";
 calib->setScaleFile(customized_cache_file);
 
 // 2. build engine
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8");
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 ```
 
 ### Python

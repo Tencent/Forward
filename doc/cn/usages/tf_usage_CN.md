@@ -63,7 +63,7 @@ make -j
 
 ```c++
 // 1. 构建 Engine
-TfBuilder tf_builder;
+fwd::TfBuilder tf_builder;
 
 std::string model_path = "path/to/tf.pb";
 const std::string infer_mode = "float32"; // float32 / float16 / int8_calib /int8
@@ -76,7 +76,7 @@ std::unordered_map<std::string, TF_Tensor*> dummy_input_map;
 dummy_input_map.insert({"input_name", dummy_input});
 
 tf_builder.SetInferMode(infer_mode); // （可选）若不设置, 则默认为 FP32
-std::shared_ptr<TfEngine> tf_engine = tf_builder.Build(model_path, dummy_input_map );
+std::shared_ptr<fwd::TfEngine> tf_engine = tf_builder.Build(model_path, dummy_input_map );
 
 bool need_save = true;
 if (!need_save){
@@ -86,7 +86,7 @@ if (!need_save){
     std::string engine_file = "path/to/out/engine";
     tf_engine->Save(engine_file);
     // load saved engine
-    TfEngine tf_engine;
+    fwd::TfEngine tf_engine;
     tf_engine.Load(engine_file);
 
     std::unordered_map<std::string, TF_Tensor*> input_map = dummy_input_map;  
@@ -116,7 +116,7 @@ std::shared_ptr<IBatchStream> ibs = std::make_shared<TestBatchStream>();
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "entropy");
 
 // 2. 构建 Engine
-TfBuilder tf_builder;
+fwd::TfBuilder tf_builder;
 
 std::string model_path = "path/to/tf.pb";
 const std::string infer_mode = "float32"; // or float16
@@ -127,7 +127,7 @@ std::unordered_map<std::string, TF_Tensor*> dummy_input_map = xxx;
 tf_builder.SetCalibrator(calib);
 
 tf_builder.SetInferMode("int8"); 
-std::shared_ptr<TfEngine> tf_engine = tf_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TfEngine> tf_engine = tf_builder.Build(model_path, dummy_inputs);
 ```
 
 ### Cpp BERT INT8 Example
@@ -192,18 +192,18 @@ class TestBertStream : public fwd::IBatchStream {
 std::shared_ptr<IBatchStream> ibs = std::make_shared<BertBatchStream>();
 // 创建量化器实例, 参数分别为BatchStream, 缓存名, 量化算法名用 minmax
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "minmax");
-TfBuilder tf_builder;
+fwd::TfBuilder tf_builder;
 tf_builder.SetCalibrator(calib);
 
 // 构建码本
 tf_builder.SetInferMode("int8_calib"); 
-std::shared_ptr<TfEngine> tf_engine = tf_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TfEngine> tf_engine = tf_builder.Build(model_path, dummy_inputs);
 
 // 使用码本构建推理引擎
-TfBuilder tf_builder;
+fwd::TfBuilder tf_builder;
 tf_builder.SetCalibrator(calib);
 tf_builder.SetInferMode("int8");
-std::shared_ptr<TfEngine> tf_engine = tf_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TfEngine> tf_engine = tf_builder.Build(model_path, dummy_inputs);
 ```
 
 ## Python Example

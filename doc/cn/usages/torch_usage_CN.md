@@ -117,16 +117,16 @@ make -j
 
 ```c++
 // 1. 构建 Engine
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 
 std::string model_path = "path/to/jit/module";
 const std::string infer_mode = "float32"; // float32 / float16 / int8_calib / int8
 const c10::DeviceType device = c10::kCPU; // c10::kCPU / c10::kCUDA
 // 伪输入的数据类型和维度须与真实输入保持一致 
-std::vector<torch::jit::IValue*> dummy_inputs = torch::randn({1, 3, 224, 224}, device);
+std::vector<c10::IValue> dummy_inputs {torch::randn({1, 3, 224, 224}, device)};
 
 torch_builder.SetInferMode(infer_mode);
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 
 // // 带名字的伪输入构建方式
 //
@@ -135,7 +135,7 @@ std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dumm
 // dummy_inputs["input"] =  torch::randn({1, 3, 224, 224}, device); 
 //
 
-std::vector<torch::jit::IValue*> inputs = dummy_inputs; 
+std::vector<c10::IValue> inputs = dummy_inputs; 
 bool need_save = true;
 if (!need_save){
     std::vector<torch::Tensor> outputs = torch_engine->Forward(inputs);
@@ -145,7 +145,7 @@ if (!need_save){
     std::string engine_file = "path/to/out/engine";
     torch_engine->Save(engine_file);
 
-    TorchEngine torch_engine;
+    fwd::TorchEngine torch_engine;
     torch_engine.Load(engine_file);
     std::vector<torch::Tensor> outputs = torch_engine.Forward(inputs);
     // std::vector<torch::Tensor> outputs = torch_engine.ForwardWithName(dummy_inputs);
@@ -171,10 +171,10 @@ std::shared_ptr<IBatchStream> ibs = std::make_shared<ImgBatchStream>();
 // 创建量化器实例, 参数分别为BatchStream, 缓存名, 量化算法名[entropy | entropy_2 | minmax]
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "entropy");
 
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8"); 
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 ```
 
 ### Cpp BERT INT8 Example
@@ -241,16 +241,16 @@ std::shared_ptr<IBatchStream> ibs = std::make_shared<BertBatchStream>();
 std::shared_ptr<TrtInt8Calibrator> calib = std::make_shared<TrtInt8Calibrator>(ibs, "calibrator.cache", "minmax");
 
 // 构建码本
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8_calib");
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 
 // 使用码本构建推理引擎
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8");
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 ```
 
 ## Python Example
@@ -467,10 +467,10 @@ const std::string customized_cache_file = "path/to/scale_file.txt";
 calib->setScaleFile(customized_cache_file);
 
 // 2. build engine
-TorchBuilder torch_builder;
+fwd::TorchBuilder torch_builder;
 torch_builder.SetCalibrator(calib);
 torch_builder.SetInferMode("int8");
-std::shared_ptr<TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
+std::shared_ptr<fwd::TorchEngine> torch_engine = torch_builder.Build(model_path, dummy_inputs);
 ```
 
 ### Python

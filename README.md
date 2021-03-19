@@ -14,8 +14,9 @@
     - [Build with CMake](#build-with-cmake)
       - [CMake build arguments](#cmake-build-arguments)
     - [Unit Test](#unit-test)
+    - [Use Forward-Cpp](#use-forward-cpp)
     - [Use Forward-Python](#use-forward-python)
-      - [More Usages](#more-usages)
+    - [More Usages](#more-usages)
   - [FAQ](#faq)
   - [Models & Operators](#models---operators)
     - [Models](#models)
@@ -88,59 +89,17 @@ cd build/bin
 ./unit_test --gtest_filter=TestTfNodes.*
 ```
 
+### Use Forward-Cpp
+
+Refer to [Demo for using Forward-Cpp in Linux](demo/fwd_cpp/ReadMe.md)
+
 ### Use Forward-Python
 
-When the project is successfully built, the Forward-Python library can be found in the `build/bin` directory, named as `forward.cpython.xxx*.so` in Linux or `forward.xxx*.pyd` in Windows. Forward-Python library should be copied to the workspace directory of Python project. For example, the directory is organized as:
+Refer to [Demo for using Forward-Python](demo/fwd_py/ReadMe.md)
 
-```bash
----- workspace
-   |
-   -- test.py
-   |
-   -- forward.cpython.xxx*.so
-```
-
-Then, `test.py` can import Forward to perform high performance deep learning inference.
-
-```python
-# test.py
-
-import forward
-import numpy as np
-
-# 1. BUILD step: load TensorFlow-Bert model to build Forward engine
-builder = forward.TfBuilder()
-batch_size = 16
-infer_mode = 'float32'  # Infer mode: 'float32' / 'float16' / 'int8_calib' / 'int8'
-
-# dict_type dummy input
-dummy_input = {"input_ids" : np.ones([batch_size , 48], dtype='int32'), 
-               "input_mask" : np.ones([batch_size , 48], dtype='int32'),
-               "segment_ids" : np.ones([batch_size , 48], dtype='int32')}
-
-# build engine
-builder.set_mode(infer_mode); # optional, 'float32' is default.
-model_path = 'bert_model.pb'
-tf_engine = builder.build(model_path, dummy_input)
-
-need_save = True
-if need_save:
-    # save engine
-    engine_path = 'path/to/out/engine'
-    tf_engine.save(engine_path)
-
-    # load saved engine
-    tf_engine = forward.TfEngine()
-    tf_engine.load(engine_path)
-
-# 2. FORWARD step: do inference with Forward engine
-inputs = dummy_input
-outputs = tf_engine.forward(inputs) # dict_type outputs
-```
+### More Usages
 
 **Notice**: The name of INPUT in models can be viewed by model viewers, such as [Netron](https://github.com/lutzroeder/Netron).
-
-#### More Usages
 
 - [PyTorch usages](doc/en/usages/torch_usage.md)
 - [TensorFlow usages](doc/en/usages/tf_usage.md)

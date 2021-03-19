@@ -71,59 +71,17 @@ cd build/bin
 ./unit_test --gtest_filter=TestTfNodes.*
 ```
 
+### Forward-Cpp 使用
+
+参考 [Demo for using Forward-Cpp in Linux](demo/fwd_cpp/ReadMe_CN.md)
+
 ### Forward-Python 使用
 
-当项目构建成功后，可在 `build/bin` 目录下找到 Forward-Python 库，一般名为 `forward.cpython.xxx*.so` (Linux) 或者 `forward.xxx*.pyd` (Windows). 将该库拷贝到 Python 项目的工作目录下，例如:
+参考 [Demo for using Forward-Python](demo/fwd_py/ReadMe_CN.md)
 
-```bash
----- workspace
-   |
-   -- test.py
-   |
-   -- forward.cpython.xxx*.so
-```
-
-拷贝完成后，`test.py` 可直接导入 Forward 库来进行推理加速.
-
-```python
-# test.py
-
-import forward
-import numpy as np
-
-# 1. BUILD step: load TensorFlow-Bert model to build Forward engine
-builder = forward.TfBuilder()
-batch_size = 16
-infer_mode = 'float32'  # Infer mode: 'float32' / 'float16' / 'int8_calib' / 'int8'
-
-# dict_type dummy input
-dummy_input = {"input_ids" : np.ones([batch_size , 48], dtype='int32'), 
-               "input_mask" : np.ones([batch_size , 48], dtype='int32'),
-               "segment_ids" : np.ones([batch_size , 48], dtype='int32')}
-
-# build engine
-builder.set_mode(infer_mode); # optional, 'float32' is default.
-model_path = 'bert_model.pb'
-tf_engine = builder.build(model_path, dummy_input)
-
-need_save = True
-if need_save:
-    # save engine
-    engine_path = 'path/to/out/engine'
-    tf_engine.save(engine_path)
-
-    # load saved engine
-    tf_engine = forward.TfEngine()
-    tf_engine.load(engine_path)
-
-# 2. FORWARD step: do inference with Forward engine
-inputs = dummy_input
-outputs = tf_engine.forward(inputs) # dict_type outputs
-```
+### 更多使用方法
 
 **注意**: 模型输入名可通过模型查看器来查看, 例如用 [Netron](https://github.com/lutzroeder/Netron) 查看.
-
-#### 更多使用方法
 
 - [PyTorch 使用说明](doc/cn/usages/torch_usage_CN.md)
 - [TensorFlow 使用说明](doc/cn/usages/tf_usage_CN.md)
