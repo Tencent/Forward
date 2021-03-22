@@ -28,7 +28,7 @@
 - TensorRT >= 7.0.0.11,  (Recommended version: TensorRT-7.2.1.6)
 - CMake >= 3.10.1
 - GCC >= 5.4.0, ld >= 2.26.1
-- (Pytorch) pytorch == 1.3.1
+- (Pytorch) pytorch == 1.3.1 and pytorch == 1.7.1
 
  __Note: When using PyTorch that pre-installed by Conda or pip, its CUDA version should be as the same as the version of CUDA toolkit installed in the operating system. Otherwise, Forward-Python library may cause Segmentation fault.__
 

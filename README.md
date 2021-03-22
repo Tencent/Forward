@@ -50,7 +50,7 @@ Forward is a library for high performance deep learning inference on NVIDIA GPUs
 - TensorRT >= 7.0.0.11,  (Recommended version: TensorRT-7.2.1.6)
 - CMake >= 3.10.1
 - GCC >= 5.4.0, ld >= 2.26.1
-- (Pytorch) pytorch == 1.3.1
+- (Pytorch) pytorch == 1.3.1 and pytorch == 1.7.1
 - (Tensorflow) TensorFlow == 1.15.0 (download [Tensorflow 1.15.0](https://github.com/neargye-forks/tensorflow/releases) and unzip it to `source/third_party/tensorflow/lib`)
 - (Keras) HDF 5
 
