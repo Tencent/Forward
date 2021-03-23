@@ -29,8 +29,12 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <torch/csrc/jit/pybind_utils.h>
 #include <torch/extension.h>
+#ifdef NEW_TORCH_API
+#include <torch/csrc/jit/python/pybind_utils.h>
+#else
+#include <torch/csrc/jit/pybind_utils.h>
+#endif
 
 #include <memory>
 #include <string>
