@@ -18,7 +18,7 @@ cache:
 
 jobs:
   include:
-  - name: "CUDA 10.0"
+  - name: "CUDA 10.0 + TRT 7.0 + Torch 1.3"
     env:
     - CUDA=10.0.130-1
     - CUDA_SHORT=10.0
@@ -26,7 +26,8 @@ jobs:
     - CUDNN=7.6.5.*
     - TENSORRT=7.0.0
     - UBUNTU_VERSION=ubuntu1804
-  - name: "CUDA 10.2"
+    - TORCH=1.3.1
+  - name: "CUDA 10.2 + TRT 7.2 + Torch 1.7"
     env:
     - CUDA=10.2.89-1
     - CUDA_SHORT=10.2
@@ -34,6 +35,7 @@ jobs:
     - CUDNN=8.0.4.*
     - TENSORRT=7.2.3
     - UBUNTU_VERSION=ubuntu1804
+    - TORCH=1.7.0
 
 before_install:
   - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
@@ -56,7 +58,7 @@ before_install:
 
 install: 
   - pip3 install --user $(whoami) --upgrade pip
-  - pip3 install torch==1.3.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+  - pip3 install torch==${TORCH}+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
 before_script:
   - wget https://github.com/Neargye/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz -O tensorflow.tar.gz

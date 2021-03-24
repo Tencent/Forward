@@ -30,7 +30,6 @@
 
 #include <memory>
 
-#include "fwd_torch/torch_version.h"
 
 #ifdef NEW_TORCH_API
 namespace torch {

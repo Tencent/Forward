@@ -30,7 +30,6 @@ file(GLOB TORCH_CRT_SOURCES torch_cvt/torch_desc_creators/*.h)
 file(GLOB TORCH_PASS_SOURCES torch_cvt/torch_passes/*.h torch_cvt/torch_passes/*.cpp)
 
 add_library(fwd_torch 
-                torch_version.h
                 ${TORCH_LIB_SOURCES}
                 ${TORCH_CVT_SOURCES}
                 ${TORCH_CRT_SOURCES}

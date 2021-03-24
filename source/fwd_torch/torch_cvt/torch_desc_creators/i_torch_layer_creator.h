@@ -32,7 +32,6 @@
 
 #include "common/trt_layer_desc.h"
 #include "fwd_torch/fwd_torch_renaming.h"
-#include "fwd_torch/torch_version.h"
 
 #ifdef _MSC_VER
 // 关闭 Torch 太多的编译警告

@@ -42,7 +42,6 @@
 
 #include "fwd_torch/torch_engine/torch_engine.h"
 #include "fwd_torch/torch_engine/torch_infer.h"
-#include "fwd_torch/torch_version.h"
 
 #ifdef _MSC_VER
 const c10::DeviceType device = c10::kCPU;
