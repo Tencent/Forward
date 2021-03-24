@@ -34,7 +34,7 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
 #include <torch/csrc/jit/passes/inliner.h>
 
 #include "torch_passes/fold_floor_divide.h"
@@ -126,7 +126,7 @@ bool TorchModule::EvalAll(const std::vector<c10::IValue>& inputs) {
 }
 
 void TorchModule::PreProcessGraph() {
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
   torch::jit::Inline(*graph_);
 #endif  // NEW_TORCH_API
 
@@ -161,7 +161,7 @@ void TorchModule::PostProcessGraph() {
 
   // graph_->dump();
 
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
   torch::pass::FoldFloorDivide(graph_);
 #endif  // NEW_TORCH_API
 }

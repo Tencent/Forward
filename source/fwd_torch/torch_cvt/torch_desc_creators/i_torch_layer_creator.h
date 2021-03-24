@@ -40,7 +40,7 @@
 
 FWD_TORCH_NAMESPACE_BEGIN
 class TorchModule;
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
 inline std::vector<int64_t> ToIntVector(const c10::IValue& value) { return value.toIntVector(); }
 #else
 inline c10::IntArrayRef ToIntVector(const torch::jit::IValue& value) {

@@ -52,7 +52,7 @@ class TorchConvolutionCreator : public ILayerDescCreator {
     LOG(INFO) << "TorchConvolutionCreator::Create";
 
     const auto inputs = node->inputs();
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
     T_CHECK(inputs.size() == 12 || inputs.size() == 13);
 #else
     T_CHECK_EQ(inputs.size(), 12);

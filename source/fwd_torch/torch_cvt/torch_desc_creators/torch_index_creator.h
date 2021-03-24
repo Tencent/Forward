@@ -61,7 +61,7 @@ class TLayerDescCreator<TrtIndexDesc> : public ILayerDescCreator {
 
     layer_desc->axis.resize(8, 0);
     layer_desc->nbIndexDims = 0;
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
     if (module.Get(inputs[1]).isList()) {
       const auto indices = module.Get(inputs[1]).toList();
 #else

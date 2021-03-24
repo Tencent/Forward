@@ -76,3 +76,6 @@
       abort();                                                                    \
     }                                                                             \
   } while (0)
+
+#define FWD_TORCH_VERSION (TORCH_VERSION_MAJOR * 100 + TORCH_VERSION_MINOR * 10 + TORCH_VERSION_PATCH)
+

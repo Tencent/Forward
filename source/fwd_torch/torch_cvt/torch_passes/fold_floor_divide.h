@@ -30,8 +30,9 @@
 
 #include <memory>
 
+#include "common/common_macros.h"
 
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
 namespace torch {
 namespace pass {
 

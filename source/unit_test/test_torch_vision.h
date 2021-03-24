@@ -152,7 +152,7 @@ TEST(TestTorchVision131, EfficientNet) {
   TestTorchInference(model_path, input_map, "float32");
 }
 
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
 
 TEST(TestTorchVision170, AlexNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/170/alexnet.pth";

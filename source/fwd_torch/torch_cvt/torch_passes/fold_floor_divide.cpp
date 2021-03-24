@@ -26,7 +26,7 @@
 
 #include "fwd_torch/torch_cvt/torch_passes/fold_floor_divide.h"
 
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
 #include <torch/csrc/jit/passes/dead_code_elimination.h>
 
 // Note: from torch source, but just remove Constant If

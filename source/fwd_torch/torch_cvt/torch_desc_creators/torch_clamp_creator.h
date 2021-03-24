@@ -45,7 +45,7 @@ class TLayerDescCreator<TrtClampDesc> : public ILayerDescCreator {
 
     const auto kind = node->kind();
 
-#ifdef NEW_TORCH_API
+#if FWD_TORCH_VERSION > 160
     if (kind == c10::aten::clamp_) return true;
 #endif
 
