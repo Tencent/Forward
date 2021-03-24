@@ -301,10 +301,10 @@ outputs = engine.forward_with_name(dummy_inputs) # dict_type inputs
 ```python
 import forward
 import numpy as np
-# 1. Inherit forward.IBatchStream
-class MBatchStream(forward.IBatchStream):
+# 1. Inherit forward.IPyBatchStream
+class MBatchStream(forward.IPyBatchStream):
     def __init__(self):
-        forward.IBatchStream.__init__(self) # required
+        forward.IPyBatchStream.__init__(self) # required
         self.batch = 0
         self.maxbatch = 500 
 
@@ -320,14 +320,14 @@ class MBatchStream(forward.IBatchStream):
     def size(self):
         return [1*24*24*3]
 
-    def getBatch(self):
+    def getNumpyBatch(self):
         return [np.random.randn(1*24*24*3)]
 
 bs = MBatchStream()
 calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_CALIBRATION)
 
 builder = forward.TorchBuilder()
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 
 # build engine
 builder.set_mode("int8") 
@@ -420,12 +420,12 @@ class BertBatchStream(forward.IPyBatchStream):
         self.current_data = [input_ids, input_mask, segment_ids]
         return self.current_data
 
-bs = BertBatchStream()
-calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_ENTROPY)
+bs = BertBatchStream(...)
+calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_CALIBRATION)
 
 # 2. generate calibration cache as CodeBook
 builder = forward.TorchBuilder()
-builder.setCalibrator(calibrator)builder.set_mode("int8_calib") //（可选）若不设置, 则默认为 FP32
+builder.set_calibrator(calibrator)builder.set_mode("int8_calib") //（可选）若不设置, 则默认为 FP32
 engine = builder.build('path/to/jit/module', dummy_inputs)
 # build_with_name interface
 '''
@@ -435,7 +435,7 @@ engine = builder.build_with_name('path/to/jit/module', dummy_inputs)
 
 # 3. build engine with calibration cache
 builder = forward.TorchBuilder()
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 builder.set_mode("int8") //（可选）若不设置, 则默认为 FP32
 engine = builder.build('path/to/jit/module', dummy_inputs)
 # engine = builder.build_with_name('path/to/jit/module', dummy_inputs) 
@@ -485,7 +485,7 @@ customized_cache_file = "path/to/scale_file.txt"
 calib.set_scale_file(customized_cache_file)
 
 # 2. build engine
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 builder.set_mode("int8") 
 engine = builder.build('path/to/jit/module', dummy_inputs)
 ```

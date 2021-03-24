@@ -299,9 +299,9 @@ outputs = engine.forward_with_name(dummy_inputs) # dummy_inputs 须为 dict 类�
 import forward
 import numpy as np
 # 1. 继承实现数据提供工具类
-class MBatchStream(forward.IBatchStream):
+class MBatchStream(forward.IPyBatchStream):
     def __init__(self):
-        forward.IBatchStream.__init__(self) # 必须调用父类的初始化方法
+        forward.IPyBatchStream.__init__(self) # 必须调用父类的初始化方法
         self.batch = 0
         self.maxbatch = 500 
 
@@ -317,14 +317,14 @@ class MBatchStream(forward.IBatchStream):
     def size(self):
         return [1*24*24*3]
 
-    def getBatch(self):
+    def getNumpyBatch(self):
         return [np.random.randn(1*24*24*3)]
 
 bs = MBatchStream()
 calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_CALIBRATION)
 
 builder = forward.TorchBuilder()
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 
 # 构建 engine
 builder.set_mode("int8") 
@@ -418,11 +418,12 @@ class BertBatchStream(forward.IPyBatchStream):
         return self.current_data
 
 bs = BertBatchStream()
-calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_ENTROPY)
+calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_CALIBRATION)
 
 # 2. 构建码本
 builder = forward.TorchBuilder()
-builder.setCalibrator(calibrator)builder.set_mode("int8_calib") //（可选）若不设置, 则默认为 FP32
+builder.set_calibrator(calibrator)
+builder.set_mode("int8_calib") //（可选）若不设置, 则默认为 FP32
 engine = builder.build('path/to/jit/module', dummy_inputs)
 # build_with_name 接口
 '''
@@ -432,7 +433,7 @@ engine = builder.build_with_name('path/to/jit/module', dummy_inputs)
 
 # 3. 使用码本构建引擎
 builder = forward.TorchBuilder()
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 builder.set_mode("int8") //（可选）若不设置, 则默认为 FP32
 engine = builder.build('path/to/jit/module', dummy_inputs)
 # engine = builder.build_with_name('path/to/jit/module', dummy_inputs) 
@@ -486,7 +487,7 @@ customized_cache_file = "path/to/scale_file.txt"
 calib.set_scale_file(customized_cache_file)
 
 # 2. 构建 engine
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 builder.set_mode("int8") 
 engine = builder.build('path/to/jit/module', dummy_inputs)
 ```

@@ -130,9 +130,9 @@ outputs = engine.forward([inputs]) # list_type output
 import forward
 import numpy as np
 # 1. 继承实现数据提供工具类
-class MBatchStream(forward.IBatchStream):
+class MBatchStream(forward.IPyBatchStream):
     def __init__(self):
-        forward.IBatchStream.__init__(self) # 必须调用父类的初始化方法
+        forward.IPyBatchStream.__init__(self) # 必须调用父类的初始化方法
         self.batch = 0
         self.maxbatch = 500 
 
@@ -148,7 +148,7 @@ class MBatchStream(forward.IBatchStream):
     def size(self):
         return [1*24*24*3]
 
-    def getBatch(self):
+    def getNumpyBatch(self):
         return [np.random.randn(1*24*24*3)]
 
 bs = MBatchStream()

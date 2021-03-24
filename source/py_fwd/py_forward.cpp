@@ -68,7 +68,7 @@ PYBIND11_MODULE(forward, m) {
 
   py::class_<fwd::TrtInt8Calibrator, nvinfer1::IInt8Calibrator,
              std::shared_ptr<fwd::TrtInt8Calibrator>>(m, "TrtInt8Calibrator")
-      .def(py::init<std::shared_ptr<fwd::IBatchStream>, const std::string&, const std::string&>())
+      .def(py::init<std::shared_ptr<IPyBatchStream>, const std::string&, const std::string&>())
       .def(py::init<const std::string&, const std::string&, int>())
       .def("set_scale_file", &fwd::TrtInt8Calibrator::setScaleFile);
 

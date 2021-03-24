@@ -129,10 +129,10 @@ outputs = engine.forward([inputs]) # list_type output
 ```python
 import forward
 import numpy as np
-# inherit from forward.IBatchStream
-class MBatchStream(forward.IBatchStream):
+# inherit from forward.IPyBatchStream
+class MBatchStream(forward.IPyBatchStream):
     def __init__(self):
-        forward.IBatchStream.__init__(self) # required
+        forward.IPyBatchStream.__init__(self) # required
         self.batch = 0
         self.maxbatch = 500 
 
@@ -148,13 +148,13 @@ class MBatchStream(forward.IBatchStream):
     def size(self):
         return [1*24*24*3]
 
-    def getBatch(self):
+    def getNumpyBatch(self):
         return [np.random.randn(1*24*24*3)]
 
 bs = MBatchStream()
 calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.ENTROPY_CALIBRATION)
 builder = forward.KerasBuilder()
-builder.setCalibrator(calibrator )
+builder.set_calibrator(calibrator )
 
 # 2. build engine
 builder.set_mode('int8')

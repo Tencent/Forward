@@ -245,10 +245,10 @@ outputs = tf_engine.forward(inputs)
 ```python
 import forward
 import numpy as np
-# 1. Inherit forward.IBatchStream
-class MBatchStream(forward.IBatchStream):
+# 1. Inherit forward.IPyBatchStream
+class MBatchStream(forward.IPyBatchStream):
     def __init__(self):
-        forward.IBatchStream.__init__(self) # required
+        forward.IPyBatchStream.__init__(self) # required
         self.batch = 0
         self.maxbatch = 500 
 
@@ -264,7 +264,7 @@ class MBatchStream(forward.IBatchStream):
     def size(self):
         return [1*24*24*3]
 
-    def getBatch(self):
+    def getNumpyBatch(self):
         return [np.random.randn(1*24*24*3)]
 
 bs = MBatchStream()
@@ -276,7 +276,7 @@ dummy_input = {"input1" : np.ones([batch_size , 24, 24, 3], dtype='float32'),
                "input2" : np.ones([batch_size , 24, 24, 3], dtype='float32'),
                "input3" : np.ones([batch_size , 24, 24, 3], dtype='float32')}
 
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 
 # 2. build engine
 builder.set_mode("int8") //（可选）若不设置, 则默认为 FP32
@@ -383,17 +383,17 @@ class BertBatchStream(forward.IPyBatchStream):
         return self.current_data
 
 bs = BertBatchStream()
-calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_ENTROPY)
+calibrator = forward.TrtInt8Calibrator(bs, "calibrator.cache", forward.MINMAX_CALIBRATION)
 
 # 2. generate calibration cache as CodeBook
 builder = forward.TfBuilder()
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 builder.set_mode("int8_calib") 
 engine = builder.build('path/to/jit/module', dummy_inputs)
 
 # 3. build engine with calibration cache
 builder = forward.TfBuilder()
-builder.setCalibrator(calibrator)
+builder.set_calibrator(calibrator)
 builder.set_mode("int8") 
 engine = builder.build('path/to/jit/module', dummy_inputs)
 ```
