@@ -28,33 +28,33 @@
 
 #ifdef ENABLE_TORCH
 
-#include "unit_test/test_torch_bert.h"
+// #include "unit_test/test_torch_bert.h"
 #include "unit_test/test_torch_nodes.h"
 #include "unit_test/test_torch_nodes_fp16.h"
-#include "unit_test/test_torch_nodes_int8.h"
+// #include "unit_test/test_torch_nodes_int8.h"
 // #include "unit_test/test_torch_nodes_v170.h"
-#include "unit_test/test_torch_seg.h"
-#include "unit_test/test_torch_tuple_inputs.h"
-#include "unit_test/test_torch_vision.h"
-#include "unit_test/test_torch_vision_fp16.h"
-#include "unit_test/test_torch_vision_int8.h"
+// #include "unit_test/test_torch_seg.h"
+// #include "unit_test/test_torch_tuple_inputs.h"
+// #include "unit_test/test_torch_vision.h"
+// #include "unit_test/test_torch_vision_fp16.h"
+// #include "unit_test/test_torch_vision_int8.h"
 
 #endif  // ENABLE_TORCH
 
 #ifdef ENABLE_TENSORFLOW
 
-#include "unit_test/test_tf_bert.h"
+// #include "unit_test/test_tf_bert.h"
 #include "unit_test/test_tf_nodes.h"
 #include "unit_test/test_tf_nodes_fp16.h"
-#include "unit_test/test_tf_nodes_int8.h"
-#include "unit_test/test_tf_vision.h"
+// #include "unit_test/test_tf_nodes_int8.h"
+// #include "unit_test/test_tf_vision.h"
 
 #endif  // ENABLE_TENSORFLOW
 
 #ifdef ENABLE_KERAS
 
 #include "unit_test/test_keras_nodes.h"
-#include "unit_test/test_keras_vision.h"
+// #include "unit_test/test_keras_vision.h"
 
 #endif  // ENABLE_KERAS
 
