@@ -105,7 +105,8 @@ bool TrtForwardEngine::Execute(const IOMappingVector& inputs, IOMappingVector& o
     return false;
   }
 
-  if (!buffer_manager_.PrepareInputBuffer(engine_.get(), context_.get(), inputs, buffers)) {
+  if (!buffer_manager_.PrepareInputBuffer(engine_.get(), context_.get(), inputs, buffers,
+                                          stream_)) {
     return false;
   }
 
@@ -114,25 +115,19 @@ bool TrtForwardEngine::Execute(const IOMappingVector& inputs, IOMappingVector& o
     return false;
   }
 
-#ifdef TRT_INFER_ENABLE_PROFILING
   CUDA_CHECK(cudaStreamSynchronize(stream_));
-#endif
 
   // Forwards
   {
     UTILS_PROFILE(Forward);
     // inference
-#ifdef TRT_INFER_ENABLE_PROFILING
 
 #ifdef SUPPORT_RNN
-    if (!context_->execute(engine_->getMaxBatchSize(), buffers.data())) {
-#else
-    if (!context_->executeV2(buffers.data())) {
-#endif  // SUPPORT_RNN
-
+    if (!context_->enqueue(engine_->getMaxBatchSize(), buffers.data(), stream_, nullptr)) {
 #else
     if (!context_->enqueueV2(buffers.data(), stream_, nullptr)) {
-#endif  // TRT_INFER_ENABLE_PROFILING
+#endif  // SUPPORT_RNN
+
       LOG(ERROR) << "Error when enqueue";
       return false;
     }

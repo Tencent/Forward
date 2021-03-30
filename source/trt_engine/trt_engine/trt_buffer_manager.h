@@ -42,25 +42,18 @@ FWD_NAMESPACE_BEGIN
  */
 class BufferManager {
  public:
-  /**
-   * \brief 构造函数
-   */
   BufferManager() = default;
 
-  /**
-   * \brief 析构函数
-   */
   ~BufferManager() { Clear(); }
 
-  /**
-   * \brief 绑定一个需要管理 输入和输出 Device 内存的推理引擎
-   * \param engine 推理引擎
-   * \return
-   */
+  // initialize the device memory of Input and Output.
+  // First, clear the input and output buffers.
+  // Then, malloc the device memory of Input and Output for internal use.
   bool Initialize(const nvinfer1::IExecutionContext *context,
                   const std::vector<int> &input_bindings, const std::vector<int> &output_pos) {
     // allocate input & output buffers
     Clear();
+
     for (auto &index : input_bindings) {
       void *temp;
       const auto dims = context->getBindingDimensions(index);
@@ -78,15 +71,13 @@ class BufferManager {
     return true;
   }
 
-  /**
-   * \brief 准备输入 device 指针放入 buffers 中
-   * \param inputs 传入的输入数据
-   * \param buffers 作为输出，接收输入指针
-   * \return 成功返回 true
-   */
+  // bind the input buffers into the corresponding pointer of Input tensor.
+  // If the given Input tensor is on the CPU, then the internal pre-malloc device memory will be
+  // used. And the data in the CPU-Input tensor will be transfer into the internal pre-malloc device
+  // memory.
   bool PrepareInputBuffer(const nvinfer1::ICudaEngine *engine,
                           const nvinfer1::IExecutionContext *context, const IOMappingVector &inputs,
-                          std::vector<void *> &buffers) {
+                          std::vector<void *> &buffers, cudaStream_t stream) {
     for (auto &input : inputs) {
       const int index = engine->getBindingIndex(input.name.c_str());
       const auto dims = context->getBindingDimensions(index);
@@ -95,8 +86,9 @@ class BufferManager {
         // host -> device
         const auto dtype = engine->getBindingDataType(index);
         const int element_size = dtype == nvinfer1::DataType::kHALF ? 2 : 4;
-        CUDA_CHECK(cudaMemcpy(d_input_buffers_[index], input.tensor.data,
-                              TrtUtils::Volume(dims) * element_size, cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpyAsync(d_input_buffers_[index], input.tensor.data,
+                                   TrtUtils::Volume(dims) * element_size, cudaMemcpyHostToDevice,
+                                   stream));
         buffers[index] = d_input_buffers_[index];
       } else {
         buffers[index] = input.tensor.data;
@@ -105,12 +97,7 @@ class BufferManager {
     return true;
   }
 
-  /**
-   * \brief 准备输出 device 指针放入 buffers 中
-   * \param outputs 传入用于接收返回值的输出
-   * \param buffers 作为输出，接收输出指针
-   * \return 成功返回 true
-   */
+  // bind the output buffers into the corresponding pointer of Output tensor.
   bool PrepareOutputBuffer(const nvinfer1::ICudaEngine *engine,
                            const nvinfer1::IExecutionContext *context, IOMappingVector &outputs,
                            std::vector<void *> &buffers, const std::vector<int> &output_bindings) {
@@ -122,18 +109,18 @@ class BufferManager {
       buffers[index] = d_output_buffers_[i];
 
       const auto &output_name = engine->getBindingName(index);
-      outputs.push_back({output_name,
-                         {d_output_buffers_[i], TrtUtils::ToVector(output_dim), DataType::FLOAT,
-                          DeviceType::CUDA}});
+
+      const DataType dtype = TrtCommon::FwdDataType(engine->getBindingDataType(index));
+      outputs.push_back(
+          {output_name,
+           {d_output_buffers_[i], TrtUtils::ToVector(output_dim), dtype, DeviceType::CUDA}});
     }
 
     return true;
   }
 
  private:
-  /**
-   * \brief 清除缓存
-   */
+  // Clear d_input_buffers and d_output_buffers.
   void Clear() {
     for (auto &input : d_input_buffers_) {
       CUDA_CHECK(cudaFree(input));
@@ -145,14 +132,10 @@ class BufferManager {
     d_output_buffers_.clear();
   }
 
-  /**
-   * \brief 网络输入的 Device 缓存
-   */
+  // d_input_buffers are reserved for CPU-Input tensors.
   std::vector<void *> d_input_buffers_;
 
-  /**
-   * \brief 网络输出的 Device 缓存
-   */
+  // d_output_buffers are reserved for Output tensors.
   std::vector<void *> d_output_buffers_;
 };
 
