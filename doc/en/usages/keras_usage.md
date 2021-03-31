@@ -16,7 +16,7 @@
 
 - NVIDIA CUDA >= 10.0, CuDNN >= 7 (Recommended version: CUDA 10.2 )
 - TensorRT >= 7.0.0.11,  (Recommended version: TensorRT-7.2.1.6)
-- CMake >= 3.10.1
+- CMake >= 3.12.2
 - GCC >= 5.4.0, ld >= 2.26.1
 - (Keras) HDF 5
 
