@@ -33,16 +33,15 @@ template <typename T>
 inline void serialize_value(void** buffer, T const& value);
 
 template <typename T>
-inline void deserialize_value(void const** buffer, size_t* buffer_size,
-                              T* value);
+inline void deserialize_value(void const** buffer, size_t* buffer_size, T* value);
 
 template <typename T, class Enable = void>
 struct Serializer {};
 
 template <typename T>
-struct Serializer<T, typename std::enable_if<std::is_arithmetic<T>::value ||
-                                             std::is_enum<T>::value ||
-                                             std::is_pod<T>::value>::type> {
+struct Serializer<T,
+                  typename std::enable_if<std::is_arithmetic<T>::value || std::is_enum<T>::value ||
+                                          std::is_pod<T>::value>::type> {
   static size_t serialized_size(T const& value) { return sizeof(T); }
 
   static void serialize(void** buffer, T const& value) {
@@ -67,8 +66,7 @@ struct Serializer<const char*> {
     reinterpret_cast<char*&>(*buffer) += strlen(value) + 1;
   }
 
-  static void deserialize(void const** buffer, size_t* buffer_size,
-                          const char** value) {
+  static void deserialize(void const** buffer, size_t* buffer_size, const char** value) {
     *value = static_cast<char const*>(*buffer);
     size_t data_size = strnlen(*value, *buffer_size) + 1;
     assert(*buffer_size >= data_size);
@@ -79,8 +77,7 @@ struct Serializer<const char*> {
 
 template <typename T>
 struct Serializer<std::vector<T>,
-                  typename std::enable_if<std::is_arithmetic<T>::value ||
-                                          std::is_enum<T>::value ||
+                  typename std::enable_if<std::is_arithmetic<T>::value || std::is_enum<T>::value ||
                                           std::is_pod<T>::value>::type> {
   static size_t serialized_size(std::vector<T> const& value) {
     return sizeof(value.size()) + value.size() * sizeof(T);
@@ -93,8 +90,7 @@ struct Serializer<std::vector<T>,
     reinterpret_cast<char*&>(*buffer) += nbyte;
   }
 
-  static void deserialize(void const** buffer, size_t* buffer_size,
-                          std::vector<T>* value) {
+  static void deserialize(void const** buffer, size_t* buffer_size, std::vector<T>* value) {
     size_t size;
     deserialize_value(buffer, buffer_size, &size);
     value->resize(size);
@@ -117,8 +113,7 @@ inline void serialize_value(void** buffer, T const& value) {
 }
 
 template <typename T>
-inline void deserialize_value(void const** buffer, size_t* buffer_size,
-                              T* value) {
+inline void deserialize_value(void const** buffer, size_t* buffer_size, T* value) {
   return Serializer<T>::deserialize(buffer, buffer_size, value);
 }
 

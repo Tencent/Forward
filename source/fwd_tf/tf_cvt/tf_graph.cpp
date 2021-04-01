@@ -134,8 +134,7 @@ bool Graph::LoadOuterWeightsToOp(const Operation& op) {
   const auto new_op_name = key + "_weights";
   TF_OperationDescription* new_op = TF_NewOperation(graph_, "Const", new_op_name.c_str());
 
-  auto tensor =
-      CreateTensor(TF_DataType::TF_FLOAT, op.GetAttrShape("shape"), weights.data());
+  auto tensor = CreateTensor(TF_DataType::TF_FLOAT, op.GetAttrShape("shape"), weights.data());
 
   Status status;
   TF_SetAttrType(new_op, "dtype", TF_DataType::TF_FLOAT);

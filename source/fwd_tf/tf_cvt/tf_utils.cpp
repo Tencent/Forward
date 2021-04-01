@@ -53,7 +53,6 @@ TF_Code DeleteSession(TF_Session* session) {
   return TF_OK;
 }
 
-
 TF_Buffer* ReadBufferFromFile(const std::string& filename) {
   std::ifstream f(filename, std::ios::binary);
   if (f.fail() || !f.is_open()) {

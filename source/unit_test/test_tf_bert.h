@@ -64,7 +64,7 @@ class TestTfBert : public ::testing::Test {
         TF_INT32, {batch_size, seq_length}, max_input_id));  //  input_ids
     std::vector<int> mask = CreateInputMask(batch_size, seq_length);
     const auto input_mask = (fwd::tf_::CreateTensor(TF_INT32, {batch_size, seq_length},
-                                                           mask.data()));  //  input_mask
+                                                    mask.data()));  //  input_mask
     const auto segment_ids = (fwd::tf_::CreateRandomIntTensor<int32_t>(
         TF_INT32, {batch_size, seq_length}, 2));  //  segment_ids
 

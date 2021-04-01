@@ -90,8 +90,7 @@ TEST(TestKerasNodes, Concatenate) {
 
   TestKerasInference(pb_path, keras_h5_path, {input1.get(), input2.get(), input3.get()},
                      {"input1", "input2", "input3"},
-                     {"concatenate/concat", "concatenate_1/concat", "concatenate_2/concat",
-                      "concatenate_3/concat"},
+                     {"concatenate/concat", "concatenate_1/concat", "concatenate_2/concat"},
                      batch_size);
 }
 

@@ -125,8 +125,7 @@ class TFInfer {
       UTILS_PROFILE(RunSession);
       tf_::Status status;
       if (!tf_::RunSession(session_.get(), input_ops.data(), inputs.data(), inputs.size(),
-                                  output_ops.data(), output_ptrs.data(), output_ptrs.size(),
-                                  status)) {
+                           output_ops.data(), output_ptrs.data(), output_ptrs.size(), status)) {
         LOG(ERROR) << "Error when RunSession : " << status.Message();
         return false;
       }

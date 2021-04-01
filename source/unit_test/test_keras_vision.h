@@ -37,8 +37,7 @@ TEST(TestKerasVision, DenseNet201) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/densenet201.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_4"}, {"relu/Relu"}, batch_size,
                      1e-4);
@@ -51,8 +50,7 @@ TEST(TestKerasVision, InceptionV3) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/inception_v3.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"}, {"mixed10/concat"},
                      batch_size, 1e-4);
@@ -81,8 +79,7 @@ TEST(TestKerasVision, MobileNetV2) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/mobilenet_v2.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_5"}, {"out_relu/Relu6"},
                      batch_size, 2e-4);
@@ -95,8 +92,7 @@ TEST(TestKerasVision, NasNetLarge) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/nasnet_large.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 331, 331, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 331, 331, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_8"}, {"activation_556/Relu"},
                      batch_size, 1e-3);
@@ -109,8 +105,7 @@ TEST(TestKerasVision, ResNet152V2) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/resnet152_v2.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_3"}, {"post_relu/Relu"},
                      batch_size, 1e-4);
@@ -122,8 +117,7 @@ TEST(TestKerasVision, Vgg19) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/vgg19.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_2"}, {"block5_pool/MaxPool"},
                      batch_size, 1e-4);
@@ -136,8 +130,7 @@ TEST(TestKerasVision, Xception) {
       std::string(keras_root_dir) + "../../models/keras_vision_models/xception.h5";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
                      {"block14_sepconv2_act/Relu"}, batch_size, 1e-4);

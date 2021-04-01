@@ -26,7 +26,6 @@
 
 #pragma once
 
-
 #include <common/common_macros.h>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
@@ -35,17 +34,13 @@ FWD_TRT_NAMESPACE_BEGIN
 
 __device__ __forceinline__ float fabs(float a) { return ::fabsf(a); }
 
-__device__ __forceinline__ half fabs(half a) {
-  return __hle(a, 0.0f) ? __hneg(a) : a;
-}
+__device__ __forceinline__ half fabs(half a) { return __hle(a, 0.0f) ? __hneg(a) : a; }
 
 __device__ __forceinline__ float floor(float a) { return ::floorf(a); }
 
 __device__ __forceinline__ half floor(half a) { return hfloor(a); }
 
-__device__ __forceinline__ float fmod(float a, float b) {
-  return ::fmodf(a, b);
-}
+__device__ __forceinline__ float fmod(float a, float b) { return ::fmodf(a, b); }
 
 __device__ __forceinline__ float fmod(half a, half b) {
   return ::fmod(__half2float(a), __half2float(b));
@@ -57,13 +52,9 @@ __device__ __forceinline__ float max(float a, float b) { return ::max(a, b); }
 
 __device__ __forceinline__ float min(float a, float b) { return ::min(a, b); }
 
-__device__ __forceinline__ half max(half a, half b) {
-  return __hgt(a, b) ? a : b;
-}
+__device__ __forceinline__ half max(half a, half b) { return __hgt(a, b) ? a : b; }
 
-__device__ __forceinline__ half min(half a, half b) {
-  return __hlt(a, b) ? a : b;
-}
+__device__ __forceinline__ half min(half a, half b) { return __hlt(a, b) ? a : b; }
 
 __device__ __forceinline__ half operator/(half a, int b) {
   return __float2half(__half2float(a) / b);
@@ -77,15 +68,11 @@ __device__ __forceinline__ half operator-(half a, int b) {
   return __float2half(__half2float(a) - b);
 }
 
-__device__ __forceinline__ float operator*(float a, half b) {
-  return a * __half2float(b);
-}
+__device__ __forceinline__ float operator*(float a, half b) { return a * __half2float(b); }
 
 __device__ __forceinline__ float round(float a) { return ::round(a); }
 
-__device__ __forceinline__ float round(const half &a) {
-  return ::round(__half2float(a));
-}
+__device__ __forceinline__ float round(const half &a) { return ::round(__half2float(a)); }
 
 #include <cfloat>
 
@@ -103,13 +90,9 @@ class NumericLimits<float> {
 template <>
 class NumericLimits<half> {
  public:
-  __device__ __forceinline__ static half max() noexcept {
-    return __half_raw{0x7BFF};
-  }
+  __device__ __forceinline__ static half max() noexcept { return __half_raw{0x7BFF}; }
 
-  __device__ __forceinline__ static half lowest() noexcept {
-    return __half_raw{0xFBFF};
-  }
+  __device__ __forceinline__ static half lowest() noexcept { return __half_raw{0xFBFF}; }
 };
 
 FWD_TRT_NAMESPACE_END

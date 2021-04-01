@@ -96,30 +96,6 @@ class TLayerDescCreator<TrtSliceDesc> : public ILayerDescCreator {
       return constant_desc;
     }
 
-    auto start_vec = TrtUtils::ToVector(layer_desc->start);
-
-    for (int i = 0; i < layer_desc->size.nbDims; ++i) {
-      // TODO(yzx): 这里默认若是负值，则对应维度的 size 取全集。
-      if (layer_desc->size.d[i] < 0) {
-        layer_desc->size.d[i] = std::numeric_limits<int>::max();
-        layer_desc->dynamic_size = true;
-      }
-
-      if (layer_desc->start.d[i] < 0) {
-        layer_desc->start.d[i] = std::numeric_limits<int>::max();
-        layer_desc->dynamic_start = true;
-      }
-    }
-
-    if (layer_desc->dynamic_start) {
-      layer_desc->weight_map["start_raw"] = FwdWeights(TrtUtils::ToVector(layer_desc->start));
-      for (auto& s : start_vec) s = s < 0 ? s : 0;
-      layer_desc->weight_map["start_negative"] = FwdWeights(start_vec);
-    }
-    if (layer_desc->dynamic_size) {
-      layer_desc->weight_map["size"] = FwdWeights(TrtUtils::ToVector(layer_desc->size));
-    }
-
     // 非常量 slice
     input_values.push_back(prev_node->inputs()[0]);
     return layer_desc;

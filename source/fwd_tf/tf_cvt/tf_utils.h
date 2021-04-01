@@ -64,8 +64,7 @@ float RandomFloat();
 int RandomInt();
 
 std::shared_ptr<TF_Tensor> CreateEmptyTensor(TF_DataType data_type,
-                                                    const std::vector<int64_t>& dims);
-
+                                             const std::vector<int64_t>& dims);
 
 /**
  * \brief 将 vector 数据封装成一个 TF_Tensor
@@ -130,8 +129,8 @@ std::shared_ptr<TF_Tensor> CreateRandomIntTensor(TF_DataType data_type,
  * \param options 会话可选项
  * \return std::shared_ptr<TF_Session>
  */
-std::shared_ptr<TF_Session> CreateSession(
-    const Graph& graph, std::shared_ptr<TF_SessionOptions> options = nullptr);
+std::shared_ptr<TF_Session> CreateSession(const Graph& graph,
+                                          std::shared_ptr<TF_SessionOptions> options = nullptr);
 
 inline std::vector<int64_t> GetTensorShape(const TF_Tensor* tensor) {
   const int num_dim = TF_NumDims(tensor);

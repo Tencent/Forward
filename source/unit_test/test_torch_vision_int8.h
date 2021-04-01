@@ -173,8 +173,7 @@ TEST(TestTorchVision131Int8, ResNet50) {
 }
 
 TEST(TestTorchVision131Int8, WideResNet50_2) {
-  const auto model_path =
-      std::string(models_dir) + "torch_vision_models/wide_resnet50_2.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/wide_resnet50_2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -214,8 +213,7 @@ TEST(TestTorchVision131Int8, Mobilenet_v2) {
 }
 
 TEST(TestTorchVision131Int8, ShuffleNet_v2_x1_5) {
-  const auto model_path =
-      std::string(models_dir) + "torch_vision_models/shufflenet_v2_x1_5.pth";
+  const auto model_path = std::string(models_dir) + "torch_vision_models/shufflenet_v2_x1_5.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;

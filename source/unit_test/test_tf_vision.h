@@ -36,8 +36,7 @@ TEST(TestTfVision, DenseNet201) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/densenet201.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_4"] = input.get();
@@ -51,8 +50,7 @@ TEST(TestTfVision, InceptionV3) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/inception_v3.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
@@ -66,8 +64,7 @@ TEST(TestTfVision, InceptionResNetV2) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/inception_resnet_v2.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_7"] = input.get();
@@ -81,8 +78,7 @@ TEST(TestTfVision, MobileNetV2) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/mobilenet_v2.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_5"] = input.get();
@@ -96,8 +92,7 @@ TEST(TestTfVision, NasNetLarge) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/nasnet_large.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 331, 331, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 331, 331, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_5"] = input.get();
@@ -111,8 +106,7 @@ TEST(TestTfVision, ResNet152V2) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/resnet152_v2.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_3"] = input.get();
@@ -125,8 +119,7 @@ TEST(TestTfVision, Vgg19) {
   const std::string filename = std::string(tf_root_dir) + "../../models/tf_vision_models/vgg19.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_2"] = input.get();
@@ -140,8 +133,7 @@ TEST(TestTfVision, Xception) {
       std::string(tf_root_dir) + "../../models/tf_vision_models/xception.pb";
 
   const int batch_size = 1;
-  const auto input =
-      fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();

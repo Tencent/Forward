@@ -136,8 +136,7 @@ TEST(TestTorchNodes131Int8, InstanceNorm2dAffine) {
 }
 
 TEST(TestTorchNodes131Int8, InstanceNorm2dAffineTrack) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes131/instance_norm_aff_track.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/instance_norm_aff_track.pth";
   const auto input = torch::randn({6, 3, 7, 7}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -294,8 +293,7 @@ TEST(TestTorchNodes131Int8, LayerNorm) {
 }
 
 TEST(TestTorchNodes131Int8, LayerNormWithWeights) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes131/layer_norm_with_weights.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/layer_norm_with_weights.pth";
   const auto input = torch::randn({20, 5, 10}, device);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -501,8 +499,7 @@ TEST(TestTorchNodes131Int8, Var) {
 }
 
 TEST(TestTorchNodes131Int8, GridSamplerBilinearModule) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes131/grid_sampler_bilinear.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/grid_sampler_bilinear.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device).to(c10::kHalf);
   const auto T = ::torch::randn({1, 5, 10, 2}, device).to(c10::kHalf);
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -604,8 +601,7 @@ TEST(TestTorchNodes131Int8, AdaILN) {
 
 #ifdef SUPPORT_RNN
 TEST(TestTorchNodes131Int8, RnnModuleTanHBid) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes131/rnn_tanh_bidirectional.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/rnn_tanh_bidirectional.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;
@@ -616,8 +612,7 @@ TEST(TestTorchNodes131Int8, RnnModuleTanHBid) {
 }
 
 TEST(TestTorchNodes131Int8, BidirectionRNN) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes131/rnn_tanh_bidirectional.pth";
+  const auto model_path = std::string(torch_root_dir) + "nodes131/rnn_tanh_bidirectional.pth";
   const auto input = torch::randn({1, 28, 28}, device).to(c10::kHalf);
 
   std::unordered_map<std::string, c10::IValue> input_map;

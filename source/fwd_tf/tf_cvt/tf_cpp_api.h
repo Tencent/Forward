@@ -76,25 +76,17 @@ class Operation {
 
   std::string OpType() const { return TF_OperationOpType(op_); }
 
-  std::string Name() const {
-    return TF_OperationName(op_);
-  }
+  std::string Name() const { return TF_OperationName(op_); }
 
-  std::string Device() const {
-    return TF_OperationDevice(op_);
-  }
+  std::string Device() const { return TF_OperationDevice(op_); }
 
-  int NumInputs() const {
-    return TF_OperationNumInputs(op_);
-  }
+  int NumInputs() const { return TF_OperationNumInputs(op_); }
 
   TF_DataType InputType(int index) const { return TF_OperationInputType(TF_Input{op_, index}); }
 
   Output Input(int index) const;
 
-  int NumOutputs() const {
-    return TF_OperationNumOutputs(op_);
-  }
+  int NumOutputs() const { return TF_OperationNumOutputs(op_); }
 
   TF_DataType OutputType(int index) const { return TF_OperationOutputType(TF_Output{op_, index}); }
 

@@ -20,7 +20,7 @@
 # ╚════════════════════════════════════════════════════════════════════════════════════════╝
 #
 
-cmake_minimum_required(VERSION 3.12.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.1 FATAL_ERROR)
 
 project(Forward LANGUAGES C CXX CUDA)
 
@@ -128,13 +128,9 @@ if(ENABLE_RNN)
   add_definitions(-DSUPPORT_RNN=1)
 endif(ENABLE_RNN)
 
-if(BUILD_PYTHON_LIB AND ENABLE_TORCH)
-  if (ENABLE_KERAS)
-    message(FATAL_ERROR "Forward_Pytorch cannot work with Forward_Python_Keras")
-  else()
-  # for forward-python-torch
+if(BUILD_PYTHON_LIB)
+  # for torch
   add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-  endif(ENABLE_KERAS)
 endif()
 
 # Glog
@@ -285,9 +281,16 @@ if(ENABLE_KERAS)
   include_directories(
     ${PROJECT_SOURCE_DIR}/source/third_party/json/single_include)
   # hdf5
-  find_package(HDF5 REQUIRED)
-  message("HDF5_INCLUDE_DIRS: " ${HDF5_INCLUDE_DIRS})
-  include_directories(${HDF5_INCLUDE_DIRS})
+  find_package(HDF5)
+  if (HDF5_FOUND)
+    message("Found HDF5 on system HDF5_INCLUDE_DIRS: " ${HDF5_INCLUDE_DIRS})
+    include_directories(${HDF5_INCLUDE_DIRS})
+  else()
+    message("Use HDF5 on third_party: ${PROJECT_SOURCE_DIR}/source/third_party/hdf5")
+    include_directories(${PROJECT_SOURCE_DIR}/source/third_party/hdf5/src)
+    include_directories(${PROJECT_SOURCE_DIR}/source/third_party/hdf5/include)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/hdf5)
+  endif()
 
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_keras)
   include_directories(${TENSORFLOW_LIB_DIR}/include)

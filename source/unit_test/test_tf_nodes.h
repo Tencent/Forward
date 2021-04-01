@@ -286,8 +286,7 @@ TEST(TestTfNodes, EmbeddingBag) {
   const int batch_size = 10;
   const int emb_size = 5;
 
-  const auto indices =
-      fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, emb_size}, 50);
+  const auto indices = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, emb_size}, 50);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["Placeholder"] = indices.get();
