@@ -45,7 +45,7 @@ option(ENABLE_TORCH "Enable Torch" ON)
 # Enable TensorFlow
 option(ENABLE_TENSORFLOW "Enable TensorFlow" ON)
 # Enable Keras
-option(ENABLE_KERAS "Enable Keras" OFF)
+option(ENABLE_KERAS "Enable Keras" ON)
 # Enable profiling
 option(ENABLE_PROFILING "Enable profiling" ON)
 # Enable logging
@@ -134,7 +134,13 @@ if(ENABLE_DYNAMIC_BATCH)
   add_definitions(-DUSE_DYNAMIC_BATCH=1)
 endif()
 
-# Glog
+# _GLIBCXX_USE_CXX11_ABI=0 only for pytorch
+if (BUILD_PYTHON_LIB AND ENABLE_TORCH)
+add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+message(WARNING "_GLIBCXX_USE_CXX11_ABIT=0 is set for PyTorch libraries. Check dependencies for this flag.")
+endif()
+
+# easylogging
 if(NOT ENABLE_LOGGING)
   add_definitions(-DELPP_DISABLE_INFO_LOGS=1)
 endif()
@@ -303,14 +309,6 @@ if(BUILD_PYTHON_LIB)
   
   # pyinfer
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/py_fwd)
-
-  if (ENABLE_TORCH AND ENABLE_KERAS)
-    message(FATAL_ERROR "PYTHON_LIB cannot support BOTH torch and keras!")
-  endif()
-  if (ENABLE_TORCH AND NOT ENABLE_KERAS)
-    # only for pytorch
-    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-  endif()
 endif()
 
 # fwd test
