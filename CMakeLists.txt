@@ -20,7 +20,7 @@
 # ╚════════════════════════════════════════════════════════════════════════════════════════╝
 #
 
-cmake_minimum_required(VERSION 3.10.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12.2 FATAL_ERROR)
 
 project(Forward LANGUAGES C CXX CUDA)
 
@@ -124,13 +124,14 @@ else()
       CACHE STRING "cuda flags")
 endif()
 
+# support RNN models
 if(ENABLE_RNN)
   add_definitions(-DSUPPORT_RNN=1)
 endif(ENABLE_RNN)
 
-if(BUILD_PYTHON_LIB)
-  # for torch
-  add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+# Dynamic Batch
+if(ENABLE_DYNAMIC_BATCH)
+  add_definitions(-DUSE_DYNAMIC_BATCH=1)
 endif()
 
 # Glog
@@ -147,10 +148,6 @@ if(ENABLE_PROFILING)
 else()
   add_definitions(-DTRT_INFER_ENABLE_PROFILING=0)
 endif() # ENABLE_PROFILING
-
-if(ENABLE_DYNAMIC_BATCH)
-  add_definitions(-DUSE_DYNAMIC_BATCH=1)
-endif()
 
 # simple-utils
 include_directories(${PROJECT_SOURCE_DIR}/source/third_party/simple-utils)
@@ -303,9 +300,17 @@ if(BUILD_PYTHON_LIB)
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/pybind11)
   # if(USE_FOLDERS) set_target_properties (pybind11 PROPERTIES FOLDER
   # third_party) endif()
-
+  
   # pyinfer
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/py_fwd)
+
+  if (ENABLE_TORCH AND ENABLE_KERAS)
+    message(FATAL_ERROR "PYTHON_LIB cannot support BOTH torch and keras!")
+  endif()
+  if (ENABLE_TORCH AND NOT ENABLE_KERAS)
+    # only for pytorch
+    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+  endif()
 endif()
 
 # fwd test
