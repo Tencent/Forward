@@ -20,7 +20,7 @@
 # ╚════════════════════════════════════════════════════════════════════════════════════════╝
 #
 
-cmake_minimum_required(VERSION 3.10.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12.2 FATAL_ERROR)
 
 project(Forward LANGUAGES C CXX CUDA)
 
@@ -128,9 +128,13 @@ if(ENABLE_RNN)
   add_definitions(-DSUPPORT_RNN=1)
 endif(ENABLE_RNN)
 
-if(BUILD_PYTHON_LIB)
-  # for torch
+if(BUILD_PYTHON_LIB AND ENABLE_TORCH)
+  if (ENABLE_KERAS)
+    message(FATAL_ERROR "Forward_Pytorch cannot work with Forward_Python_Keras")
+  else()
+  # for forward-python-torch
   add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+  endif(ENABLE_KERAS)
 endif()
 
 # Glog
