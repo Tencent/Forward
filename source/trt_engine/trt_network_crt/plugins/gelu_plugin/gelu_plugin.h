@@ -26,8 +26,8 @@
 
 namespace bert {
 
-static const char* GELU_PLUGIN_VERSION{"1"};
-static const char* GELU_PLUGIN_NAME{"CustomGeluPluginDynamic"};
+static const char* FWD_GELU_PLUGIN_VERSION{"1"};
+static const char* FWD_GELU_PLUGIN_NAME{"ForwardGeluPluginDynamic"};
 
 int computeGelu(cudaStream_t stream, int n, const float* input, float* output);
 

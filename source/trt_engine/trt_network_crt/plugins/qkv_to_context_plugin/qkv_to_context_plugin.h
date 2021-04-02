@@ -30,9 +30,9 @@
 
 namespace bert {
 
-static const char* QKV_TO_CONTEXT_PLUGIN_VERSION{"1"};
-static const char* QKV_TO_CONTEXT_VAR_SEQLEN_PLUGIN_VERSION{"2"};
-static const char* QKV_TO_CONTEXT_PLUGIN_NAME{"CustomQKVToContextPluginDynamic"};
+static const char* FWD_QKV_TO_CONTEXT_PLUGIN_VERSION{"1"};
+static const char* FWD_QKV_TO_CONTEXT_VAR_SEQLEN_PLUGIN_VERSION{"2"};
+static const char* FWD_QKV_TO_CONTEXT_PLUGIN_NAME{"ForwardQKVToContextPluginDynamic"};
 
 // Multi Head Attention runner
 class MHARunner {

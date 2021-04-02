@@ -270,9 +270,9 @@ nvinfer1::DataType SkipLayerNormPluginDynamic::getOutputDataType(
 }
 
 // IPluginV2 Methods
-const char* SkipLayerNormPluginDynamic::getPluginType() const { return SKIP_LAYER_NORM_NAME; }
+const char* SkipLayerNormPluginDynamic::getPluginType() const { return FWD_SKIP_LAYER_NORM_NAME; }
 
-const char* SkipLayerNormPluginDynamic::getPluginVersion() const { return SKIP_LAYER_NORM_VERSION; }
+const char* SkipLayerNormPluginDynamic::getPluginVersion() const { return FWD_SKIP_LAYER_NORM_VERSION; }
 
 int SkipLayerNormPluginDynamic::getNbOutputs() const { return 1; }
 int SkipLayerNormPluginDynamic::initialize() {
@@ -329,11 +329,11 @@ SkipLayerNormPluginDynamicCreator::SkipLayerNormPluginDynamicCreator() {
 }
 
 const char* SkipLayerNormPluginDynamicCreator::getPluginName() const {
-  return SKIP_LAYER_NORM_NAME;
+  return FWD_SKIP_LAYER_NORM_NAME;
 }
 
 const char* SkipLayerNormPluginDynamicCreator::getPluginVersion() const {
-  return SKIP_LAYER_NORM_VERSION;
+  return FWD_SKIP_LAYER_NORM_VERSION;
 }
 
 const nvinfer1::PluginFieldCollection* SkipLayerNormPluginDynamicCreator::getFieldNames() {
@@ -654,10 +654,10 @@ nvinfer1::DataType SkipLayerNormVarSeqlenPlugin::getOutputDataType(
 }
 
 // IPluginV2 Methods
-const char* SkipLayerNormVarSeqlenPlugin::getPluginType() const { return SKIP_LAYER_NORM_NAME; }
+const char* SkipLayerNormVarSeqlenPlugin::getPluginType() const { return FWD_SKIP_LAYER_NORM_NAME; }
 
 const char* SkipLayerNormVarSeqlenPlugin::getPluginVersion() const {
-  return SKIP_LAYER_NORM_VAR_SEQLEN_VERSION;
+  return FWD_SKIP_LAYER_NORM_VAR_SEQLEN_VERSION;
 }
 
 int SkipLayerNormVarSeqlenPlugin::getNbOutputs() const { return 1; }
@@ -715,11 +715,11 @@ SkipLayerNormVarSeqlenPluginCreator::SkipLayerNormVarSeqlenPluginCreator() {
 }
 
 const char* SkipLayerNormVarSeqlenPluginCreator::getPluginName() const {
-  return SKIP_LAYER_NORM_NAME;
+  return FWD_SKIP_LAYER_NORM_NAME;
 }
 
 const char* SkipLayerNormVarSeqlenPluginCreator::getPluginVersion() const {
-  return SKIP_LAYER_NORM_VAR_SEQLEN_VERSION;
+  return FWD_SKIP_LAYER_NORM_VAR_SEQLEN_VERSION;
 }
 
 const nvinfer1::PluginFieldCollection* SkipLayerNormVarSeqlenPluginCreator::getFieldNames() {

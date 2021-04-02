@@ -155,9 +155,9 @@ nvinfer1::DataType GeluPluginDynamic::getOutputDataType(int index,
 
 // IPluginV2 Methods
 
-const char* GeluPluginDynamic::getPluginType() const { return GELU_PLUGIN_NAME; }
+const char* GeluPluginDynamic::getPluginType() const { return FWD_GELU_PLUGIN_NAME; }
 
-const char* GeluPluginDynamic::getPluginVersion() const { return GELU_PLUGIN_VERSION; }
+const char* GeluPluginDynamic::getPluginVersion() const { return FWD_GELU_PLUGIN_VERSION; }
 
 int GeluPluginDynamic::getNbOutputs() const { return 1; }
 
@@ -206,9 +206,9 @@ GeluPluginDynamicCreator::GeluPluginDynamicCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* GeluPluginDynamicCreator::getPluginName() const { return GELU_PLUGIN_NAME; }
+const char* GeluPluginDynamicCreator::getPluginName() const { return FWD_GELU_PLUGIN_NAME; }
 
-const char* GeluPluginDynamicCreator::getPluginVersion() const { return GELU_PLUGIN_VERSION; }
+const char* GeluPluginDynamicCreator::getPluginVersion() const { return FWD_GELU_PLUGIN_VERSION; }
 
 const PluginFieldCollection* GeluPluginDynamicCreator::getFieldNames() { return &mFC; }
 

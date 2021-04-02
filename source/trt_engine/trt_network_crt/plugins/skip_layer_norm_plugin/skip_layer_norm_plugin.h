@@ -26,9 +26,9 @@
 namespace bert {
 
 // Clip plugin specific constants
-static const char* SKIP_LAYER_NORM_VERSION{"1"};
-static const char* SKIP_LAYER_NORM_NAME{"CustomSkipLayerNormPluginDynamic"};
-static const char* SKIP_LAYER_NORM_VAR_SEQLEN_VERSION{"2"};
+static const char* FWD_SKIP_LAYER_NORM_VERSION{"1"};
+static const char* FWD_SKIP_LAYER_NORM_NAME{"ForwardSkipLayerNormPluginDynamic"};
+static const char* FWD_SKIP_LAYER_NORM_VAR_SEQLEN_VERSION{"2"};
 
 template <bool hasBias>
 int computeSkipLayerNormDQQ(cudaStream_t stream, const int ld, const int n, const int8_t* input,

@@ -138,7 +138,7 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
 
     // 创建 Plugin
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::SKIP_LAYER_NORM_NAME, bert::SKIP_LAYER_NORM_VERSION);
+        bert::FWD_SKIP_LAYER_NORM_NAME, bert::FWD_SKIP_LAYER_NORM_VERSION);
 
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("ld", &norm_desc->leading_dim, nvinfer1::PluginFieldType::kINT32, 1);

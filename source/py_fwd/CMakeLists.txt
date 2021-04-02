@@ -28,7 +28,7 @@ file(GLOB BINDING_HEADERS *.h)
 
 pybind11_add_module(forward py_forward.cpp)
 
-target_link_libraries(forward PUBLIC -static-libstdc++ -static-libgcc)
+# target_link_libraries(forward PUBLIC -static-libstdc++ -static-libgcc)
 set_target_properties(forward PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 # pybind11::overload_cast<...> requires compiling in C++14 mode
 set_property(TARGET forward PROPERTY CXX_STANDARD 14)

@@ -144,18 +144,18 @@ DimsExprs QKVToContextPluginDynamic::getOutputDimensions(int outputIndex, const 
 bool QKVToContextPluginDynamic::SupportINT8(const PluginTensorDesc* in, int packedSize) const {
   if (mSM != kSM_75 && mSM != kSM_80 && mSM != kSM_86) {
     LOG(ERROR) << "INT8 IO is only supported on Turing and Ampere for plugin "
-               << QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
+               << FWD_QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
     return false;
   }
   if (in->dims.d[SDIM] == -1) {
     LOG(ERROR) << "INT8 IO not support dynamic shape in sequence dimension "
                   "for plugin "
-               << QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
+               << FWD_QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
     return false;
   }
   if (packedSize == unfusedMaskSize) {
     LOG(ERROR) << "INT8 IO only support sequence length 128,384 for plugin "
-               << QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
+               << FWD_QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
     return false;
   }
   return true;
@@ -166,7 +166,7 @@ bool QKVToContextPluginDynamic::CheckInputMask(int pos, const PluginTensorDesc* 
   const auto* inMask = &inOut[1];
   if (inMask->dims.d[1] != -1 && inMask->dims.d[1] != packedSize) {
     LOG(ERROR) << "CustomEmbLayerNormPluginDynamic returned mask with pack size "
-               << inMask->dims.d[1] << ", but " << QKV_TO_CONTEXT_PLUGIN_NAME
+               << inMask->dims.d[1] << ", but " << FWD_QKV_TO_CONTEXT_PLUGIN_NAME
                << " expects mask pack size " << packedSize << std::endl;
   }
 
@@ -320,10 +320,10 @@ nvinfer1::DataType QKVToContextPluginDynamic::getOutputDataType(
 }
 
 // IPluginV2 Methods
-const char* QKVToContextPluginDynamic::getPluginType() const { return QKV_TO_CONTEXT_PLUGIN_NAME; }
+const char* QKVToContextPluginDynamic::getPluginType() const { return FWD_QKV_TO_CONTEXT_PLUGIN_NAME; }
 
 const char* QKVToContextPluginDynamic::getPluginVersion() const {
-  return QKV_TO_CONTEXT_PLUGIN_VERSION;
+  return FWD_QKV_TO_CONTEXT_PLUGIN_VERSION;
 }
 
 int QKVToContextPluginDynamic::getNbOutputs() const { return 1; }
@@ -395,11 +395,11 @@ QKVToContextPluginDynamicCreator::QKVToContextPluginDynamicCreator() {
 }
 
 const char* QKVToContextPluginDynamicCreator::getPluginName() const {
-  return QKV_TO_CONTEXT_PLUGIN_NAME;
+  return FWD_QKV_TO_CONTEXT_PLUGIN_NAME;
 }
 
 const char* QKVToContextPluginDynamicCreator::getPluginVersion() const {
-  return QKV_TO_CONTEXT_PLUGIN_VERSION;
+  return FWD_QKV_TO_CONTEXT_PLUGIN_VERSION;
 }
 
 const PluginFieldCollection* QKVToContextPluginDynamicCreator::getFieldNames() { return &mFC; }
@@ -663,7 +663,7 @@ bool QKVToContextVarSeqlenPlugin::supportsFormatCombination(int pos, const Plugi
   if (mType == nvinfer1::DataType::kINT8 && mSM != kSM_86 && mSM != kSM_80 && mSM != kSM_75 &&
       mSM != kSM_72) {
     LOG(INFO) << "INT8 IO is only supported on Xavier, Turing and Ampere for plugin "
-              << QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
+              << FWD_QKV_TO_CONTEXT_PLUGIN_NAME << std::endl;
     return false;
   }
 
@@ -742,11 +742,11 @@ nvinfer1::DataType QKVToContextVarSeqlenPlugin::getOutputDataType(
 
 // IPluginV2 Methods
 const char* QKVToContextVarSeqlenPlugin::getPluginType() const {
-  return QKV_TO_CONTEXT_PLUGIN_NAME;
+  return FWD_QKV_TO_CONTEXT_PLUGIN_NAME;
 }
 
 const char* QKVToContextVarSeqlenPlugin::getPluginVersion() const {
-  return QKV_TO_CONTEXT_VAR_SEQLEN_PLUGIN_VERSION;
+  return FWD_QKV_TO_CONTEXT_VAR_SEQLEN_PLUGIN_VERSION;
 }
 
 int QKVToContextVarSeqlenPlugin::getNbOutputs() const { return 1; }
@@ -832,11 +832,11 @@ QKVToContextVarSeqlenPluginCreator::QKVToContextVarSeqlenPluginCreator() {
 }
 
 const char* QKVToContextVarSeqlenPluginCreator::getPluginName() const {
-  return QKV_TO_CONTEXT_PLUGIN_NAME;
+  return FWD_QKV_TO_CONTEXT_PLUGIN_NAME;
 }
 
 const char* QKVToContextVarSeqlenPluginCreator::getPluginVersion() const {
-  return QKV_TO_CONTEXT_VAR_SEQLEN_PLUGIN_VERSION;
+  return FWD_QKV_TO_CONTEXT_VAR_SEQLEN_PLUGIN_VERSION;
 }
 
 const PluginFieldCollection* QKVToContextVarSeqlenPluginCreator::getFieldNames() { return &mFC; }

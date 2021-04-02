@@ -125,7 +125,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
         TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, bert_desc->calib_mode);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::EMB_LAYER_NORM_NAME, bert::EMB_LAYER_NORM_VERSION);
+        bert::FWD_EMB_LAYER_NORM_NAME, bert::FWD_EMB_LAYER_NORM_VERSION);
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back(NAME_MAP.at("EMB_BETA").c_str(), beta.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, beta.Count());
@@ -216,7 +216,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     const auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, use_int8, bert_desc->calib_mode);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::SKIP_LAYER_NORM_NAME, bert::SKIP_LAYER_NORM_VERSION);
+        bert::FWD_SKIP_LAYER_NORM_NAME, bert::FWD_SKIP_LAYER_NORM_VERSION);
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("beta", beta.Data(), nvinfer1::PluginFieldType::kFLOAT32, beta.Count());
     field_data.emplace_back("gamma", gamma.Data(), nvinfer1::PluginFieldType::kFLOAT32,
@@ -276,7 +276,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, true);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::QKV_TO_CONTEXT_PLUGIN_NAME, bert::QKV_TO_CONTEXT_PLUGIN_VERSION);
+        bert::FWD_QKV_TO_CONTEXT_PLUGIN_NAME, bert::FWD_QKV_TO_CONTEXT_PLUGIN_VERSION);
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("hidden_size", &hidden_size, nvinfer1::PluginFieldType::kINT32, 1);
@@ -401,7 +401,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
           auto dtype = bert_desc->use_fp16 ? nvinfer1::DataType::kHALF : nvinfer1::DataType::kFLOAT;
 
           nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-              bert::GELU_PLUGIN_NAME, bert::GELU_PLUGIN_VERSION);
+              bert::FWD_GELU_PLUGIN_NAME, bert::FWD_GELU_PLUGIN_VERSION);
           std::vector<nvinfer1::PluginField> field_data;
           field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
 

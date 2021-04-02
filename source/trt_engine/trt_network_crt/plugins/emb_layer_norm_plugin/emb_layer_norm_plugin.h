@@ -25,8 +25,8 @@
 
 namespace bert {
 
-static const char* EMB_LAYER_NORM_VERSION{"1"};
-static const char* EMB_LAYER_NORM_NAME{"CustomEmbLayerNormPluginDynamic"};
+static const char* FWD_EMB_LAYER_NORM_VERSION{"1"};
+static const char* FWD_EMB_LAYER_NORM_NAME{"ForwardEmbLayerNormPluginDynamic"};
 int computeMaskIdx(cudaStream_t stream, const int S, const int B, const int* mask, int* maskIdx);
 
 template <typename T>
