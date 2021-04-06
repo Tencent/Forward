@@ -1,0 +1,14 @@
+# Demo for building BERT model
+
+> Use fwd_tf for BERT-tiny as example
+0. Download BERT-model from [BERT](https://github.com/google-research/bert/blob/master/README.md). BERT-tiny is downloaded as example.
+
+1. Utilize the script [export_bert.py](../../python/bert_helpers/export_bert.py) to export `frozen_bert.pb`.
+
+2. Build Forward libraries refer to [CMake-Build](../../doc/en/usages/cmake_build.md).
+
+3. Copy Forward-Python library to this directory.
+
+5. Run the python script `test_tf_bert.py`
+
+**Notice**: The name of INPUT in models can be viewed by model viewers, such as [Netron](https://github.com/lutzroeder/Netron).
