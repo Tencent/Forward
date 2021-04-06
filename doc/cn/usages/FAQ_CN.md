@@ -21,3 +21,7 @@
     - 常见错误日志: `[TRT] engine.cpp (902) - Cuda Error in executeInternal: 77 (an illegal memory access was encountered)`
     - 常见错误日志: `[TRT] engine.cpp (902) - Cuda Error in executeInternal: 74 (misaligned address)`
 3. 当在不同的机器集群内多线程使用 Forward 时（一个线程对应一个 Forward 对象）, 须注意多个 Engine 加载的模型总大小不能超过 GPU 显存上限. 
+
+## cublasLt 相关的错误
+
+1. 像 `[TRT] Assertion failed: cublasStatus == CUBLAS_STATUS_SUCCESS \source\rtSafe\cublas\cublasLtWrapper.cpp:279`这类错误信息，一般与一个已知的 CUDA 10.2 中的 cubBLAS LT bug 有关. 它可以通过升级 CUDA 10.2 的补丁包或者用 TensorRT 的 API `config->setTacticSources()` 来禁用 cuBLAS Lt. (参考 [TensorRT Issue 1151](https://github.com/NVIDIA/TensorRT/issues/1151))

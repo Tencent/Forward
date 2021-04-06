@@ -28,3 +28,7 @@
     - `[TRT] engine.cpp (902) - Cuda Error in executeInternal: 77 (an illegal memory access was encountered)`
     - `[TRT] engine.cpp (902) - Cuda Error in executeInternal: 74 (misaligned address)`
 3. The amount of GPU memory usages in multi-thread scenarios should not be larger than the maximum memory of the GPU device.
+
+## cublasLt related errors
+
+1. Error message like `[TRT] Assertion failed: cublasStatus == CUBLAS_STATUS_SUCCESS \source\rtSafe\cublas\cublasLtWrapper.cpp:279` is almost related to a known cubBLAS LT bug in CUDA 10.2. You can fix it either by upgrading to a newer patch version of 10.2, or using the work-around mentioned here. Since you're using the API you can use  `config->setTacticSources()`  to disable cuBLAS LT. (Refer to [TensorRT Issue 1151](https://github.com/NVIDIA/TensorRT/issues/1151))
