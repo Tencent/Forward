@@ -191,6 +191,7 @@ inline nvinfer1::Dims DimsOf(const Output& output) {
   Status status;
 
   int num_dims = output.GetTensorNumDims();
+  if (num_dims <= 0) return {};
 
   std::vector<int64_t> dims(num_dims);
   output.GetTensorShape(dims.data(), num_dims);
