@@ -75,8 +75,8 @@ class TLayerDescCreator<TrtConstantDesc> : public ILayerDescCreator {
       }
     } else if (node->kind() == c10::aten::zeros) {
       input_values.push_back(nullptr);
-      auto size = module.Get(inputs[0]).toIntListRef();
-      at::Tensor tensor = torch::zeros(size);
+      const auto size = ToIntVector(module.Get(inputs[0]));
+      const at::Tensor tensor = torch::zeros(size);
       layer_desc->weights = ToFwdWeights(tensor);
       layer_desc->dimensions = DimsOf(tensor);
     }
