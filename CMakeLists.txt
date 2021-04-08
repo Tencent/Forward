@@ -41,25 +41,25 @@ include(CMakeDependentOption)
 # Enable TensorRT
 option(ENABLE_TENSORRT "Enable TensorRT" ON)
 # Enable Torch
-option(ENABLE_TORCH "Enable Torch" ON)
+option(ENABLE_TORCH "Enable Torch" OFF)
 # Enable TensorFlow
-option(ENABLE_TENSORFLOW "Enable TensorFlow" ON)
+option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 # Enable Keras
-option(ENABLE_KERAS "Enable Keras" ON)
+option(ENABLE_KERAS "Enable Keras" OFF)
 # Enable profiling
-option(ENABLE_PROFILING "Enable profiling" ON)
+option(ENABLE_PROFILING "Enable profiling" OFF)
 # Enable logging
-option(ENABLE_LOGGING "Enable logging" ON)
+option(ENABLE_LOGGING "Enable logging" OFF)
 # Enable dynamic batch size
-option(ENABLE_DYNAMIC_BATCH "Enable dynamic batch size" ON)
+option(ENABLE_DYNAMIC_BATCH "Enable dynamic batch size" OFF)
 # Build Python Lib
 option(BUILD_PYTHON_LIB "Build Python Lib" OFF)
 # Enable Inference Tests (need OpenCV)
 option(ENABLE_INFER_TESTS "Enable Inference Tests" OFF)
 # Enable RNN models forward
-option(ENABLE_RNN "Enable RNN models forward" ON)
+option(ENABLE_RNN "Enable RNN models forward" OFF)
 # Enable unit tests
-option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 
 if(MSVC)
   set(USE_FOLDERS ON)
