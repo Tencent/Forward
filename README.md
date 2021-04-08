@@ -97,6 +97,10 @@ Refer to [Demo for using Forward-Cpp in Linux](demo/fwd_cpp/ReadMe.md)
 
 Refer to [Demo for using Forward-Python](demo/fwd_py/ReadMe.md)
 
+### Use Forward-Bert
+
+Refer to [Demo for using Forward-Bert](demo/bert/README.md)
+
 ### More Usages
 
 **Notice**: The name of INPUT in models can be viewed by model viewers, such as [Netron](https://github.com/lutzroeder/Netron).

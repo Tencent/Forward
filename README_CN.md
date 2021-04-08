@@ -79,6 +79,10 @@ cd build/bin
 
 参考 [Demo for using Forward-Python](demo/fwd_py/ReadMe_CN.md)
 
+### Forward-Bert 使用
+
+Refer to [Demo for using Forward-Bert](demo/bert/README_CN.md)
+
 ### 更多使用方法
 
 **注意**: 模型输入名可通过模型查看器来查看, 例如用 [Netron](https://github.com/lutzroeder/Netron) 查看.
