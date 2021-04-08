@@ -29,6 +29,8 @@ namespace bert {
 static const char* FWD_GELU_PLUGIN_VERSION{"1"};
 static const char* FWD_GELU_PLUGIN_NAME{"ForwardGeluPluginDynamic"};
 
+static constexpr int MAX_GELU_VAL{10};
+
 int computeGelu(cudaStream_t stream, int n, const float* input, float* output);
 
 int computeGelu(cudaStream_t stream, int n, const half* input, half* output);
@@ -38,6 +40,15 @@ void computeGeluBias(float* output, const float* input, const float* bias, const
 
 void computeGeluBias(half* output, const half* input, const half* bias, const int ld,
                      const int cols, cudaStream_t stream);
+
+nvinfer1::ITensor* CreateGeluLayer(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor* input,
+                                   bool use_fp16, bool use_int8);
+
+nvinfer1::ITensor* CreateGeluCombinattion(nvinfer1::INetworkDefinition* network,
+                                          nvinfer1::ITensor* input);
+
+nvinfer1::ITensor* CreateGeluPlugin(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor* input,
+                                    bool use_fp16);
 
 class GeluPluginDynamic : public nvinfer1::IPluginV2DynamicExt {
  public:

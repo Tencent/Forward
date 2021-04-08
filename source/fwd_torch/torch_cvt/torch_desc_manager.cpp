@@ -45,6 +45,7 @@
 #include "torch_desc_creators/torch_convolution_creator.h"
 #include "torch_desc_creators/torch_element_wise_creator.h"
 #include "torch_desc_creators/torch_embedding_bag_creator.h"
+#include "torch_desc_creators/torch_gelu_creator.h"
 #include "torch_desc_creators/torch_gather_creator.h"
 #include "torch_desc_creators/torch_grid_sampler_creator.h"
 #include "torch_desc_creators/torch_identity_creator.h"
@@ -95,6 +96,7 @@ TorchDescManager::TorchDescManager() {
   RegisterCreator<TrtClampDesc>();
   RegisterCreator<TrtConcatenationDesc>();
   // RegisterCreator<TrtGatherDesc>();
+  RegisterCreator<TrtGeluDesc>();
   RegisterCreator<TrtGridSamplerDesc>();
   RegisterCreator<TrtIndexDesc>();
   RegisterCreator<TrtPoolingDesc>();

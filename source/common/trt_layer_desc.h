@@ -72,8 +72,8 @@ struct TrtLayerDesc {
   static const char* NAME() { return #LayerDesc; } \
   const std::string Name() const override { return NAME(); }
 
-// StaticInput with constant Weights
-struct StaticInput {
+// ConstantInput with constant Weights
+struct ConstantInput {
   bool inUse{false};
   FwdWeights data;
   nvinfer1::Dims dim;
@@ -173,6 +173,13 @@ struct TrtConstantPadDesc : TrtLayerDesc {
   // [d0, d1], w0, w1, h0, h1
   std::vector<int> dims;
   float value;
+};
+
+struct TrtGeluDesc : TrtLayerDesc {
+  TRT_LAYER_DESC(Gelu);
+
+  bool use_fp16{false};
+  bool use_int8{false};
 };
 
 struct TrtGridSamplerDesc : TrtLayerDesc {
@@ -368,7 +375,7 @@ struct TrtDeconvolutionDesc : TrtLayerDesc {
 struct TrtElementWiseDesc : TrtLayerDesc {
   TRT_LAYER_DESC(ElementWise);
 
-  StaticInput inputs[2];
+  ConstantInput inputs[2];
   nvinfer1::ElementWiseOperation operation;
 };
 
@@ -383,14 +390,14 @@ struct TrtFullyConnectedDesc : TrtLayerDesc {
 struct TrtGatherDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Gather)
 
-  StaticInput inputs[2];
+  ConstantInput inputs[2];
   int gatherAxis;
 };
 
 struct TrtIdentityDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Identity)
 
-  StaticInput input;
+  ConstantInput input;
   bool copy{false};
 };
 
@@ -406,7 +413,7 @@ struct TrtLRNDesc : TrtLayerDesc {
 struct TrtMatrixMultiplyDesc : TrtLayerDesc {
   TRT_LAYER_DESC(MatrixMultiply)
 
-  StaticInput inputs[2];
+  ConstantInput inputs[2];
   nvinfer1::MatrixOperation op0;
   nvinfer1::MatrixOperation op1;
 };
@@ -493,7 +500,7 @@ struct TrtScaleDesc : TrtLayerDesc {
 struct TrtSelectDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Select)
 
-  StaticInput trueInput, falseInput;
+  ConstantInput trueInput, falseInput;
 };
 
 struct TrtShuffleDesc : TrtLayerDesc {
@@ -537,7 +544,7 @@ struct TrtSoftmaxDesc : TrtLayerDesc {
 struct TrtUnaryDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Unary)
 
-  StaticInput input;
+  ConstantInput input;
   nvinfer1::UnaryOperation operation;
 };
 

@@ -41,6 +41,7 @@
 #include "trt_engine/trt_network_crt/layer_creators/trt_embedding_bag_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_fully_connected_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_gather_creator.h"
+#include "trt_engine/trt_network_crt/layer_creators/trt_gelu_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_grid_sampler_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_identity_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_index_creator.h"
@@ -119,6 +120,7 @@ LayerCreatorManager::LayerCreatorManager() {
   RegisterCreator<TrtEmbeddingBagDesc>();
   RegisterCreator<TrtFullyConnectedDesc>();
   RegisterCreator<TrtGatherDesc>();
+  RegisterCreator<TrtGeluDesc>();
   RegisterCreator<TrtGridSamplerDesc>();
   RegisterCreator<TrtIdentityDesc>();
   RegisterCreator<TrtIndexDesc>();

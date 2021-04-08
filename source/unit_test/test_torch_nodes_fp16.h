@@ -90,6 +90,17 @@ TEST(TestTorchNodes131Fp16, PRelu) {
   TestTorchInference(model_path, input_map, "float16");
 }
 
+
+TEST(TestTorchNodes131Fp16, Gelu) {
+  const auto model_path = std::string(torch_root_dir) + "nodes131/gelu.pth";
+  const auto input = torch::randn({1, 3, 24, 24}, device).to(c10::kHalf);
+
+  std::unordered_map<std::string, c10::IValue> input_map;
+  input_map["input"] = input;
+
+  TestTorchInference(model_path, input_map, "float16", 1e-1);
+}
+
 TEST(TestTorchNodes131Fp16, Inplace) {
   const auto model_path = std::string(torch_root_dir) + "nodes131/inplace.pth";
   const auto input = torch::randn({1, 3, 64, 32}, device).to(c10::kHalf);

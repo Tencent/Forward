@@ -35,15 +35,12 @@
 
 FWD_TORCH_NAMESPACE_BEGIN
 
-/**
- * \brief Activation 层描述创建器
- */
+// Activation Description Creator
 template <>
 class TLayerDescCreator<TrtActivationDesc> : public ILayerDescCreator {
  public:
   bool Check(const JitNode* node, const TorchModule& module) override {
-    const auto kind = node->kind();
-    return NK2AT_MAPPING.find(kind) != NK2AT_MAPPING.end();
+    return NK2AT_MAPPING.find(node->kind()) != NK2AT_MAPPING.end();
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
@@ -62,20 +59,14 @@ class TLayerDescCreator<TrtActivationDesc> : public ILayerDescCreator {
     const auto kind = node->kind();
     layer_desc->activationType = NK2AT_MAPPING.find(kind)->second;
 
-    if (inputs.size() > 1) {
-      layer_desc->alpha = module.Get(inputs[1]).toDouble();
-    }
-
-    if (inputs.size() > 2) {
-      layer_desc->beta = module.Get(inputs[2]).toDouble();
-    }
+    if (inputs.size() > 1) layer_desc->alpha = module.Get(inputs[1]).toScalar().toFloat();
+    if (inputs.size() > 2) layer_desc->beta = module.Get(inputs[2]).toScalar().toFloat();
 
     return layer_desc;
   }
 
  private:
 #define CSYM(s) c10::Symbol::fromQualString(#s)
-
   const std::unordered_map<c10::Symbol, nvinfer1::ActivationType> NK2AT_MAPPING = {
       {c10::aten::relu, nvinfer1::ActivationType::kRELU},                // 0
       {CSYM(aten::relu_), nvinfer1::ActivationType::kRELU},              // 0
@@ -87,7 +78,6 @@ class TLayerDescCreator<TrtActivationDesc> : public ILayerDescCreator {
       {c10::aten::selu, nvinfer1::ActivationType::kSELU},                // 5
       {c10::aten::softplus, nvinfer1::ActivationType::kSOFTPLUS},        // 7
   };
-
 #undef CSYM
 };
 

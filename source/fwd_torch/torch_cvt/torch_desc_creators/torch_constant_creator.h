@@ -44,7 +44,7 @@ class TLayerDescCreator<TrtConstantDesc> : public ILayerDescCreator {
   bool Check(const JitNode* node, const TorchModule& module) override {
     const auto kind = node->kind();
     // 在这里补充其他的常量算子
-    return kind == c10::aten::arange;
+    return kind == c10::aten::arange || kind == c10::aten::zeros;
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
@@ -58,12 +58,25 @@ class TLayerDescCreator<TrtConstantDesc> : public ILayerDescCreator {
     const auto kind = node->kind();
     if (node->kind() == c10::aten::arange) {
       input_values.push_back(nullptr);
-
-      const c10::Scalar start = module.Get(inputs[0]).toScalar();
-      const c10::Scalar end = module.Get(inputs[1]).toScalar();
-      const c10::Scalar step = module.Get(inputs[2]).toScalar();
-      const c10::ScalarType dtype = module.Get(inputs[3]).toScalarType();
-      at::Tensor tensor = ::torch::arange(start, end, step, dtype);
+      if (inputs.size() == 5) {
+        const c10::Scalar end = module.Get(inputs[0]).toScalar();
+        const c10::ScalarType dtype = module.Get(inputs[1]).toScalarType();
+        at::Tensor tensor = ::torch::arange(end, dtype);
+        layer_desc->weights = ToFwdWeights(tensor);
+        layer_desc->dimensions = DimsOf(tensor);
+      } else {
+        const c10::Scalar start = module.Get(inputs[0]).toScalar();
+        const c10::Scalar end = module.Get(inputs[1]).toScalar();
+        const c10::Scalar step = module.Get(inputs[2]).toScalar();
+        const c10::ScalarType dtype = module.Get(inputs[3]).toScalarType();
+        at::Tensor tensor = ::torch::arange(start, end, step, dtype);
+        layer_desc->weights = ToFwdWeights(tensor);
+        layer_desc->dimensions = DimsOf(tensor);
+      }
+    } else if (node->kind() == c10::aten::zeros) {
+      input_values.push_back(nullptr);
+      auto size = module.Get(inputs[0]).toIntListRef();
+      at::Tensor tensor = torch::zeros(size);
       layer_desc->weights = ToFwdWeights(tensor);
       layer_desc->dimensions = DimsOf(tensor);
     }

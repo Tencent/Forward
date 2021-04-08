@@ -200,6 +200,16 @@ TEST(TestTorchNodes131, Expand) {
   TestTorchInference(model_path, input_map, "float32");
 }
 
+TEST(TestTorchNodes131, Gelu) {
+  const auto model_path = std::string(torch_root_dir) + "nodes131/gelu.pth";
+  const auto input = torch::randn({1, 3, 24, 24}, device);
+
+  std::unordered_map<std::string, c10::IValue> input_map;
+  input_map["input"] = input;
+
+  TestTorchInference(model_path, input_map, "float32", 1e-2);
+}
+
 TEST(TestTorchNodes131, Pooling2d) {
   const auto model_path = std::string(torch_root_dir) + "nodes131/pooling_2d.pth";
   const auto x = ::torch::randn({1, 23, 54, 96}, device);

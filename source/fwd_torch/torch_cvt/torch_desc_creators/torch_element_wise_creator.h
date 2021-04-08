@@ -35,9 +35,7 @@
 
 FWD_TORCH_NAMESPACE_BEGIN
 
-/**
- * \brief ElementWise 层描述创建器
- */
+// ElementWise Description Creator
 template <>
 class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
  public:
@@ -51,53 +49,32 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
     LOG(INFO) << "TrtElementWiseDesc::Create";
 
     const auto inputs = node->inputs();
+    const auto kind = node->kind();
     T_CHECK_GE(inputs.size(), 2);
     // Input 0: Tensor input0
     // Input 1: Tensor input1
     // Input 2: Scalar alpha, add, add_, sub, rsub
 
-    auto layer_desc = std::make_shared<TrtElementWiseDesc>();
-
-    const auto kind = node->kind();
-
     // op = rsub 读入顺序为 inputs[1], inputs[0]; 否则为inputs[0], inputs[1]
     const bool isRSub = (kind == c10::aten::rsub);
 
-    // 两个输入都可能从NumToTensor()/常数得到，若是则需要单独储存
+    auto layer_desc = std::make_shared<TrtElementWiseDesc>();
+    // Inputs can be constant
     for (int i = 0; i < 2; i++) {
-      if (inputs[i ^ isRSub]->node()->kind() == c10::prim::GetAttr) {
-        layer_desc->inputs[i].inUse = true;
-        T_CHECK(module.Get(inputs[i ^ isRSub]).isTensor());
-        auto tensor = module.Get(inputs[i ^ isRSub]).toTensor();
-        layer_desc->inputs[i].data = ToFwdWeights(tensor);
-        layer_desc->inputs[i].dim = DimsOf(tensor);
-      } else if (inputs[i ^ isRSub]->node()->kind() == c10::prim::Constant) {
-        layer_desc->inputs[i].inUse = true;
-        const auto& input = module.Get(inputs[i ^ isRSub]);
-        if (input.isTensor()) {
-          layer_desc->inputs[i].data = ToFwdWeights(input.toTensor());
-          layer_desc->inputs[i].dim = DimsOf(input.toTensor());
-        } else if (input.isInt()) {
-          layer_desc->inputs[i].data = ToFwdWeights(input.toInt());
-          layer_desc->inputs[i].dim = {1, 1};
-        } else if (input.isDouble()) {
-          layer_desc->inputs[i].data = ToFwdWeights(input.toDouble());
-          layer_desc->inputs[i].dim = {1, 1};
-        } else {
-          LOG(ERROR) << "Input " << i << "'s Type " << input.type()->str() << " Not Supported yet.";
-          LOG(ERROR) << "Create Desc Failed.";
-          T_CHECK(false);
-        }
+      auto iv = inputs[i ^ isRSub];
+      if (iv->node()->kind() == c10::prim::GetAttr || iv->node()->kind() == c10::prim::Constant) {
+        if (!CreateConstantInput(module, iv, layer_desc->inputs[i])) return {};
       } else {
-        input_values.push_back(inputs[i ^ isRSub]);
+        input_values.push_back(iv);
       }
     }
 
     // Tensor op Scalar 时，可能会出现alpha != 1, 系数与Scalar相乘
-    int alpha = inputs.size() > 2 ? module.Get(inputs[2]).toInt() : 1;
+    const float alpha = inputs.size() > 2 ? module.Get(inputs[2]).toInt() : 1;
     if (alpha != 1) {
-      float value = *(reinterpret_cast<const float*>(layer_desc->inputs[1 ^ isRSub].data.Data()));
-      layer_desc->inputs[1 ^ isRSub].data = torch_::ToFwdWeights(value * alpha);
+      auto& static_input = layer_desc->inputs[1 ^ isRSub].data;
+      const float value = *(reinterpret_cast<const float*>(static_input.Data()));
+      static_input = ToFwdWeights(value * alpha);
     }
 
     layer_desc->operation = NK2EWP_MAPPING.find(kind)->second;
@@ -106,6 +83,26 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
   }
 
  private:
+  bool CreateConstantInput(const TorchModule& module, const torch::jit::Value* iv,
+                           ConstantInput& c_input) const {
+    const auto& input = module.Get(iv);
+    at::Tensor tensor = torch::ones(1);
+    if (input.isTensor()) {
+      tensor = input.toTensor();
+    } else if (input.isScalar()) {
+      tensor = input.toScalar() * tensor;
+    } else {
+      LOG(ERROR) << "Create ConstantInput : Input Type " << input.type()->str()
+                 << " Not Supported yet.";
+      LOG(ERROR) << "Create Desc Failed.";
+      return false;
+    }
+    c_input.inUse = true;
+    c_input.data = ToFwdWeights(tensor);
+    c_input.dim = DimsOf(tensor);
+    return true;
+  }
+
   const std::unordered_map<c10::Symbol, nvinfer1::ElementWiseOperation> NK2EWP_MAPPING = {
       {c10::aten::add, nvinfer1::ElementWiseOperation::kSUM},             // 0
       {c10::aten::add_, nvinfer1::ElementWiseOperation::kSUM},            // 0

@@ -45,72 +45,41 @@ class TLayerCreator<TrtElementWiseDesc> : public ILayerCreator {
     const auto element_wise_desc = dynamic_cast<const TrtElementWiseDesc*>(layer_desc);
     T_CHECK(element_wise_desc);
 
-    nvinfer1::ITensor* input0{nullptr};
-    nvinfer1::ITensor* input1{nullptr};
+    nvinfer1::ITensor* inputs[2];
 
-    // 两个输入都是正常的ITensor*
-    if (input_tensors.size() == 2) {
-      input0 = input_tensors[0];
-      input1 = input_tensors[1];
-    } else if (input_tensors.size() == 1) {
-      // 输入中的一个是常量
-      if (element_wise_desc->inputs[0].inUse) {
-        input1 = input_tensors[0];
+    int max_dims = 0;
+    int input_id = 0;
+    for (int i = 0; i < 2; ++i) {
+      inputs[i] = element_wise_desc->inputs[i].inUse ? nullptr : input_tensors[input_id++];
+      const int nbdims = element_wise_desc->inputs[i].inUse ? 0 : inputs[i]->getDimensions().nbDims;
+      max_dims = std::max(max_dims, nbdims);
+    }
 
-        const auto input0_layer =
-            network->addConstant(TrtUtils::BroadcastDims(element_wise_desc->inputs[0].dim,
-                                                         input1->getDimensions().nbDims),
-                                 nvinfer1::Weights(element_wise_desc->inputs[0].data));
-        if (input0_layer == nullptr) {
+    for (int i = 0; i < 2; ++i) {
+      if (element_wise_desc->inputs[i].inUse) {
+        auto& static_in = element_wise_desc->inputs[i];
+
+        const auto c_layer =
+            network->addConstant(TrtUtils::BroadcastDims(static_in.dim, max_dims), static_in.data);
+        if (c_layer == nullptr) {
           LOG(ERROR) << "Create Network: Fail to create [element "
                         "wise::constant::0] layer";
           return {};
         }
-        input0 = input0_layer->getOutput(0);
-      } else {
-        input0 = input_tensors[0];
-
-        const auto input1_layer =
-            network->addConstant(TrtUtils::BroadcastDims(element_wise_desc->inputs[1].dim,
-                                                         input0->getDimensions().nbDims),
-                                 nvinfer1::Weights(element_wise_desc->inputs[1].data));
-
-        if (input1_layer == nullptr) {
-          LOG(ERROR) << "Create Network: Fail to create [element "
-                        "wise::constant::1] layer";
-          return {};
-        }
-        input1 = input1_layer->getOutput(0);
+        inputs[i] = c_layer->getOutput(0);
       }
-    } else {
-      // 两个常量的情况
-      auto broadcast_nbDims =
-          element_wise_desc->inputs[0].dim.nbDims > element_wise_desc->inputs[1].dim.nbDims
-              ? element_wise_desc->inputs[0].dim.nbDims
-              : element_wise_desc->inputs[1].dim.nbDims;
-
-      const auto input0_layer = network->addConstant(
-          TrtUtils::BroadcastDims(element_wise_desc->inputs[0].dim, broadcast_nbDims),
-          nvinfer1::Weights(element_wise_desc->inputs[0].data));
-
-      const auto input1_layer = network->addConstant(
-          TrtUtils::BroadcastDims(element_wise_desc->inputs[1].dim, broadcast_nbDims),
-          nvinfer1::Weights(element_wise_desc->inputs[1].data));
-
-      input0 = input0_layer->getOutput(0);
-      input1 = input1_layer->getOutput(0);
     }
 
     // 同步两个向量的维度数量 (目前只用于fp_model)
-    if (input0->getDimensions().nbDims > input1->getDimensions().nbDims) {
-      auto reshape_input1 = network->addShuffle(*input1);
+    if (inputs[0]->getDimensions().nbDims > inputs[1]->getDimensions().nbDims) {
+      auto reshape_input1 = network->addShuffle(*inputs[1]);
       reshape_input1->setReshapeDimensions(
-          TrtUtils::BroadcastDims(input1->getDimensions(), input0->getDimensions().nbDims));
-      input1 = reshape_input1->getOutput(0);
+          TrtUtils::BroadcastDims(inputs[1]->getDimensions(), inputs[0]->getDimensions().nbDims));
+      inputs[1] = reshape_input1->getOutput(0);
     }
 
     nvinfer1::IElementWiseLayer* element_wise =
-        network->addElementWise(*input0, *input1, element_wise_desc->operation);
+        network->addElementWise(*inputs[0], *inputs[1], element_wise_desc->operation);
     if (!element_wise) {
       LOG(ERROR) << "Create Network: Fail to create [element wise] layer";
       return {};

@@ -328,33 +328,6 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     return att_ln_layer->getOutput(0);
   }
 
-  nvinfer1::ITensor* CreateGeluLayer(nvinfer1::INetworkDefinition* network,
-                                     nvinfer1::ITensor* input) {
-    auto POW = network->addConstant({5, 1, 1, 1, 1, 1}, {nvinfer1::DataType::kFLOAT, &f3_, 1});
-    auto MULTIPLY =
-        network->addConstant({5, 1, 1, 1, 1, 1}, {nvinfer1::DataType::kFLOAT, &f004_, 1});
-    auto SQRT = network->addConstant({5, 1, 1, 1, 1, 1}, {nvinfer1::DataType::kFLOAT, &f079_, 1});
-    auto ONE = network->addConstant({5, 1, 1, 1, 1, 1}, {nvinfer1::DataType::kFLOAT, &f1_, 1});
-    auto HALF = network->addConstant({5, 1, 1, 1, 1, 1}, {nvinfer1::DataType::kFLOAT, &f05_, 1});
-    auto X_pow =
-        network->addElementWise(*input, *POW->getOutput(0), nvinfer1::ElementWiseOperation::kPOW);
-    auto X_mul = network->addElementWise(*X_pow->getOutput(0), *MULTIPLY->getOutput(0),
-                                         nvinfer1::ElementWiseOperation::kPROD);
-    auto X_add =
-        network->addElementWise(*input, *X_mul->getOutput(0), nvinfer1::ElementWiseOperation::kSUM);
-    auto X_sqrt = network->addElementWise(*X_add->getOutput(0), *SQRT->getOutput(0),
-                                          nvinfer1::ElementWiseOperation::kPROD);
-    auto X_tanh = network->addActivation(*X_sqrt->getOutput(0), nvinfer1::ActivationType::kTANH);
-    auto X_one = network->addElementWise(*X_tanh->getOutput(0), *ONE->getOutput(0),
-                                         nvinfer1::ElementWiseOperation::kSUM);
-    auto CDF = network->addElementWise(*X_one->getOutput(0), *HALF->getOutput(0),
-                                       nvinfer1::ElementWiseOperation::kPROD);
-    auto gelu_layer =
-        network->addElementWise(*CDF->getOutput(0), *input, nvinfer1::ElementWiseOperation::kPROD);
-    TrtCommon::SetOutputRange(gelu_layer, MAX_GELU_VAL);
-    return gelu_layer->getOutput(0);
-  }
-
   nvinfer1::ITensor* CreateIntermediateActivation(const std::string& prefix,
                                                   const TrtBertDesc* bert_desc,
                                                   nvinfer1::INetworkDefinition* network,
@@ -395,27 +368,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
         // reluLayer->setName("relu");
         mid_act = relu_layer->getOutput(0);
       } else {
-        if (bert_desc->use_int8) {
-          mid_act = CreateGeluLayer(network, mid_out);
-        } else {
-          auto dtype = bert_desc->use_fp16 ? nvinfer1::DataType::kHALF : nvinfer1::DataType::kFLOAT;
-
-          nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-              bert::FWD_GELU_PLUGIN_NAME, bert::FWD_GELU_PLUGIN_VERSION);
-          std::vector<nvinfer1::PluginField> field_data;
-          field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
-
-          const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
-                                                            field_data.data()};
-          const auto plugin_obj = TrtCommon::InferUniquePtr<nvinfer1::IPluginV2>(
-              creator->createPlugin("gelu", &plugin_data));
-
-          nvinfer1::IPluginV2Layer* gelu_layer = network->addPluginV2(&mid_out, 1, *plugin_obj);
-          T_CHECK(gelu_layer);
-
-          TrtCommon::SetOutputRange(gelu_layer, MAX_GELU_VAL);
-          mid_act = gelu_layer->getOutput(0);
-        }
+        mid_act = bert::CreateGeluLayer(network, mid_out, bert_desc->use_fp16, bert_desc->use_int8);
       }
 
       T_CHECK(mid_act);
@@ -575,13 +528,6 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
       {"LOUT_LN_BETA", "output_layernorm_beta"},
       {"LOUT_LN_GAMMA", "output_layernorm_gamma"},
   };
-  const int MAX_GELU_VAL{10};
-
-  const float f3_{3.0f};
-  const float f004_{0.044715f};
-  const float f079_{0.79788456080286535587989211986876f};
-  const float f1_{1.0f};
-  const float f05_{0.5f};
 };
 
 FWD_TRT_NAMESPACE_END

@@ -24,12 +24,74 @@
 #include <cstring>
 #include <vector>
 
+#include "trt_engine/trt_common/trt_common.h"
 #include "trt_engine/trt_network_crt/plugins/common/serialize.hpp"
 #include "trt_engine/trt_network_crt/plugins/gelu_plugin/gelu_plugin.h"
 
 using namespace nvinfer1;
 
 namespace bert {
+
+constexpr float f3_{3.0f};
+constexpr float f004_{0.044715f};
+constexpr float f079_{0.79788456080286535587989211986876f};
+constexpr float f1_{1.0f};
+constexpr float f05_{0.5f};
+
+nvinfer1::ITensor* CreateGeluLayer(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor* input,
+                                   bool use_fp16, bool use_int8) {
+  if (use_int8) {
+    return CreateGeluCombinattion(network, input);
+  }
+  return CreateGeluPlugin(network, input, use_fp16);
+}
+
+nvinfer1::ITensor* CreateGeluCombinattion(nvinfer1::INetworkDefinition* network,
+                                          nvinfer1::ITensor* input) {
+  const auto nbdims = input->getDimensions().nbDims;
+  const Dims ref_dims = {nbdims, 1, 1, 1, 1, 1, 1, 1, 1};
+  const nvinfer1::DataType dtype = nvinfer1::DataType::kFLOAT;
+
+  auto POW = network->addConstant(ref_dims, {dtype, &f3_, 1})->getOutput(0);
+  auto MULTIPLY = network->addConstant(ref_dims, {dtype, &f004_, 1})->getOutput(0);
+  auto SQRT = network->addConstant(ref_dims, {dtype, &f079_, 1})->getOutput(0);
+  auto ONE = network->addConstant(ref_dims, {dtype, &f1_, 1})->getOutput(0);
+  auto HALF = network->addConstant(ref_dims, {dtype, &f05_, 1})->getOutput(0);
+
+  using EleWiseOp = nvinfer1::ElementWiseOperation;
+
+  auto X_pow = network->addElementWise(*input, *POW, EleWiseOp::kPOW);
+  auto X_mul = network->addElementWise(*X_pow->getOutput(0), *MULTIPLY, EleWiseOp::kPROD);
+  auto X_add = network->addElementWise(*input, *X_mul->getOutput(0), EleWiseOp::kSUM);
+  auto X_sqrt = network->addElementWise(*X_add->getOutput(0), *SQRT, EleWiseOp::kPROD);
+  auto X_tanh = network->addActivation(*X_sqrt->getOutput(0), nvinfer1::ActivationType::kTANH);
+  auto X_one = network->addElementWise(*X_tanh->getOutput(0), *ONE, EleWiseOp::kSUM);
+  auto CDF = network->addElementWise(*X_one->getOutput(0), *HALF, EleWiseOp::kPROD);
+  auto gelu_layer = network->addElementWise(*CDF->getOutput(0), *input, EleWiseOp::kPROD);
+  fwd::TrtCommon::SetOutputRange(gelu_layer, MAX_GELU_VAL);
+  return gelu_layer->getOutput(0);
+}
+
+nvinfer1::ITensor* CreateGeluPlugin(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor* input,
+                                    bool use_fp16) {
+  auto dtype = use_fp16 ? nvinfer1::DataType::kHALF : nvinfer1::DataType::kFLOAT;
+
+  nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
+      bert::FWD_GELU_PLUGIN_NAME, bert::FWD_GELU_PLUGIN_VERSION);
+  std::vector<nvinfer1::PluginField> field_data;
+  field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
+
+  const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
+                                                    field_data.data()};
+  const auto plugin_obj = fwd::TrtCommon::InferUniquePtr<nvinfer1::IPluginV2>(
+      creator->createPlugin("gelu", &plugin_data));
+
+  nvinfer1::IPluginV2Layer* gelu_layer = network->addPluginV2(&input, 1, *plugin_obj);
+  T_CHECK(gelu_layer);
+
+  fwd::TrtCommon::SetOutputRange(gelu_layer, bert::MAX_GELU_VAL);
+  return gelu_layer->getOutput(0);
+}
 
 // Static class fields initialization
 PluginFieldCollection GeluPluginDynamicCreator::mFC{};
