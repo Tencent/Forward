@@ -46,7 +46,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
 
     return kind == c10::aten::flatten || kind == c10::aten::permute ||
            kind == c10::aten::transpose || kind == c10::aten::view || kind == c10::aten::reshape ||
-           kind == c10::aten::unsqueeze ||
+           kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_ ||
            kind == c10::aten::expand;  // TODO(Ao Li): 暂时在这里处理 expand
   }
 
@@ -69,7 +69,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       return CreateView(node, module, input_values);
     }
 
-    if (kind == c10::aten::unsqueeze) {
+    if (kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_) {
       return CreateUnSqueeze(node, module, input_values);
     }
 

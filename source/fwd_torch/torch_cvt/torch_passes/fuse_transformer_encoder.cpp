@@ -29,6 +29,7 @@
 #include <easylogging++.h>
 #include <torch/csrc/jit/passes/subgraph_rewrite.h>
 
+#include <common/common_macros.h>
 #include <string>
 
 static auto bert_registry = torch::RegisterOperators(
@@ -53,6 +54,7 @@ void torch::pass::FuseTransformerEncoder(std::shared_ptr<torch::jit::Graph>& gra
     LOG(WARNING) << "fwd::transformer_encoder has not been registered in torch.";
   }
 
+#if FWD_TORCH_VERSION < 170
   const std::string src_pattern = R"IR(
     graph(%input, %q_kernel, %q_bias, %k_kernel, %k_bias, %v_kernel, %v_bias,
             %attention_output_kernel, %attention_output_bias,
@@ -130,7 +132,7 @@ void torch::pass::FuseTransformerEncoder(std::shared_ptr<torch::jit::Graph>& gra
         %2424 : Tensor = aten::erf(%2423) 
         %2427 : Tensor = aten::mul(%2871, %gelu_mul) 
         %2430 : Tensor = aten::add(%2424, %gelu_add, %one) 
-        %input90.1 : Tensor = aten::mul(%2427, %2430) 
+        %input90.1 : Tensor = aten::mul(%2427, %2430)
         %2872 : Tensor = aten::linear(%input90.1, %output_kernel, %output_bias)
         %hidden_states18.1 : Tensor = aten::dropout(%2872, %drop_prop, %bool_f) 
         %input92.1 : Tensor = aten::add(%hidden_states18.1, %input_tensor8.1, %one) 
@@ -139,7 +141,6 @@ void torch::pass::FuseTransformerEncoder(std::shared_ptr<torch::jit::Graph>& gra
                             %out_layer_norm_gamma, %out_layer_norm_beta,
                             %epsilon, %bool_t) 
         return (%res))IR";
-
   const std::string dest_pattern = R"IR(
     graphgraph(%input, %q_kernel, %q_bias, %k_kernel, %k_bias, %v_kernel, %v_bias,
             %attention_output_kernel, %attention_output_bias,
@@ -160,6 +161,88 @@ void torch::pass::FuseTransformerEncoder(std::shared_ptr<torch::jit::Graph>& gra
                   %out_layer_norm_gamma, %out_layer_norm_beta,
                   %attention_mask, %num_heads, %head_size, %hidden_size)
         return (%res))IR";
+#else
+  const std::string src_pattern = R"IR(
+    graph(%input, %q_kernel, %q_bias, %k_kernel, %k_bias, %v_kernel, %v_bias,
+            %attention_output_kernel, %attention_output_bias,
+            %layer_norm_gamma, %layer_norm_beta,
+            %intermediate_kernel, %intermediate_bias,
+            %output_kernel, %output_bias,
+            %out_layer_norm_gamma, %out_layer_norm_beta,
+            %attention_mask, %num_heads, %head_size, %hidden_size,
+            %attention_div, %drop_prop,
+            %none, %zero, %one, %two, %three,
+            %minus_one, %minus_two, %bool_f, %bool_t, %epsilon):
+        
+        %1394 : Tensor = aten::linear(%input, %q_kernel, %q_bias)
+        %1395 : Tensor = aten::linear(%input, %k_kernel, %k_bias)
+        %1094 : int = aten::size(%1395, %zero) 
+        %1095 : int = aten::size(%1395, %one) 
+        %1096 : int[] = prim::ListConstruct(%1094, %1095, %num_heads, %head_size)
+        %x.1 : Tensor = aten::view(%1395, %1096) 
+        %1098 : int[] = prim::ListConstruct(%zero, %two, %one, %three)
+        %key_layer.1 : Tensor = aten::permute(%x.1, %1098) 
+        %1396 : Tensor = aten::linear(%input, %v_kernel, %v_bias)
+        %1105 : int = aten::size(%1396, %zero) 
+        %1106 : int = aten::size(%1396, %one) 
+        %1107 : int[] = prim::ListConstruct(%1105, %1106, %num_heads, %head_size)
+        %x0.1 : Tensor = aten::view(%1396, %1107) 
+        %1109 : int[] = prim::ListConstruct(%zero, %two, %one, %three)
+        %value_layer.1 : Tensor = aten::permute(%x0.1, %1109) 
+        %1111 : int = aten::size(%1394, %zero) 
+        %1112 : int = aten::size(%1394, %one) 
+        %1113 : int[] = prim::ListConstruct(%1111, %1112, %num_heads, %head_size)
+        %x1.1 : Tensor = aten::view(%1394, %1113) 
+        %1115 : int[] = prim::ListConstruct(%zero, %two, %one, %three)
+        %query_layer.1 : Tensor = aten::permute(%x1.1, %1115) 
+        %1117 : Tensor = aten::transpose(%key_layer.1, %minus_one, %minus_two) 
+        %attention_scores.1 : Tensor = aten::matmul(%query_layer.1, %1117) 
+        %attention_scores0.1 : Tensor = aten::div(%attention_scores.1, %attention_div) 
+        %input.2 : Tensor = aten::add(%attention_scores0.1, %attention_mask, %one) 
+        %input0.25 : Tensor = aten::softmax(%input.2, %minus_one, %none) 
+        %attention_probs.1 : Tensor = aten::dropout(%input0.25, %drop_prop, %bool_f) 
+        %context_layer.1 : Tensor = aten::matmul(%attention_probs.1, %value_layer.1) 
+        %1124 : int[] = prim::ListConstruct(%zero, %two, %one, %three)
+        %1125 : Tensor = aten::permute(%context_layer.1, %1124) 
+        %context_layer0.1 : Tensor = aten::contiguous(%1125, %zero) 
+        %1127 : int = aten::size(%context_layer0.1, %zero) 
+        %1128 : int = aten::size(%context_layer0.1, %one) 
+        %1129 : int[] = prim::ListConstruct(%1127, %1128, %hidden_size)
+        %input1.1 : Tensor = aten::view(%context_layer0.1, %1129) 
+        %1397 : Tensor = aten::linear(%input1.1, %attention_output_kernel, %attention_output_bias)
+        %hidden_states.3 : Tensor = aten::dropout(%1397, %drop_prop, %bool_f) 
+        %input.3 : Tensor = aten::add(%hidden_states.3, %input, %one) 
+        %1142 : int[] = prim::ListConstruct(%hidden_size)
+        %input_tensor.1 : Tensor = aten::layer_norm(%input.3, %1142, %layer_norm_gamma, %layer_norm_beta, %epsilon, %bool_t) 
+        %1398 : Tensor = aten::linear(%input_tensor.1, %intermediate_kernel, %intermediate_bias)
+        %input.4 : Tensor = aten::gelu(%1398) 
+        %1399 : Tensor = aten::linear(%input.4, %output_kernel, %output_bias)
+        %hidden_states.2 : Tensor = aten::dropout(%1399, %drop_prop, %bool_f) 
+        %input.51 : Tensor = aten::add(%hidden_states.2, %input_tensor.1, %one) 
+        %1162 : int[] = prim::ListConstruct(%hidden_size)
+        %res : Tensor = aten::layer_norm(%input.51, %1162, %out_layer_norm_gamma, %out_layer_norm_beta, %epsilon, %bool_t) 
+        return (%res))IR";
+  const std::string dest_pattern = R"IR(
+    graphgraph(%input, %q_kernel, %q_bias, %k_kernel, %k_bias, %v_kernel, %v_bias,
+            %attention_output_kernel, %attention_output_bias,
+            %layer_norm_gamma, %layer_norm_beta,
+            %intermediate_kernel, %intermediate_bias,
+            %output_kernel, %output_bias,
+            %out_layer_norm_gamma, %out_layer_norm_beta,
+            %attention_mask, %num_heads, %head_size, %hidden_size,
+            %attention_div, %drop_prop, 
+            %none, %zero, %one, %two, %three,
+            %minus_one, %minus_two, %bool_f, %bool_t, %epsilon):
+        %res = fwd::transformer_encoder(%input, %q_kernel, %q_bias,
+                  %k_kernel, %k_bias, %v_kernel, %v_bias,
+                  %attention_output_kernel, %attention_output_bias,
+                  %layer_norm_gamma, %layer_norm_beta,
+                  %intermediate_kernel, %intermediate_bias,
+                  %output_kernel, %output_bias,
+                  %out_layer_norm_gamma, %out_layer_norm_beta,
+                  %attention_mask, %num_heads, %head_size, %hidden_size)
+        return (%res))IR";
+#endif
 
   jit::SubgraphRewriter transformer_encoder_fuser;
   transformer_encoder_fuser.RegisterRewritePattern(src_pattern, dest_pattern);

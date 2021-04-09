@@ -110,9 +110,12 @@ inline void ExtractAllInputs(const JitValue* input, std::vector<const JitValue*>
  */
 inline nvinfer1::Dims DimsOf(const at::Tensor& tensor) {
   CHECK_LE(tensor.ndimension(), nvinfer1::Dims::MAX_DIMS);
-  nvinfer1::Dims dims{static_cast<int>(tensor.ndimension()), {}};
-  for (int64_t i = 0; i < tensor.ndimension(); ++i) {
-    dims.d[i] = static_cast<int>(tensor.size(i));
+  const auto sizes = tensor.sizes();
+  if (sizes.size() == 0 && tensor.numel() == 1) return {1, 1};
+
+  nvinfer1::Dims dims{static_cast<int>(sizes.size()), {}};
+  for (int64_t i = 0; i < sizes.size(); ++i) {
+    dims.d[i] = static_cast<int>(sizes[i]);
   }
   return dims;
 }
@@ -337,31 +340,23 @@ inline FwdWeights ToFwdWeights(const at::Tensor& tensor) {
 
   at::Tensor real_tensor = tensor.contiguous();
   // TODO(Ao Li): Long 作为 Int 来处理
-  if (real_tensor.scalar_type() == c10::ScalarType::Long) {
-    real_tensor = real_tensor.toType(c10::ScalarType::Int);
+  if (real_tensor.scalar_type() == c10::kLong || real_tensor.scalar_type() == c10::kInt ||
+      real_tensor.scalar_type() == c10::kDouble) {
+    real_tensor = real_tensor.toType(c10::kFloat);
   }
 
   int factor = 1;
 
   switch (real_tensor.scalar_type()) {
-    case c10::ScalarType::Float:
-      weights.SetType(nvinfer1::DataType::kFLOAT);
-      factor = 4;
-      break;
-    case c10::ScalarType::Half:
+    case c10::kHalf:
       weights.SetType(nvinfer1::DataType::kHALF);
       factor = 2;
       break;
-    case c10::ScalarType::Char:
+    case c10::kChar:
       weights.SetType(nvinfer1::DataType::kINT8);
       break;
-    case c10::ScalarType::Int:
-      weights.SetType(nvinfer1::DataType::kINT32);
-      factor = 4;
-      break;
-    case c10::ScalarType::Double:
+    case c10::kFloat:
       weights.SetType(nvinfer1::DataType::kFLOAT);
-      real_tensor = real_tensor.to(c10::kFloat);
       factor = 4;
       break;
     default:
@@ -371,6 +366,8 @@ inline FwdWeights ToFwdWeights(const at::Tensor& tensor) {
 
   weights.SetCount(real_tensor.numel());
   weights.SetDims(DimsOf(real_tensor));
+
+  assert(weights.Count() > 0 && weights.Dims().nbDims > 0);
 
   const char* data_ptr = static_cast<const char*>(real_tensor.data_ptr());
   weights.SetData(data_ptr, real_tensor.numel() * factor);

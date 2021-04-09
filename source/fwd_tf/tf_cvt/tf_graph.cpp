@@ -77,9 +77,13 @@ bool Graph::ExtractGraphInfos() {
       int is_output = 1;
       for (int i = 0; i < op.NumInputs(); ++i) {
         is_output &= (op.Input(i).OpType() != "IteratorGetNext");
+        is_output &= (op.OpType() != "IteratorGetNext");
       }
 
-      if (is_output) outputs_.push_back(op);
+      if (is_output) {
+        LOG(INFO) << "Output : " << op.Name();
+        outputs_.push_back(op);
+      }
     }
   }
   return true;

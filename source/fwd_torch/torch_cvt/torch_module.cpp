@@ -148,8 +148,6 @@ void TorchModule::PreProcessGraph() {
 
 #endif  // USE_TORCH_CUSTOM_OPS
   RemoveUnusedInputs();
-
-  // graph_->dump();
 }
 
 void TorchModule::PostProcessGraph() {

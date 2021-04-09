@@ -89,7 +89,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
     }
 
     auto child = node;
-    while (GetLayerIndex(child->inputs()[2]->node()) > 0) {
+    while (GetLayerIndex(child->inputs()[2]->node()) >= 0) {
       child = child->inputs()[0]->node();  // layer_norm -> add(intermediate)
       if (child->kind() != c10::aten::add && child->kind() != c10::aten::add_) return false;
       child = child->inputs()[1]->node();  // add(intermediate) -> layer_norm
@@ -97,7 +97,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
       child = child->inputs()[0]->node();  // layer_norm -> add(attention)
       if (child->kind() != c10::aten::add && child->kind() != c10::aten::add_) return false;
       child = child->inputs()[1]->node();  // add(attention) -> layer_norm
-      if (child->kind() != c10::aten::layer_norm) return false;
+      if (child->kind() != c10::aten::layer_norm) break;
     }
 
     if (!(child->kind() == c10::aten::dropout)) return false;
@@ -110,6 +110,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
   bool CreateBertByPattern(const JitNode* node, const TorchModule& module,
                            std::vector<const JitValue*>& input_values,
                            std::shared_ptr<TrtBertDesc> layer_desc) {
+    LOG(INFO) << "CreateBertByPattern";
     std::unordered_set<const JitNode*> checked_node;
     input_values.resize(3);
 
@@ -120,6 +121,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
   bool CreateBertByFuseOp(const JitNode* node, const TorchModule& module,
                           std::vector<const JitValue*>& input_values,
                           std::shared_ptr<TrtBertDesc> layer_desc) {
+    LOG(INFO) << "CreateBertByFuseOp: fwd::transformer_encoder";
     int num_layer = 0;
     const auto f_kind = c10::Symbol::fromQualString("fwd::transformer_encoder");
     auto child = node;
@@ -146,7 +148,7 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
   int GetLayerIndex(const JitNode* node) const {
     if (node->inputs().size() < 1) return -2;
     node = node->inputs()[0]->node();  // weight -> LayerNorm
-    if (node->kind() != c10::aten::layer_norm) return -2;
+    if (node->kind() != c10::aten::layer_norm && !node->kind().is_prim()) return -2;
     node = node->inputs()[0]->node();  // LayerNorm -> embedding / output
     const std::string attr_name = node->s(c10::Symbol::attr("name"));
     if (attr_name == "embeddings") return -1;
