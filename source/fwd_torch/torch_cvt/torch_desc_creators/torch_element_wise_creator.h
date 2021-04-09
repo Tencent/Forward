@@ -62,12 +62,14 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
     // Inputs can be constant
     for (int i = 0; i < 2; i++) {
       auto iv = inputs[i ^ isRSub];
-      if (iv->node()->kind() == c10::prim::GetAttr || iv->node()->kind() == c10::prim::Constant) {
+      if (iv->node()->kind().is_prim() || iv->node()->kind() == c10::aten::size) {
         if (!CreateConstantInput(module, iv, layer_desc->inputs[i])) return {};
       } else {
         input_values.push_back(iv);
       }
     }
+
+    if (input_values.empty()) input_values.push_back(nullptr);
 
     // Tensor op Scalar 时，可能会出现alpha != 1, 系数与Scalar相乘
     const float alpha = inputs.size() > 2 ? module.Get(inputs[2]).toInt() : 1;
