@@ -51,6 +51,8 @@ class TLayerCreator<TrtReduceDesc> : public ILayerCreator {
     uint32_t reduce_axes = reduce_desc->reduceAxes;
     if (reduce_axes == 0) {
       reduce_axes = (1 << input.getDimensions().nbDims) - 1;
+    } else if (reduce_axes >= (1 << input.getDimensions().nbDims)) {
+      reduce_axes = 1 << (input.getDimensions().nbDims - 1);
     }
 
     bool keep_dim = reduce_desc->keepDimensions;
