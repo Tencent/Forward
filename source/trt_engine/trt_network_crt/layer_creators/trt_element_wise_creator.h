@@ -47,11 +47,11 @@ class TLayerCreator<TrtElementWiseDesc> : public ILayerCreator {
 
     nvinfer1::ITensor* inputs[2];
 
-    int max_dims = 0;
+    int max_dims = 1;
     int input_id = 0;
     for (int i = 0; i < 2; ++i) {
       inputs[i] = element_wise_desc->inputs[i].inUse ? nullptr : input_tensors[input_id++];
-      const int nbdims = element_wise_desc->inputs[i].inUse ? 0 : inputs[i]->getDimensions().nbDims;
+      const int nbdims = element_wise_desc->inputs[i].inUse ? 1 : inputs[i]->getDimensions().nbDims;
       max_dims = std::max(max_dims, nbdims);
     }
 
