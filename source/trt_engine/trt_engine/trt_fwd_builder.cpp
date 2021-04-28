@@ -26,6 +26,9 @@
 
 #include "trt_engine/trt_engine/trt_fwd_builder.h"
 
+#include <NvInferVersion.h>
+#include <cuda_runtime_api.h>
+
 #include <algorithm>
 #include <iomanip>
 #include <map>
@@ -34,11 +37,10 @@
 #include <utility>
 #include <vector>
 
+#include "common/trt_utils.h"
 #include "trt_engine/trt_common/trt_logger.h"
 #include "trt_engine/trt_engine/trt_fwd_engine.h"
 #include "trt_engine/trt_network_crt/trt_network_creator.h"
-
-#include <NvInferVersion.h>
 
 FWD_NAMESPACE_BEGIN
 
@@ -124,9 +126,10 @@ std::shared_ptr<IForwardEngine> TrtForwardBuilder::Build(const TrtNetworkDesc& n
 
   meta_data_.SetOutputPositions(GetOutputOrder(engine, network.get()));
 
-  auto trt_fwd_engine = std::make_shared<TrtForwardEngine>(engine, meta_data_);
+  auto trt_fwd_engine = std::make_shared<TrtForwardEngine>();
+
   // 默认返回一个已经被初始化的 Engine
-  if (!trt_fwd_engine->InitEngine()) {
+  if (!trt_fwd_engine->Clone(engine, meta_data_) && !trt_fwd_engine->InitEngine()) {
     LOG(ERROR) << "Init Engine failed.";
     return nullptr;
   }
@@ -210,7 +213,7 @@ bool TrtForwardBuilder::SetDynamicProfile(nvinfer1::IBuilder* builder,
   // only use one optimization profile
   config->addOptimizationProfile(profile);
 
-#if NV_TENSORRT_MAJOR > 7 && NV_TENSORRT_MINOR > 1
+#if NV_TENSORRT_MAJOR >= 7 && NV_TENSORRT_MINOR >= 1
   config->setCalibrationProfile(profile);
 #endif
 
@@ -224,7 +227,6 @@ void TrtForwardBuilder::DumpNetwork(const nvinfer1::INetworkDefinition* network,
       {nvinfer1::DataType::kHALF, "FLOAT16"},
       {nvinfer1::DataType::kINT8, "INT8"},
       {nvinfer1::DataType::kINT32, "INT32"},
-      //        { nvinfer1::DataType::kBOOL, "BOOL"},
   };
 
   std::fstream file(filename, std::ios::out);

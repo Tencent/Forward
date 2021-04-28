@@ -84,8 +84,10 @@ inline std::string StringOf(nvinfer1::DataType type) {
       return "INT8";
     case nvinfer1::DataType::kINT32:
       return "INT32";
+#if NV_TENSORRT_MAJOR >= 7
     case nvinfer1::DataType::kBOOL:
       return "BOOL";
+#endif // NV_TENSORRT_MAJOR >= 7
     default:
       return "INVALID";
   }

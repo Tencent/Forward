@@ -113,8 +113,10 @@ class TLayerDescCreator<TrtUnaryDesc> : public ILayerDescCreator {
       {CSYM(aten::ceil_), nvinfer1::UnaryOperation::kCEIL},         // 17
       {c10::aten::floor, nvinfer1::UnaryOperation::kFLOOR},         // 18
       {CSYM(aten::floor_), nvinfer1::UnaryOperation::kFLOOR},       // 18
+#if NV_TENSORRT_MAJOR >= 7
       {CSYM(aten::erf), nvinfer1::UnaryOperation::kERF},            // 19
       {CSYM(aten::erf_), nvinfer1::UnaryOperation::kERF},           // 19
+#endif // NV_TENSORRT_MAJOR >= 7
   };
 
 #undef CSYM

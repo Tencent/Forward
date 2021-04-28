@@ -26,6 +26,8 @@
 
 #include "fwd_tf/tf_engine/tf_engine.h"
 
+#include <cuda_runtime.h>
+
 #include <memory>
 #include <string>
 #include <utility>

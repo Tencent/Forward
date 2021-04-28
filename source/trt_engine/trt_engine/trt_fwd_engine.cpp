@@ -26,22 +26,25 @@
 
 #include "trt_engine/trt_engine/trt_fwd_engine.h"
 
+#include <simple_profiler.h>
+
 #include <algorithm>
 #include <iomanip>
-#include <map>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "trt_engine/trt_common/trt_logger.h"
+#include "trt_engine/trt_common/trt_meta_data.h"
+#include "trt_engine/trt_common/trt_profiler.h"
+#include "trt_engine/trt_engine/trt_buffer_manager.h"
 #include "trt_engine/trt_network_crt/trt_network_creator.h"
 
 FWD_NAMESPACE_BEGIN
 
-TrtForwardEngine::TrtForwardEngine(nvinfer1::ICudaEngine* engine, const EngineMetaData& meta_data)
-    : meta_data_(meta_data) {
-  engine_.reset(engine);
+TrtForwardEngine::TrtForwardEngine() {
+  buffer_manager_ = std::make_shared<BufferManager>();
+  meta_data_ = std::make_shared<EngineMetaData>();
 #if TRT_INFER_ENABLE_PROFILING
   profiler_ = std::make_shared<utils::Profiler>("TrtForwardEngine");
   trt_profiler_.reset(new SimpleProfiler("TensoRT performance"));
@@ -105,13 +108,13 @@ bool TrtForwardEngine::Execute(const IOMappingVector& inputs, IOMappingVector& o
     return false;
   }
 
-  if (!buffer_manager_.PrepareInputBuffer(engine_.get(), context_.get(), inputs, buffers,
-                                          stream_)) {
+  if (!buffer_manager_->PrepareInputBuffer(engine_.get(), context_.get(), inputs, buffers,
+                                           stream_)) {
     return false;
   }
 
-  if (!buffer_manager_.PrepareOutputBuffer(engine_.get(), context_.get(), outputs, buffers,
-                                           meta_data_.OutputPositions())) {
+  if (!buffer_manager_->PrepareOutputBuffer(engine_.get(), context_.get(), outputs, buffers,
+                                            meta_data_->OutputPositions())) {
     return false;
   }
 
@@ -150,11 +153,17 @@ bool TrtForwardEngine::Load(const std::string& engine_file) {
 
   LOG(INFO) << "Loading engine " << engine_file;
 
-  if (!meta_data_.LoadMetaData(engine_file + ".meta")) return false;
+  if (!meta_data_->LoadMetaData(engine_file + ".meta")) return false;
 
   if (!LoadEngine(engine_file)) return false;
 
   return InitEngine();
+}
+
+bool TrtForwardEngine::Clone(nvinfer1::ICudaEngine* engine, const EngineMetaData& meta_data) {
+  engine_.reset(engine);
+  meta_data_ = std::make_shared<EngineMetaData>(meta_data);
+  return true;
 }
 
 bool TrtForwardEngine::Save(const std::string& engine_file) const {
@@ -163,7 +172,7 @@ bool TrtForwardEngine::Save(const std::string& engine_file) const {
     return false;
   }
 
-  if (!meta_data_.SaveMetaData(engine_file + ".meta")) {
+  if (!meta_data_->SaveMetaData(engine_file + ".meta")) {
     return false;
   }
 
@@ -182,7 +191,7 @@ bool TrtForwardEngine::Save(const std::string& engine_file) const {
 }
 
 bool TrtForwardEngine::CheckInputNums(std::vector<Tensor>& inputs) const {
-  const auto& unused_input_indices = meta_data_.UnusedInputIndices();
+  const auto& unused_input_indices = meta_data_->UnusedInputIndices();
   const auto& num_bindings = input_binding_indices_.size();
   const auto& num_unused = unused_input_indices.size();
   const auto& num_inputs = inputs.size();
@@ -222,7 +231,7 @@ std::vector<std::vector<int>> TrtForwardEngine::GetInputDims() const {
 std::vector<std::vector<int>> TrtForwardEngine::GetOutputDims() const {
   std::vector<std::vector<int>> output_dims;
 
-  for (auto& output_index : meta_data_.OutputPositions()) {
+  for (auto& output_index : meta_data_->OutputPositions()) {
     auto dims = engine_->getBindingDimensions(output_index);
     output_dims.push_back(TrtUtils::ToVector(dims));
   }
@@ -231,7 +240,7 @@ std::vector<std::vector<int>> TrtForwardEngine::GetOutputDims() const {
 }
 
 DataType TrtForwardEngine::GetOutputType(int index) const {
-  const auto& output_bindings = meta_data_.OutputPositions();
+  const auto& output_bindings = meta_data_->OutputPositions();
 
   if (index >= output_bindings.size()) {
     LOG(ERROR) << "Expect output index  < " << output_bindings.size() << ", but got " << index;
@@ -251,7 +260,7 @@ DataType TrtForwardEngine::GetOutputType(int index) const {
   return {};
 }
 
-InferMode TrtForwardEngine::GetMode() { return meta_data_.Mode(); }
+InferMode TrtForwardEngine::GetMode() { return meta_data_->Mode(); }
 
 bool TrtForwardEngine::CheckInputs(const IOMappingVector& inputs) const {
   // TODO(Paul Lu): 未考虑从名字拿到冗余输入的情况
@@ -310,13 +319,14 @@ bool TrtForwardEngine::InitEngine() {
     if (engine_->bindingIsInput(i)) input_binding_indices_.push_back(i);
   }
 
-  if (!SetBindingDimensions(meta_data_.MaxBatchSize())) {
+  if (!SetBindingDimensions(meta_data_->MaxBatchSize())) {
     LOG(ERROR) << "Failed to SetBindingDimensions: You must make sure that "
                   "allInputDimensionsSpecified.";
     return false;
   }
 
-  buffer_manager_.Initialize(context_.get(), input_binding_indices_, meta_data_.OutputPositions());
+  buffer_manager_->Initialize(context_.get(), input_binding_indices_,
+                              meta_data_->OutputPositions());
 
   // create cuda stream
   CUDA_CHECK(cudaStreamCreate(&stream_));

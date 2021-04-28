@@ -26,170 +26,107 @@
 
 #pragma once
 
+#if TRT_INFER_ENABLE_PROFILING
 #include <simple_profiler.h>
+#endif  // TRT_INFER_ENABLE_PROFILING
 
 #include <memory>
-#include <set>
 #include <string>
 #include <vector>
 
 #include "common/i_forward_api.h"
 #include "trt_engine/trt_common/trt_common.h"
-#include "trt_engine/trt_common/trt_meta_data.h"
-#include "trt_engine/trt_common/trt_profiler.h"
-#include "trt_engine/trt_engine/trt_buffer_manager.h"
 
 FWD_NAMESPACE_BEGIN
 
 struct TrtNetworkDesc;
+class BufferManager;
+class SimpleProfiler;
+class EngineMetaData;
 
-/**
- * \brief 推理引擎类
- */
+// ForwardEngine for TensorRT
 class TrtForwardEngine : public IForwardEngine {
  public:
-  /**
-   * \brief 构造函数
-   */
-  TrtForwardEngine(nvinfer1::ICudaEngine* engine = nullptr, const EngineMetaData& meta_data = {});
+  TrtForwardEngine();
 
-  /**
-   * \brief 析构函数
-   */
   ~TrtForwardEngine();
 
-  /**
-   * \brief 使用 device 指针参数的前向推理
-   * \param inputs 输入 tensor 的指针 vector，可以指向 host memory, 也可以指向
-   * device memory, 由 device_type 控制 \param outputs 作为返回值，接收输出
-   * tensor, 输出 tensor 指向 device memory, 内存由内部管理，调用者不可销毁
-   * \return 成功返回 true
-   */
+  // return true if forwarding succeed. The vector of outputs store results of forwarding. The data
+  // ptr in Tensors can be in host memory or device memory, which is determined by DeviceType.
+  // The memory of the outputs is managed internally, so the caller should NOT delete the data ptr
+  // in the Tensor of outputs.
   bool Forward(const std::vector<Tensor>& inputs, std::vector<Tensor>& outputs) override;
 
-  /**
-   * \brief 使用 device 指针参数的前向推理
-   * \param inputs key=输入名, value=输入值 的指针 map，可以指向 host memory,
-   * 也可以指向 device memory, 由 device_type 控制 \param outputs
-   * 作为返回值，接收输出 tensor, 输出 tensor 指向 device memory,
-   * 内存由内部管理，调用者不可销毁 \return 成功返回 true
-   */
+  // return true if forwarding with name succeed. The vector of outputs store results of forwarding.
+  // The data ptr in Tensors can be in host memory or device memory, which is determined by
+  // DeviceType. The memory of the outputs is managed internally, so the caller should NOT delete
+  // the data ptr in the Tensor of outputs.
   bool ForwardWithName(const IOMappingVector& inputs, IOMappingVector& outputs) override;
 
-  /**
-   * \brief 保存 TRT 推理引擎
-   * \param engine_file 文件路径
-   * \return 成功返回 True
-   */
+  // return true if engine_file is saved as engine_file.
   bool Save(const std::string& engine_file) const override;
 
-  /**
-   * \brief 加载 TRT 推理引擎
-   * \param engine_file 文件路径
-   * \return 成功返回 True
-   */
+  // return true if engine_file is loaded as engine_file.
   bool Load(const std::string& engine_file) override;
 
-  /**
-   * \brief 初始化 TRT 引擎
-   * \return 成功，返回 True
-   */
+  // Clone TrtForwardEngine with Engine and MetaData.
+  bool Clone(nvinfer1::ICudaEngine* engine, const EngineMetaData& meta_data);
+
+  // return true if TensorRT engine is initialized.
   bool InitEngine();
 
-  /**
-   * \brief 获取输入维度
-   * \return
-   */
+  // return dimensions of inputs of TensorRT engine.
   std::vector<std::vector<int>> GetInputDims() const;
 
-  /**
-   * \brief 获取输出维度
-   * \return
-   */
+  // return dimensions of outputs of TensorRT engine.
   std::vector<std::vector<int>> GetOutputDims() const;
 
-  /**
-   * \brief 获取输出数据类型
-   * \param index 输出索引
-   * \return 输出数据类型
-   */
+  // return DataType of the Output by the given output index.
   DataType GetOutputType(int index) const;
 
-  /**
-   * \brief 获取推理模式
-   * \return
-   */
+  // return InferMode of the Engine.
   InferMode GetMode() override;
 
  protected:
-  /**
-   * \brief 使用 device 指针参数的前向推理重载版本，不进行输入数量和维度的检查
-   * \param inputs 输入 tensor 的指针 vector，可以指向 host memory, 也可以指向
-   * device memory, 由 device_type 控制 \param outputs 作为返回值，接收输出
-   * tensor, 输出 tensor 指向 device memory, 内存由内部管理，调用者不可销毁
-   * \return 成功返回 true
-   */
+  // return true if TensorRT engine execute successfully. Before the execution, the BATCH of engine
+  // will be set as the BATCH of inputs. After inputs and outputs are all set on the device, the
+  // engine execute.
   bool Execute(const IOMappingVector& inputs, IOMappingVector& outputs);
 
-  /**
-   * \brief 从文件读取 Engine
-   * \param engine_file 文件路径
-   * \return 成功，返回 True
-   */
+  // return true if TensorRT engine is loaded from a saved engine_file.
   bool LoadEngine(const std::string& engine_file);
 
-  /**
-   * \brief 检查是否有 未被使用 的输入
-   * \param inputs 输入
-   * \return 成功返回 true
-   */
+  // Check if numbers of given inputs and numbers of required inputs in the Engine.
   bool CheckInputNums(std::vector<Tensor>& inputs) const;
 
-  /**
-   * \brief 检查输入维度是否匹配
-   * @param inputs 输入
-   * @return 成功返回 true
-   */
+  // Check DataTypes and Dimensions of given inputs
   bool CheckInputs(const IOMappingVector& inputs) const;
 
-  /**
-   * \brief 设置运行时的固定输入维度
-   * \param batch_size 批量大小
-   * \return
-   */
+  // Set the batch size of all inputs to the given batch_size.
   bool SetBindingDimensions(int batch_size);
 
-  /**
-   * \brief 输入的绑定编号
-   */
+  // binding indices of inputs in the Engine.
   std::vector<int> input_binding_indices_;
 
-  /**
-   * \brief TRT 引擎的元数据
-   */
-  EngineMetaData meta_data_;
+  // Meta data of the engine.
+  std::shared_ptr<EngineMetaData> meta_data_{nullptr};
 
-  /**
-   * \brief 输入输出的 Device 内存管理
-   */
-  BufferManager buffer_manager_;
+  // Buffer manager to prepare INPUTs and OUTPUTs for Engine execution.
+  std::shared_ptr<BufferManager> buffer_manager_{nullptr};
 
-  /**
-   * \brief TensorRT 推理引擎
-   */
+  // TensorRT engine.
   TrtCommon::InferUniquePtr<nvinfer1::ICudaEngine> engine_{nullptr};
 
-  /**
-   * \brief TensorRT 推理执行上下文
-   */
+  // ExecutionContext of the Engine.
   TrtCommon::InferUniquePtr<nvinfer1::IExecutionContext> context_{nullptr};
 
+  // Cuda stream for execution.
   cudaStream_t stream_{nullptr};
 
 #if TRT_INFER_ENABLE_PROFILING
   std::shared_ptr<utils::Profiler> profiler_{nullptr};
 
-  std::unique_ptr<SimpleProfiler> trt_profiler_;
+  std::shared_ptr<SimpleProfiler> trt_profiler_{nullptr};
 #endif  // TRT_INFER_ENABLE_PROFILING
 };
 

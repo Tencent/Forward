@@ -34,8 +34,6 @@
 #include "fwd_tf/tf_cvt/tf_desc_creators/i_tf_layer_creator.h"
 #include "fwd_tf/tf_cvt/tf_utils.h"
 
-#define TensorRT7
-
 FWD_TF_NAMESPACE_BEGIN
 // ElementWise Description Creator
 template <>
@@ -106,10 +104,10 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
       {"RealDiv", nvinfer1::ElementWiseOperation::kDIV},  // 5
       {"Pow", nvinfer1::ElementWiseOperation::kPOW},      // 6
       {"Square", nvinfer1::ElementWiseOperation::kPROD},  // 1
-#ifdef TensorRT7
+#if NV_TENSORRT_MAJOR >= 7
       {"Greater", nvinfer1::ElementWiseOperation::kGREATER},  // 12
       {"Less", nvinfer1::ElementWiseOperation::kLESS},        // 13
-#endif                                                        // ifdef TensorRT7
+#endif // NV_TENSORRT_MAJOR >= 7
   };
 };
 

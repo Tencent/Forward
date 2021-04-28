@@ -82,10 +82,12 @@ int CastPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
     case nvinfer1::DataType::kINT32:
       Cast<int, float>(static_cast<const int*>(inputs[0]), static_cast<float*>(outputs[0]), volume);
       break;
+#if NV_TENSORRT_MAJOR >= 7
     case nvinfer1::DataType::kBOOL:
       Cast<bool, float>(static_cast<const bool*>(inputs[0]), static_cast<float*>(outputs[0]),
                         volume);
       break;
+#endif // NV_TENSORRT_MAJOR >= 7
     default:
       break;
   }

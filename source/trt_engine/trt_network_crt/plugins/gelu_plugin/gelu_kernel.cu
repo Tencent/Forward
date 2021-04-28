@@ -123,7 +123,6 @@ void computeGeluBias(half* output, const half* input, const half* bias, const in
 
   CUDA_CHECK(cudaPeekAtLastError());
 }
-
 }  // namespace bert
 
 #endif  // CUDA_VERSION >= 10000
