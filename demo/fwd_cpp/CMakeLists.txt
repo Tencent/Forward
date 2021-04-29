@@ -27,8 +27,17 @@ cmake_minimum_required(VERSION 3.10.1 FATAL_ERROR)
 
 project(Forward LANGUAGES C CXX CUDA)
 
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 OLD)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
+# Enable Torch
+option(ENABLE_TORCH "Enable Torch" OFF)
+# Enable TensorFlow
+option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 
 # CUDA
 find_package(CUDA)
@@ -44,7 +53,19 @@ if(NOT TensorRT_FOUND) # use sources
 endif()
 
 include_directories(${TensorRT_INCLUDE_DIRS})
+# include headers
+include_directories(${PROJECT_SOURCE_DIR}/include)
+find_library(FWD_ENGINE trt_engine HINTS ${PROJECT_SOURCE_DIR}/libs)
 
+CUDA_ADD_EXECUTABLE(test_fwd_engine test_fwd_engine.cpp)
+target_link_libraries(test_fwd_engine
+        ${TensorRT_LIBRARIES}
+        ${FWD_ENGINE}
+        )
+CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_engine)
+set_property(TARGET test_fwd_engine PROPERTY CXX_STANDARD 14)
+
+if (ENABLE_TORCH)
 # libtorch
 find_package(Torch)
 if(NOT TORCH_FOUND)
@@ -55,17 +76,35 @@ if(NOT TORCH_FOUND)
           or -DTORCH_CMAKE_PATH=/usr/local/share/cmake")
 endif()
 
-CUDA_ADD_EXECUTABLE(test_fwd test_fwd.cpp)
-
-find_library(FWD_LIBRARIES NAMES fwd_torch PATHS "${PROJECT_SOURCE_DIR}/libs")
-message("FWD_LIBRARIES = ${FWD_LIBRARIES}")
-
-target_link_libraries(test_fwd
-        ${FWD_LIBRARIES}
+CUDA_ADD_EXECUTABLE(test_fwd_torch test_fwd_torch.cpp)
+find_library(FWD_TORCH fwd_torch HINTS ${PROJECT_SOURCE_DIR}/libs)
+target_link_libraries(test_fwd_torch
+        ${FWD_TORCH}
         ${TensorRT_LIBRARIES}
         ${TORCH_LIBRARIES}
         )
+CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_torch)
+set_property(TARGET test_fwd_torch PROPERTY CXX_STANDARD 14)
+endif(ENABLE_TORCH)
 
-CUDA_ADD_CUBLAS_TO_TARGET(test_fwd)
+if (ENABLE_TENSORFLOW)
+if (NOT Tensorflow_ROOT)
+  set(Tensorflow_ROOT ${PROJECT_SOURCE_DIR}/tensorflow) 
+endif()
+message(STATUS "Tensorflow_ROOT = ${Tensorflow_ROOT}")
+#tensorflow
+include_directories(${Tensorflow_ROOT}/include)
+find_library(TF_LIBRARY tensorflow HINTS ${Tensorflow_ROOT}/lib)
 
-set_property(TARGET test_fwd PROPERTY CXX_STANDARD 14)
+CUDA_ADD_EXECUTABLE(test_fwd_tf test_fwd_tf.cpp)
+find_library(FWD_TF fwd_tf HINTS ${PROJECT_SOURCE_DIR}/libs)
+target_link_libraries(test_fwd_tf
+        ${TF_LIBRARY}
+        ${FWD_TF}
+        ${TensorRT_LIBRARIES}
+        )
+CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_tf)
+set_property(TARGET test_fwd_tf PROPERTY CXX_STANDARD 14)
+endif(ENABLE_TENSORFLOW)
+
+

@@ -1,11 +1,15 @@
-if [ ! -d "build" ]
-then
+rm -rf build
 mkdir build
-fi
+
+ENABLE_TORCH=ON
+ENABLE_TENSORFLOW=ON
+
+TensorRT_ROOT=/path/to/TensorRT
+LibTorch=/path/to/libtorch
+LibTensorflow=/path/to/tensorflow
 
 cd build
 make clean
-cmake .. -DTensorRT_ROOT=/path/to/TensorRT-7.2.1.6 -DCMAKE_PREFIX_PATH=/path/to/libtorch
+cmake .. -DENABLE_TORCH=$ENABLE_TORCH -DENABLE_TENSORFLOW=$ENABLE_TENSORFLOW -DTensorRT_ROOT=$TensorRT_ROOT -DCMAKE_PREFIX_PATH=$LibTorch -DTensorflow_ROOT=$LibTensorflow
 
 make -j
-
