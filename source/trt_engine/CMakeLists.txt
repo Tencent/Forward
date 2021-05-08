@@ -93,6 +93,8 @@ if (MSVC)
 	CUDA_ADD_CUBLAS_TO_TARGET(trt_engine)
 endif (MSVC)
 
+set_target_properties(trt_engine PROPERTIES CUDA_ARCHITECTURES "${GPU_ARCHS}")
+
 set_target_properties(trt_engine PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 set_property(TARGET trt_engine PROPERTY CXX_STANDARD 14)
