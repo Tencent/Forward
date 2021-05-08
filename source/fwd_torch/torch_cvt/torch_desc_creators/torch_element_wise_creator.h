@@ -106,22 +106,22 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
   }
 
   const std::unordered_map<c10::Symbol, nvinfer1::ElementWiseOperation> NK2EWP_MAPPING = {
-      {c10::aten::add, nvinfer1::ElementWiseOperation::kSUM},             // 0
-      {c10::aten::add_, nvinfer1::ElementWiseOperation::kSUM},            // 0
-      {c10::aten::mul, nvinfer1::ElementWiseOperation::kPROD},            // 1
-      {c10::aten::mul_, nvinfer1::ElementWiseOperation::kPROD},           // 1
-      {c10::aten::sub, nvinfer1::ElementWiseOperation::kSUB},             // 4
-      {c10::aten::sub_, nvinfer1::ElementWiseOperation::kSUB},            // 4
-      {c10::aten::rsub, nvinfer1::ElementWiseOperation::kSUB},            // 4
-      {c10::aten::div, nvinfer1::ElementWiseOperation::kDIV},             // 5
-      {c10::aten::div_, nvinfer1::ElementWiseOperation::kDIV},            // 5
-      {c10::aten::pow, nvinfer1::ElementWiseOperation::kPOW},             // 6
-      {c10::aten::floordiv, nvinfer1::ElementWiseOperation::kFLOOR_DIV},  // 7
+    {c10::aten::add, nvinfer1::ElementWiseOperation::kSUM},             // 0
+    {c10::aten::add_, nvinfer1::ElementWiseOperation::kSUM},            // 0
+    {c10::aten::mul, nvinfer1::ElementWiseOperation::kPROD},            // 1
+    {c10::aten::mul_, nvinfer1::ElementWiseOperation::kPROD},           // 1
+    {c10::aten::sub, nvinfer1::ElementWiseOperation::kSUB},             // 4
+    {c10::aten::sub_, nvinfer1::ElementWiseOperation::kSUB},            // 4
+    {c10::aten::rsub, nvinfer1::ElementWiseOperation::kSUB},            // 4
+    {c10::aten::div, nvinfer1::ElementWiseOperation::kDIV},             // 5
+    {c10::aten::div_, nvinfer1::ElementWiseOperation::kDIV},            // 5
+    {c10::aten::pow, nvinfer1::ElementWiseOperation::kPOW},             // 6
+    {c10::aten::floordiv, nvinfer1::ElementWiseOperation::kFLOOR_DIV},  // 7
 #if NV_TENSORRT_MAJOR >= 7
-      {c10::aten::eq, nvinfer1::ElementWiseOperation::kEQUAL},            // 11
-      {c10::aten::gt, nvinfer1::ElementWiseOperation::kGREATER},          // 12
-      {c10::aten::lt, nvinfer1::ElementWiseOperation::kLESS},             // 13
-#endif // NV_TENSORRT_MAJOR >= 7
+    {c10::aten::eq, nvinfer1::ElementWiseOperation::kEQUAL},    // 11
+    {c10::aten::gt, nvinfer1::ElementWiseOperation::kGREATER},  // 12
+    {c10::aten::lt, nvinfer1::ElementWiseOperation::kLESS},     // 13
+#endif                                                          // NV_TENSORRT_MAJOR >= 7
   };
 };
 

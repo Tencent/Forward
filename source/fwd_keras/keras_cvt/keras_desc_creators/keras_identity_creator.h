@@ -26,117 +26,35 @@
 
 #pragma once
 
-#include <NvInfer.h>
-
-#include <functional>
 #include <memory>
-#include <numeric>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "common/fwd_common.h"
+#include "fwd_keras/keras_cvt/keras_desc_creators/i_keras_layer_creator.h"
 
-#undef max
-#undef min
+FWD_KERAS_NAMESPACE_BEGIN
+/**
+ * \brief Noop 无操作层描述创建器
+ */
+template <>
+class TLayerDescCreator<TrtIdentityDesc> : public ILayerDescCreator {
+ public:
+  bool Check(const Layer& layer) override { return layer.Type() == "Dropout"; }
 
-FWD_NAMESPACE_BEGIN
+  std::shared_ptr<TrtLayerDesc> Create(const Layer& layer, const H5ModelReader& reader,
+                                       std::vector<std::string>& input_names) override {
+    LOG(INFO) << "TrtIdentityDesc::Create";
 
-constexpr static int WARP_SIZE = 32;
+    LOG(INFO) << layer.Type() << " as identity";
 
-namespace TrtCommon {
-inline unsigned int GetElementSize(nvinfer1::DataType t) {
-  switch (t) {
-    case nvinfer1::DataType::kINT32:
-      return 4;
-    case nvinfer1::DataType::kFLOAT:
-      return 4;
-    case nvinfer1::DataType::kHALF:
-      return 2;
-    case nvinfer1::DataType::kINT8:
-      return 1;
-  }
-  throw std::runtime_error("Invalid DataType.");
-}
+    input_names = layer.Inputs();
 
-inline fwd::DataType FwdDataType(nvinfer1::DataType type) {
-  switch (type) {
-    case nvinfer1::DataType::kINT32:
-      return fwd::DataType::INT32;
-    case nvinfer1::DataType::kFLOAT:
-      return fwd::DataType::FLOAT;
-    case nvinfer1::DataType::kHALF:
-      return fwd::DataType::HALF;
-    case nvinfer1::DataType::kINT8:
-      return fwd::DataType::INT8;
-    default:
-      return fwd::DataType::INVALID;
-  }
-}
+    auto layer_desc = std::make_shared<TrtIdentityDesc>();
 
-inline std::string StringOf(nvinfer1::DataType type) {
-  switch (type) {
-    case nvinfer1::DataType::kFLOAT:
-      return "FLOAT";
-    case nvinfer1::DataType::kHALF:
-      return "HALF";
-    case nvinfer1::DataType::kINT8:
-      return "INT8";
-    case nvinfer1::DataType::kINT32:
-      return "INT32";
-#if NV_TENSORRT_MAJOR >= 7
-    case nvinfer1::DataType::kBOOL:
-      return "BOOL";
-#endif  // NV_TENSORRT_MAJOR >= 7
-    default:
-      return "INVALID";
-  }
-}
+    layer_desc->copy = false;
 
-inline nvinfer1::DataType GetDataType(bool use_fp16, bool use_int8, bool is_calib_mode) {
-  nvinfer1::DataType dtype = nvinfer1::DataType::kFLOAT;
-  if (use_fp16) dtype = nvinfer1::DataType::kHALF;
-  if (use_int8 && !is_calib_mode) dtype = nvinfer1::DataType::kINT8;
-  return dtype;
-}
-//////////////////////////////////////////
-//                                      //
-//            Set TRT Network           //
-//                                      //
-//////////////////////////////////////////
-
-static void SetTensorName(nvinfer1::ITensor* tensor, const std::string& prefix,
-                          const std::string& name) {
-  tensor->setName((prefix + name).c_str());
-}
-
-static void SetOutputName(nvinfer1::ILayer* layer, const std::string& prefix,
-                          const std::string& name, int out_idx = 0) {
-  SetTensorName(layer->getOutput(out_idx), prefix, name);
-}
-
-static bool SetOutputRange(nvinfer1::ILayer* layer, float max_val, int out_idx = 0) {
-  return layer->getOutput(out_idx)->setDynamicRange(-max_val, max_val);
-}
-
-//////////////////////////////////////////
-//                                      //
-//             Smart Pointer            //
-//                                      //
-//////////////////////////////////////////
-
-struct InferDeleter {
-  template <typename T>
-  void operator()(T* obj) const {
-    if (obj) {
-      obj->destroy();
-    }
+    return layer_desc;
   }
 };
 
-template <typename T>
-using InferUniquePtr = std::unique_ptr<T, InferDeleter>;
-
-}  // namespace TrtCommon
-
-FWD_NAMESPACE_END
+FWD_KERAS_NAMESPACE_END

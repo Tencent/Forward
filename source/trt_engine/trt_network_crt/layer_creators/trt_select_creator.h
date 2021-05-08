@@ -76,10 +76,10 @@ class TLayerCreator<TrtSelectDesc> : public ILayerCreator {
     }
 
     return {select->getOutput(0)};
-#else // NV_TENSORRT_MAJOR < 7
+#else   // NV_TENSORRT_MAJOR < 7
     LOG(ERROR) << "Select Layer requires TENSORRT_VERSION >= 7.";
     return {};
-#endif // NV_TENSORRT_MAJOR >= 7
+#endif  // NV_TENSORRT_MAJOR >= 7
   }
 };
 

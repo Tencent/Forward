@@ -105,7 +105,7 @@ inline unsigned int getElementSize(nvinfer1::DataType t) {
       return 2;
 #if NV_TENSORRT_MAJOR >= 7
     case nvinfer1::DataType::kBOOL:
-#endif // NV_TENSORRT_MAJOR >= 7
+#endif  // NV_TENSORRT_MAJOR >= 7
     case nvinfer1::DataType::kINT8:
       return 1;
   }

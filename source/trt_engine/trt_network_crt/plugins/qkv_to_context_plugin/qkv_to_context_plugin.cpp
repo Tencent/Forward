@@ -320,7 +320,9 @@ nvinfer1::DataType QKVToContextPluginDynamic::getOutputDataType(
 }
 
 // IPluginV2 Methods
-const char* QKVToContextPluginDynamic::getPluginType() const { return FWD_QKV_TO_CONTEXT_PLUGIN_NAME; }
+const char* QKVToContextPluginDynamic::getPluginType() const {
+  return FWD_QKV_TO_CONTEXT_PLUGIN_NAME;
+}
 
 const char* QKVToContextPluginDynamic::getPluginVersion() const {
   return FWD_QKV_TO_CONTEXT_PLUGIN_VERSION;

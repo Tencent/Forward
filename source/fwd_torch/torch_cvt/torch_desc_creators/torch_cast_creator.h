@@ -62,13 +62,13 @@ class TLayerDescCreator<TrtCastDesc> : public ILayerDescCreator {
 
  private:
   const std::unordered_map<const char*, nvinfer1::DataType> ST2DT_MAPPING = {
-      {c10::toString(c10::ScalarType::Float), nvinfer1::DataType::kFLOAT},
-      {c10::toString(c10::ScalarType::Half), nvinfer1::DataType::kHALF},
-      {c10::toString(c10::ScalarType::QInt8), nvinfer1::DataType::kINT8},
-      {c10::toString(c10::ScalarType::Int), nvinfer1::DataType::kINT32},
+    {c10::toString(c10::ScalarType::Float), nvinfer1::DataType::kFLOAT},
+    {c10::toString(c10::ScalarType::Half), nvinfer1::DataType::kHALF},
+    {c10::toString(c10::ScalarType::QInt8), nvinfer1::DataType::kINT8},
+    {c10::toString(c10::ScalarType::Int), nvinfer1::DataType::kINT32},
 #if NV_TENSORRT_MAJOR >= 7
-      {c10::toString(c10::ScalarType::Bool), nvinfer1::DataType::kBOOL},
-#endif // NV_TENSORRT_MAJOR >= 7
+    {c10::toString(c10::ScalarType::Bool), nvinfer1::DataType::kBOOL},
+#endif  // NV_TENSORRT_MAJOR >= 7
   };
 };
 

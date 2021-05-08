@@ -90,7 +90,6 @@ TEST(TestTorchNodes131Fp16, PRelu) {
   TestTorchInference(model_path, input_map, "float16");
 }
 
-
 TEST(TestTorchNodes131Fp16, Gelu) {
   const auto model_path = std::string(torch_root_dir) + "nodes131/gelu.pth";
   const auto input = torch::randn({1, 3, 24, 24}, device).to(c10::kHalf);

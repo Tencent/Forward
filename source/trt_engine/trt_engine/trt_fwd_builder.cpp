@@ -116,11 +116,14 @@ std::shared_ptr<IForwardEngine> TrtForwardBuilder::Build(const TrtNetworkDesc& n
   meta_data_.SetMaxBatchSize(network_desc.batch_size);
   if (meta_data_.OptBatchSize() < 0) meta_data_.SetOptBatchSize(network_desc.batch_size);
 
-  DumpNetwork(network.get());
+  if (!DumpNetwork(network.get())) {
+    LOG(ERROR) << "DumpNetwork failed.";
+    return nullptr;
+  }
 
   auto engine = BuildEngine(builder.get(), network.get());
   if (!engine) {
-    LOG(ERROR) << "buildEngineWithConfig error";
+    LOG(ERROR) << "buildEngineWithConfig failed.";
     return nullptr;
   }
 
@@ -129,7 +132,7 @@ std::shared_ptr<IForwardEngine> TrtForwardBuilder::Build(const TrtNetworkDesc& n
   auto trt_fwd_engine = std::make_shared<TrtForwardEngine>();
 
   // 默认返回一个已经被初始化的 Engine
-  if (!trt_fwd_engine->Clone(engine, meta_data_) && !trt_fwd_engine->InitEngine()) {
+  if (!trt_fwd_engine->Clone(engine, meta_data_) || !trt_fwd_engine->InitEngine()) {
     LOG(ERROR) << "Init Engine failed.";
     return nullptr;
   }
@@ -220,7 +223,7 @@ bool TrtForwardBuilder::SetDynamicProfile(nvinfer1::IBuilder* builder,
   return true;
 }
 
-void TrtForwardBuilder::DumpNetwork(const nvinfer1::INetworkDefinition* network,
+bool TrtForwardBuilder::DumpNetwork(const nvinfer1::INetworkDefinition* network,
                                     const std::string& filename) {
   static std::map<nvinfer1::DataType, std::string> TYPE_MAP = {
       {nvinfer1::DataType::kFLOAT, "FLOAT32"},
@@ -264,6 +267,10 @@ void TrtForwardBuilder::DumpNetwork(const nvinfer1::INetworkDefinition* network,
       auto output = layer->getOutput(j);
       // RNNv2Layer has optional outputs.
       if (output) {
+        if (output->getDimensions().nbDims < 0) {
+          LOG(ERROR) << "Invalid layer output :" << layer->getName();
+          return false;
+        }
         output_shapes += TrtUtils::ShapeStrOf(output->getDimensions()) + ",";
         output_shapes += "{" + TYPE_MAP[output->getType()] + "},";
       }
@@ -283,6 +290,10 @@ void TrtForwardBuilder::DumpNetwork(const nvinfer1::INetworkDefinition* network,
     const auto input = network->getInput(i);
     file << std::setw(max_name_length) << input->getName() << " ";
     file << std::setw(24) << TYPE_MAP[input->getType()] << " ";
+    if (input->getDimensions().nbDims < 0) {
+      LOG(ERROR) << "Invalid layer output :" << input->getName();
+      return false;
+    }
     file << std::setw(24) << "[" << TrtUtils::ShapeStrOf(input->getDimensions()) << "]"
          << std::endl;
   }
@@ -291,12 +302,18 @@ void TrtForwardBuilder::DumpNetwork(const nvinfer1::INetworkDefinition* network,
     const auto output = network->getOutput(i);
     file << std::setw(max_name_length) << output->getName() << " ";
     file << std::setw(24) << TYPE_MAP[output->getType()] << " ";
+    if (output->getDimensions().nbDims < 0) {
+      LOG(ERROR) << "Invalid layer output :" << output->getName();
+      return false;
+    }
     file << std::setw(24) << "[" << TrtUtils::ShapeStrOf(output->getDimensions()) << "]"
          << std::endl;
   }
   file.flags(old_settings);
   file.precision(old_precision);
   file.close();
+
+  return true;
 }
 
 void TrtForwardBuilder::SetCalibrator(std::shared_ptr<nvinfer1::IInt8Calibrator> calibrator) {

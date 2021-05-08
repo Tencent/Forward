@@ -46,7 +46,7 @@ class TLayerDescCreator<TrtReduceDesc> : public ILayerDescCreator {
       const std::string op_name = layer.GetAttr<json>("node_def").at("op");
       return OT2RO_MAPPING.find(op_name) != OT2RO_MAPPING.end();
     }
-    return false;
+    return name == "GlobalAveragePooling2D";
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const Layer& layer, const H5ModelReader& reader,
@@ -55,25 +55,38 @@ class TLayerDescCreator<TrtReduceDesc> : public ILayerDescCreator {
 
     input_names = layer.Inputs();
 
-    const std::string layer_name = layer.Name();
-
-    const auto node_def = layer.GetAttr<json>("node_def");
-
-    const std::string op_name = node_def.at("op");
-    const bool keep_dims = node_def.at("attr").at("keep_dims").at("b");
-    const auto dims = layer.GetAttr<json>("constants").at("1");
-
     auto layer_desc = std::make_shared<TrtReduceDesc>();
 
-    layer_desc->keepDimensions = keep_dims;
-    layer_desc->operation = OT2RO_MAPPING.find(op_name)->second;
+    if (layer.Type() == "GlobalAveragePooling2D") {
+      // equivalent to Reduce as Mean at axis channel
+      const std::string data_format = layer.GetAttr<std::string>("data_format");
+      T_CHECK_EQ(data_format, "channels_last");
 
-    if (dims.is_number_integer()) {
-      layer_desc->reduceAxes |= (1 << TrtUtils::NHWC2NCHWDim(dims.get<int>()));
-    } else if (dims.is_array()) {
-      const std::vector<int> real_dims = dims;
-      for (auto dim : real_dims) {
+      layer_desc->keepDimensions = true;
+      layer_desc->operation = nvinfer1::ReduceOperation::kAVG;
+
+      const std::vector<int> reduce_dims{1, 2};
+      for (auto dim : reduce_dims) {
+        // input has 4 dimensions as default
         layer_desc->reduceAxes |= (1 << TrtUtils::NHWC2NCHWDim(dim));
+      }
+    } else {
+      const auto node_def = layer.GetAttr<json>("node_def");
+
+      const std::string op_name = node_def.at("op");
+      const bool keep_dims = node_def.at("attr").at("keep_dims").at("b");
+      const auto dims = layer.GetAttr<json>("constants").at("1");
+
+      layer_desc->keepDimensions = keep_dims;
+      layer_desc->operation = OT2RO_MAPPING.find(op_name)->second;
+
+      if (dims.is_number_integer()) {
+        layer_desc->reduceAxes |= (1 << TrtUtils::NHWC2NCHWDim(dims.get<int>()));
+      } else if (dims.is_array()) {
+        const std::vector<int> real_dims = dims;
+        for (auto dim : real_dims) {
+          layer_desc->reduceAxes |= (1 << TrtUtils::NHWC2NCHWDim(dim));
+        }
       }
     }
 

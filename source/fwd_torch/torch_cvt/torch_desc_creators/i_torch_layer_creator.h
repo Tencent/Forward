@@ -43,9 +43,7 @@ class TorchModule;
 #if FWD_TORCH_VERSION > 160
 inline std::vector<int64_t> ToIntVector(const c10::IValue& value) { return value.toIntVector(); }
 #else
-inline c10::IntArrayRef ToIntVector(const c10::IValue& value) {
-  return value.toIntListRef();
-}
+inline c10::IntArrayRef ToIntVector(const c10::IValue& value) { return value.toIntListRef(); }
 #endif
 
 /**

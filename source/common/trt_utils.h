@@ -193,6 +193,7 @@ static std::vector<DataType> ToVector(const nvinfer1::Dims& dims) {
 // vector to nvinfer1::Permutation
 static nvinfer1::Permutation ToPermutation(const std::vector<int>& dims) {
   nvinfer1::Permutation permutation;
+  memset(permutation.order, 0, nvinfer1::Dims::MAX_DIMS * sizeof(int));
   memcpy(permutation.order, dims.data(), dims.size() * sizeof(int));
   return permutation;
 }
@@ -200,6 +201,7 @@ static nvinfer1::Permutation ToPermutation(const std::vector<int>& dims) {
 // nvinfer1::Dims to nvinfer1::Permutation
 static nvinfer1::Permutation ToPermutation(const nvinfer1::Dims& dims) {
   nvinfer1::Permutation permutation;
+  memset(permutation.order, 0, nvinfer1::Dims::MAX_DIMS * sizeof(int));
   memcpy(permutation.order, dims.d, dims.nbDims * sizeof(int));
   return permutation;
 }

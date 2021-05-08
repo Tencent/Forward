@@ -120,7 +120,7 @@ class TrtForwardBuilder : public IForwardBuilder {
    * \param network 待输出的网络
    * \param filename 输出到的文件名
    */
-  static void DumpNetwork(const nvinfer1::INetworkDefinition* network,
+  static bool DumpNetwork(const nvinfer1::INetworkDefinition* network,
                           const std::string& filename = "network.txt");
 
   /**

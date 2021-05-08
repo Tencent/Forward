@@ -340,7 +340,9 @@ nvinfer1::DataType EmbLayerNormPluginDynamic::getOutputDataType(
 // IPluginV2 Methods
 const char* EmbLayerNormPluginDynamic::getPluginType() const { return FWD_EMB_LAYER_NORM_NAME; }
 
-const char* EmbLayerNormPluginDynamic::getPluginVersion() const { return FWD_EMB_LAYER_NORM_VERSION; }
+const char* EmbLayerNormPluginDynamic::getPluginVersion() const {
+  return FWD_EMB_LAYER_NORM_VERSION;
+}
 
 int EmbLayerNormPluginDynamic::getNbOutputs() const { return 2; }
 
@@ -409,7 +411,9 @@ EmbLayerNormPluginDynamicCreator::EmbLayerNormPluginDynamicCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* EmbLayerNormPluginDynamicCreator::getPluginName() const { return FWD_EMB_LAYER_NORM_NAME; }
+const char* EmbLayerNormPluginDynamicCreator::getPluginName() const {
+  return FWD_EMB_LAYER_NORM_NAME;
+}
 
 const char* EmbLayerNormPluginDynamicCreator::getPluginVersion() const {
   return FWD_EMB_LAYER_NORM_VERSION;

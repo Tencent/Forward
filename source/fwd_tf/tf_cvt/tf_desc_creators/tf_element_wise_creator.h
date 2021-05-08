@@ -97,17 +97,17 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
   }
 
   const std::unordered_map<std::string, nvinfer1::ElementWiseOperation> NK2EWP_MAPPING = {
-      {"Add", nvinfer1::ElementWiseOperation::kSUM},      // 0
-      {"AddV2", nvinfer1::ElementWiseOperation::kSUM},    // 0
-      {"Mul", nvinfer1::ElementWiseOperation::kPROD},     // 1
-      {"Sub", nvinfer1::ElementWiseOperation::kSUB},      // 4
-      {"RealDiv", nvinfer1::ElementWiseOperation::kDIV},  // 5
-      {"Pow", nvinfer1::ElementWiseOperation::kPOW},      // 6
-      {"Square", nvinfer1::ElementWiseOperation::kPROD},  // 1
+    {"Add", nvinfer1::ElementWiseOperation::kSUM},      // 0
+    {"AddV2", nvinfer1::ElementWiseOperation::kSUM},    // 0
+    {"Mul", nvinfer1::ElementWiseOperation::kPROD},     // 1
+    {"Sub", nvinfer1::ElementWiseOperation::kSUB},      // 4
+    {"RealDiv", nvinfer1::ElementWiseOperation::kDIV},  // 5
+    {"Pow", nvinfer1::ElementWiseOperation::kPOW},      // 6
+    {"Square", nvinfer1::ElementWiseOperation::kPROD},  // 1
 #if NV_TENSORRT_MAJOR >= 7
-      {"Greater", nvinfer1::ElementWiseOperation::kGREATER},  // 12
-      {"Less", nvinfer1::ElementWiseOperation::kLESS},        // 13
-#endif // NV_TENSORRT_MAJOR >= 7
+    {"Greater", nvinfer1::ElementWiseOperation::kGREATER},  // 12
+    {"Less", nvinfer1::ElementWiseOperation::kLESS},        // 13
+#endif                                                      // NV_TENSORRT_MAJOR >= 7
   };
 };
 

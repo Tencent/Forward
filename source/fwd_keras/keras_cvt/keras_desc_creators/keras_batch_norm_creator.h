@@ -53,7 +53,7 @@ class TLayerDescCreator<TrtNormalizationDesc> : public ILayerDescCreator {
     // config
     const std::string config_name = layer.GetAttr<std::string>("name");
     const std::string dtype = layer.GetAttr<std::string>("dtype");
-    const int axis = layer.GetAttr<std::vector<int>>("axis")[0];
+    const auto axis = *layer.GetAttr<json>("axis").begin();
     const float epsilon = layer.GetAttr<float>("epsilon");
     const bool center = layer.GetAttr<bool>("center");
     const bool scale = layer.GetAttr<bool>("scale");

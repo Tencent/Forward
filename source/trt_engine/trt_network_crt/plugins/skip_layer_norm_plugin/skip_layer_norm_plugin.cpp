@@ -272,7 +272,9 @@ nvinfer1::DataType SkipLayerNormPluginDynamic::getOutputDataType(
 // IPluginV2 Methods
 const char* SkipLayerNormPluginDynamic::getPluginType() const { return FWD_SKIP_LAYER_NORM_NAME; }
 
-const char* SkipLayerNormPluginDynamic::getPluginVersion() const { return FWD_SKIP_LAYER_NORM_VERSION; }
+const char* SkipLayerNormPluginDynamic::getPluginVersion() const {
+  return FWD_SKIP_LAYER_NORM_VERSION;
+}
 
 int SkipLayerNormPluginDynamic::getNbOutputs() const { return 1; }
 int SkipLayerNormPluginDynamic::initialize() {

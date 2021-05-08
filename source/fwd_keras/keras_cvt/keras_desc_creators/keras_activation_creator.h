@@ -50,13 +50,26 @@ class TLayerDescCreator<TrtActivationDesc> : public ILayerDescCreator {
     LOG(INFO) << "TrtActivationDesc::Create";
 
     input_names = layer.Inputs();
-
-    auto layer_desc = std::make_shared<TrtActivationDesc>();
-
     const std::string type = layer.GetAttr<std::string>("activation");
-    layer_desc->activationType = NK2AT_MAPPING.find(type)->second;
 
-    return layer_desc;
+    if (type == "softmax") {
+      auto layer_desc = std::make_shared<TrtSoftmaxDesc>();
+
+      // TODO(Ao Li): 目前只支持 NCHW softmax
+      // tensorflow softmax 默认在 -1 维度，对应到 NCHW 是第一个维度
+      layer_desc->axes = 1 << 1;
+      return layer_desc;
+    } else {
+      auto layer_desc = std::make_shared<TrtActivationDesc>();
+      auto ac_type = NK2AT_MAPPING.find(type);
+      if (ac_type == NK2AT_MAPPING.end()) {
+        LOG(ERROR) << "Unsupported activation type : " << type;
+        return nullptr;
+      }
+
+      layer_desc->activationType = NK2AT_MAPPING.find(type)->second;
+      return layer_desc;
+    }
   }
 
  private:

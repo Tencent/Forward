@@ -54,6 +54,7 @@ class TLayerCreator<TrtPoolingDesc> : public ILayerCreator {
     }
 
     pooling->setPaddingMode(pooling_desc->paddingMode);
+    // nbDims = 0 when no stride
     if (pooling_desc->stride.nbDims) {
       pooling->setStrideNd(pooling_desc->stride);
     }

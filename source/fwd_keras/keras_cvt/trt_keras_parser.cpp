@@ -38,6 +38,7 @@
 #include "keras_desc_creators/keras_dense_creator.h"
 #include "keras_desc_creators/keras_element_wise_creator.h"
 #include "keras_desc_creators/keras_gather_creator.h"
+#include "keras_desc_creators/keras_identity_creator.h"
 #include "keras_desc_creators/keras_noop_creator.h"
 #include "keras_desc_creators/keras_pad_creator.h"
 #include "keras_desc_creators/keras_pooling_creator.h"
@@ -76,6 +77,7 @@ Parser::Parser(InferMode mode) : mode_(mode) {
 
   RegisterCreator<TrtGatherDesc>();
   // 这种简单的模式就放在下面
+  RegisterCreator<TrtIdentityDesc>();
   RegisterCreator<TrtNoopDesc>();
 }
 
@@ -191,12 +193,7 @@ bool Parser::ParseOperaion(TrtLayerDesc* parent, const Layer& layer) {
   const auto layer_desc = layer_creator->Create(layer, model_reader_, input_values);
 
   if (layer_desc == nullptr || input_values.empty()) {
-    const auto name = "";  // keras_OperationName(op);
-#ifdef _MSC_VER
-    char text[256];
-    sprintf_s(text, 256, "Creating %s Desc failed! Please Check implementation and inputs.", name);
-    ::MessageBox(NULL, text, "Error", MB_OK | MB_ICONERROR);
-#endif  // _MSC_VER
+    const auto name = layer.Type();
     LOG(ERROR) << "Creating " << name << "Desc failed! Please Check implementation and inputs.";
     return false;
   }
