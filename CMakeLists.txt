@@ -93,6 +93,9 @@ set(CMAKE_CUDA_EXTENSIONS ON)
 
 # Cuda
 find_package(CUDA REQUIRED)
+if (${CUDA_VERSION_MAJOR} LESS 10)
+  message(FATAL_ERROR "Forward requires CUDA_VERSION_MAJOR >= 10, but the given is ${CUDA_VERSION_MAJOR}")
+endif()
 include_directories(${CUDA_INCLUDE_DIRS})
 
 set(CMAKE_CUDA_FLAGS
