@@ -1,7 +1,5 @@
 # Demo for using Forward-Python
 
-> 以 fwd_torch 为例
-
 1. 参考 [CMake-Build](../../doc/cn/usages/cmake_build_CN.md)，构建 Forward-Python 库。
 
 2. 拷贝 `build/bin` 目录下的 `forward.cpython.xxx*.so`(Linux) or `forward.xxx*.pyd`(Windows) 到 Python 的工作目录下。则目录组织结构如下:
@@ -9,7 +7,13 @@
 ```bash
 ---- workspace
    |
-   -- test_forward.py
+   -- test_forward_torch.py
+   |
+   -- test_forward_tf.py
+   |
+   -- softmax.pb
+   |
+   -- softmax.pt
    |
    -- forward.cpython.xxx*.so
 ```

@@ -38,7 +38,8 @@ if (ENABLE_TORCH)
 endif(ENABLE_TORCH)
 
 if (ENABLE_TENSORFLOW)
-    target_link_libraries(forward PUBLIC fwd_tf tensorflow)
+    message(STATUS "py_forward link to PyTensorflow libs : ${PY_TENSORFLOW_LIB}")
+    target_link_libraries(forward PUBLIC fwd_tf ${PY_TENSORFLOW_LIB})
 endif(ENABLE_TENSORFLOW)
 
 if (ENABLE_KERAS)

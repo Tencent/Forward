@@ -273,6 +273,20 @@ if(ENABLE_TENSORFLOW)
   include_directories(${TENSORFLOW_LIB_DIR}/include)
 
   add_definitions(-DENABLE_TENSORFLOW=1)
+  if (BUILD_PYTHON_LIB)
+    if(NOT PYTHON_EXECUTABLE)
+      message(STATUS "Do not detected PYTHON_EXECUTABLE, set it to python3")
+      set(PYTHON_EXECUTABLE python3)
+    endif(NOT PYTHON_EXECUTABLE)
+    execute_process(
+      COMMAND
+        ${PYTHON_EXECUTABLE} -c
+        "import tensorflow; import os; print(os.path.dirname(tensorflow.pywrap_tensorflow.__file__), end='')"
+      OUTPUT_VARIABLE TENSORFLOW_PYLIB_DIR)
+    
+    message(STATUC "TENSORFLOW_PYLIB_DIR = ${TENSORFLOW_PYLIB_DIR}")
+    find_library(PY_TENSORFLOW_LIB NAMES _pywrap_tensorflow_internal.so PATHS "${TENSORFLOW_PYLIB_DIR}" PATH_SUFFIXES "python")
+  endif()
 endif()
 
 if(ENABLE_KERAS)
