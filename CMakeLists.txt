@@ -291,8 +291,12 @@ if(ENABLE_TENSORFLOW)
         "import tensorflow; import os; print(os.path.dirname(tensorflow.pywrap_tensorflow.__file__), end='')"
       OUTPUT_VARIABLE TENSORFLOW_PYLIB_DIR)
     
-    message(STATUC "TENSORFLOW_PYLIB_DIR = ${TENSORFLOW_PYLIB_DIR}")
+    message(STATUS "TENSORFLOW_PYLIB_DIR = ${TENSORFLOW_PYLIB_DIR}")
     find_library(PY_TENSORFLOW_LIB NAMES _pywrap_tensorflow_internal.so PATHS "${TENSORFLOW_PYLIB_DIR}" PATH_SUFFIXES "python")
+    if (NOT PY_TENSORFLOW_LIB)
+      message(WARNING "_pywrap_tensorflow_internal.so NOT-FOUND in the python-packages! Use libtensorflow.so under the source/third_party/tensorflow/lib. In this case, 'import forward' cannot be used with 'import tensorflow' in the same time.")
+      set(PY_TENSORFLOW_LIB tensorflow)
+    endif()
   endif()
 endif()
 
