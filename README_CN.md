@@ -35,32 +35,35 @@ Forward 的环境依赖如下：
 - GCC >= 5.4.0, ld >= 2.26.1
 - (Pytorch) pytorch == 1.3.1 或 pytorch == 1.7.1
 - (Tensorflow) TensorFlow == 1.15.0 (linux 需额外下载【[Tensorflow 1.15.0](https://github.com/neargye-forks/tensorflow/releases)】，将解压出来的 so 拷贝至 source/third_party/tensorflow/lib 目录下)
-- (Keras) HDF 5
+- (Keras) HDF 5 (从 `source/third_party/hdf5` 源码构建)
 
 ### 项目构建
 
-使用 CMake 进行构建生成 Makefiles 或者 Visual Studio 项目。 根据使用目的，Forward 可构建成适用于不同框架的库, 如 Fwd-Torch, Fwd-Python-Torch, Fwd-Tf, Fwd-Python-Tf, Fwd-Keras, Fwd-Python-Keras. 构建目标由 [CMake 参数](doc/cn/usages/cmake_build_CN.md)配置, 例如, Fwd-Python-Tf 可如下配置.
-
-``` sh
-mkdir build
-cd build
-
-cmake ..  \
--DTensorRT_ROOT=/path/to/TensorRT \ 
--DENABLE_LOGGING=ON \  
--DENABLE_PROFILING=ON \  
--DENABLE_DYNAMIC_BATCH=ON \ 
--DENABLE_TORCH=OFF \  
--DENABLE_TENSORFLOW=ON \ 
--DENABLE_KERAS=OFF \ 
-
-make -j
-```
+使用 CMake 进行构建生成 Makefiles 或者 Visual Studio 项目。 根据使用目的，Forward 可构建成适用于不同框架的库, 如 Fwd-Torch, Fwd-Python-Torch, Fwd-Tf, Fwd-Python-Tf, Fwd-Keras, Fwd-Python-Keras. 构建目标由 [CMake 构建](doc/cn/usages/cmake_build_CN.md)配置
 
 #### CMake 参数配置
 
 - `TensorRT_ROOT` : TensorRT 安装路径
 - 更多参数配置可参考 [CMake 参数](doc/cn/usages/cmake_build_CN.md)
+
+#### Logging 日志
+
+Forward 使用 [easylogging++](https://github.com/amrayn/easyloggingpp) 作为日志功能, 并使用 `forward_log.conf` 作为日志配置文件. 
+
+- 如果 `forward_log.conf` 能在工作目录被找到, 则 Forward 将使用这个配置文件. (参考 [Using-configuration-file](https://github.com/amrayn/easyloggingpp#using-configuration-file)).
+> forward_log.conf
+```
+* GLOBAL:
+   FORMAT               =  "[%level] %datetime %fbase(%line): %msg"
+   FILENAME             =  "Forward.log"
+   ENABLED              =  true
+   TO_FILE              =  true
+   TO_STANDARD_OUTPUT   =  true
+   PERFORMANCE_TRACKING =  true
+   MAX_LOG_FILE_SIZE    =  2097152 ## 2MB - Comment starts with two hashes (##)
+   LOG_FLUSH_THRESHOLD  =  100 ## Flush after every 100 logs
+```
+- 如果 `forward_log.conf` 无法在工作目录被找到, Forward 将使用默认配置, 并将日志记录到 `logs/myeasylog.log`.
 
 ### 单元测试
 

@@ -29,23 +29,20 @@
 #include <string>
 #include <vector>
 
-#if ELPP_LOGGING_ENABLED
 INITIALIZE_EASYLOGGINGPP
-#endif  // ELPP_LOGGING_ENABLED
 
 FWD_NAMESPACE_BEGIN
 
 Logger::Logger(nvinfer1::ILogger::Severity level) : level_(level) {
-#if ELPP_LOGGING_ENABLED
   int argc = 1;
   const char* argv[] = {"Forward"};
   START_EASYLOGGINGPP(argc, argv);
-
-  el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Filename, "Forward_%datetime.log");
-  el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
-                                     "[%level] %datetime %fbase(%line): %msg");
-  el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
-#endif  // ELPP_LOGGING_ENABLED
+  // Load configuration from file
+  el::Configurations conf("forward_log.conf");
+  // Reconfigure single logger
+  el::Loggers::reconfigureLogger("default", conf);
+  // Actually reconfigure all loggers instead
+  el::Loggers::reconfigureAllLoggers(conf);
 }
 
 nvinfer1::ILogger& Logger::getTRTLogger() { return *this; }

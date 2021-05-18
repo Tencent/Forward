@@ -309,7 +309,7 @@ if(ENABLE_KERAS)
   include_directories(
     ${PROJECT_SOURCE_DIR}/source/third_party/json/single_include)
   # hdf5
-  find_package(HDF5)
+  # find_package(HDF5)
   if (HDF5_FOUND)
     message("Found HDF5 on system HDF5_INCLUDE_DIRS: " ${HDF5_INCLUDE_DIRS})
     include_directories(${HDF5_INCLUDE_DIRS})
