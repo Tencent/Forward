@@ -65,7 +65,9 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       op_inputs.push_back(input);
 
       // [N, H, W, C]
-      const std::vector<int> permutes = perm.GetConstantTensor().AsIntList();
+      auto const_permute = perm.GetConstantTensor();
+      T_CHECK(const_permute.Valid());
+      const std::vector<int> permutes = const_permute.AsIntList();
       T_CHECK_EQ(permutes.size(), 4);
 
       layer_desc->doFirstTrans = true;
@@ -77,23 +79,32 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       T_CHECK_EQ(op.NumInputs(), 2);
 
       // Input 0, kind = input
-      // Input 1, perm
+      // Input 1, shape
       const auto input = op.Input(0);
       const auto reshape = op.Input(1);
 
       // 将输入返回
       op_inputs.push_back(input);
-
       if (reshape.OpType() == "Shape") {
         std::vector<int64_t> dims;
         const auto tensor_to_get_shape = reshape.Input(0);
         dims.resize(tensor_to_get_shape.GetTensorNumDims());
         tensor_to_get_shape.GetTensorShape(dims.data(), dims.size());
-        layer_desc->reshapeDimensions = TrtUtils::ToDims(dims);
+        layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
+      } else if (reshape.OpType() == "Pack") {
+        std::vector<int> dims{0};
+        for (int i = 1; i < reshape.NumInputs(); ++i) {
+          auto reshape_dim = reshape.Input(i).GetConstantTensor();
+          T_CHECK(reshape_dim.Valid());
+          dims.push_back(reshape_dim.AsInt());
+        }
+        layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
       } else {
         std::vector<int> dims;
-        dims = reshape.GetConstantTensor().AsIntList();
-        layer_desc->reshapeDimensions = TrtUtils::ToDims(dims);
+        auto reshape_dims = reshape.GetConstantTensor();
+        T_CHECK(reshape_dims.Valid());
+        dims = reshape_dims.AsIntList();
+        layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
       }
 
       layer_desc->doFirstTrans = false;
@@ -111,7 +122,9 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       dims.nbDims += 1;
 
       // int expand_dim = GetConstantInt(graph, dim);
-      int expand_dim = dim.GetConstantTensor().AsInt();
+      auto const_dim = dim.GetConstantTensor();
+      T_CHECK(const_dim.Valid());
+      int expand_dim = const_dim.AsInt();
       if (expand_dim < 0) {
         expand_dim += dims.nbDims;
       }

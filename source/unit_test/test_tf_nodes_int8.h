@@ -34,20 +34,6 @@
 
 #include "unit_test/unit_test.h"
 
-TEST(TestTfNodesInt8, Softmax) {
-  const std::string filename = std::string(tf_root_dir) + "softmax.pb";
-
-  const int batch_size = 16;
-  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 12, 24, 3});
-
-  std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input_11"] = input.get();
-  const std::vector<std::string> output_names{"softmax/Softmax"};
-
-  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
-                  std::make_shared<TestBatchStream>(InputVolume({input})));
-}
-
 TEST(TestTfNodesInt8, Activation) {
   const std::string filename = std::string(tf_root_dir) + "activation.pb";
 
@@ -58,20 +44,6 @@ TEST(TestTfNodesInt8, Activation) {
   input_map["input"] = input.get();
   const std::vector<std::string> output_names{"activation/Sigmoid", "activation_1/Relu",
                                               "activation_2/Tanh", "activation_3/Elu"};
-
-  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
-                  std::make_shared<TestBatchStream>(InputVolume({input})));
-}
-
-TEST(TestTfNodesInt8, BatchNorm) {
-  const std::string filename = std::string(tf_root_dir) + "batch_norm.pb";
-
-  const int batch_size = 1;
-  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 24, 24, 3});
-
-  std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input_1"] = input.get();
-  const std::vector<std::string> output_names{"batch_normalization/FusedBatchNormV3"};
 
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(InputVolume({input})));
@@ -92,6 +64,35 @@ TEST(TestTfNodesInt8, Arithmetic) {
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(
                       InputVolume(std::vector<std::shared_ptr<TF_Tensor>>{input1, input2})));
+}
+
+TEST(TestTfNodesInt8, AvgPool) {
+  const std::string filename = std::string(tf_root_dir) + "average_pooling.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 29, 17, 3});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input"] = input.get();
+  const std::vector<std::string> output_names{"average_pooling2d/AvgPool",
+                                              "average_pooling2d_1/AvgPool"};
+
+  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
+}
+
+TEST(TestTfNodesInt8, BatchNorm) {
+  const std::string filename = std::string(tf_root_dir) + "batch_norm.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 24, 24, 3});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input_1"] = input.get();
+  const std::vector<std::string> output_names{"batch_normalization/FusedBatchNormV3"};
+
+  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
 }
 
 TEST(TestTfNodesInt8, Concatenate) {
@@ -141,36 +142,6 @@ TEST(TestTfNodesInt8, Convolution2d) {
                   std::make_shared<TestBatchStream>(InputVolume({input})));
 }
 
-TEST(TestTfNodesInt8, Split) {
-  const std::string filename = std::string(tf_root_dir) + "split.pb";
-
-  const int batch_size = 1;
-  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 13, 20});
-
-  std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input_1"] = input.get();
-  const std::vector<std::string> output_names{"activation/Relu", "activation_1/Relu",
-                                              "activation_2/Relu", "activation_3/Relu"};
-
-  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
-                  std::make_shared<TestBatchStream>(InputVolume({input})));
-}
-
-TEST(TestTfNodesInt8, SeparableConv2d) {
-  const std::string filename = std::string(tf_root_dir) + "separable_conv2d.pb";
-
-  const int batch_size = 1;
-  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 23, 29, 11});
-
-  std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input_1"] = input.get();
-  const std::vector<std::string> output_names{"separable_conv2d/BiasAdd",
-                                              "separable_conv2d_1/separable_conv2d"};
-
-  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
-                  std::make_shared<TestBatchStream>(InputVolume({input})));
-}
-
 TEST(TestTfNodesInt8, DepthwiseConv2d) {
   const std::string filename = std::string(tf_root_dir) + "depthwise_conv2d.pb";
 
@@ -185,30 +156,31 @@ TEST(TestTfNodesInt8, DepthwiseConv2d) {
                   std::make_shared<TestBatchStream>(InputVolume({input})));
 }
 
-TEST(TestTfNodesInt8, MaxPool) {
-  const std::string filename = std::string(tf_root_dir) + "max_pooling.pb";
+TEST(TestTfNodesInt8, Embedding) {
+  const std::string filename = std::string(tf_root_dir) + "embedding.pb";
 
   const int batch_size = 1;
-  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 13, 33, 3});
+  const auto input = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 10}, 1000);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input"] = input.get();
-  const std::vector<std::string> output_names{"max_pooling2d/MaxPool", "max_pooling2d_1/MaxPool"};
+  input_map["input1_1"] = input.get();
+  const std::vector<std::string> output_names{"embedding_4/embedding_lookup/Identity_1"};
 
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(InputVolume({input})));
 }
 
-TEST(TestTfNodesInt8, AvgPool) {
-  const std::string filename = std::string(tf_root_dir) + "average_pooling.pb";
+TEST(TestTfNodesInt8, EmbeddingBag) {
+  const std::string filename = std::string(tf_root_dir) + "embedding_bag.pb";
 
-  const int batch_size = 1;
-  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 29, 17, 3});
+  const int batch_size = 10;
+  const int emb_size = 5;
+
+  const auto input = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, emb_size}, 50);
 
   std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input"] = input.get();
-  const std::vector<std::string> output_names{"average_pooling2d/AvgPool",
-                                              "average_pooling2d_1/AvgPool"};
+  input_map["Placeholder"] = input.get();
+  const std::vector<std::string> output_names{"sub"};
 
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(InputVolume({input})));
@@ -222,6 +194,20 @@ TEST(TestTfNodesInt8, FullyConnected) {
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_4"] = input.get();
   const std::vector<std::string> output_names{"dense/BiasAdd"};
+
+  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
+}
+
+TEST(TestTfNodesInt8, MaxPool) {
+  const std::string filename = std::string(tf_root_dir) + "max_pooling.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 13, 33, 3});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input"] = input.get();
+  const std::vector<std::string> output_names{"max_pooling2d/MaxPool", "max_pooling2d_1/MaxPool"};
 
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(InputVolume({input})));
@@ -256,6 +242,35 @@ TEST(TestTfNodesInt8, Reduce) {
                   std::make_shared<TestBatchStream>(InputVolume({input})));
 }
 
+TEST(TestTfNodes, Reshape) {
+  const std::string filename = std::string(tf_root_dir) + "reshape.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 12, 24, 3});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input_9"] = input.get();
+  const std::vector<std::string> output_names{"reshape/Reshape"};
+
+  TestTFInference(filename, "float16", input_map, output_names, 1e-2,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
+}
+
+TEST(TestTfNodesInt8, SeparableConv2d) {
+  const std::string filename = std::string(tf_root_dir) + "separable_conv2d.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 23, 29, 11});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input_1"] = input.get();
+  const std::vector<std::string> output_names{"separable_conv2d/BiasAdd",
+                                              "separable_conv2d_1/separable_conv2d"};
+
+  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
+}
+
 TEST(TestTfNodesInt8, SliceStride) {
   const std::string filename = std::string(tf_root_dir) + "cropping2d.pb";
 
@@ -265,6 +280,35 @@ TEST(TestTfNodesInt8, SliceStride) {
   std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
   const std::vector<std::string> output_names{"cropping2d/strided_slice"};
+
+  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
+}
+
+TEST(TestTfNodesInt8, Softmax) {
+  const std::string filename = std::string(tf_root_dir) + "softmax.pb";
+
+  const int batch_size = 16;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 12, 24, 3});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input_11"] = input.get();
+  const std::vector<std::string> output_names{"softmax/Softmax"};
+
+  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
+                  std::make_shared<TestBatchStream>(InputVolume({input})));
+}
+
+TEST(TestTfNodesInt8, Split) {
+  const std::string filename = std::string(tf_root_dir) + "split.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<uint16_t>(TF_HALF, {batch_size, 13, 20});
+
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+  input_map["input_1"] = input.get();
+  const std::vector<std::string> output_names{"activation/Relu", "activation_1/Relu",
+                                              "activation_2/Relu", "activation_3/Relu"};
 
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(InputVolume({input})));
@@ -280,36 +324,6 @@ TEST(TestTfNodesInt8, ZeroPadding) {
   input_map["input_1"] = input.get();
   const std::vector<std::string> output_names{"zero_padding2d/Pad", "zero_padding2d_1/Pad",
                                               "zero_padding2d_2/Pad", "zero_padding2d_3/Pad"};
-
-  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
-                  std::make_shared<TestBatchStream>(InputVolume({input})));
-}
-
-TEST(TestTfNodesInt8, Embedding) {
-  const std::string filename = std::string(tf_root_dir) + "embedding.pb";
-
-  const int batch_size = 1;
-  const auto input = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 10}, 1000);
-
-  std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["input1_1"] = input.get();
-  const std::vector<std::string> output_names{"embedding_4/embedding_lookup/Identity_1"};
-
-  TestTFInference(filename, "int8", input_map, output_names, 1e-3,
-                  std::make_shared<TestBatchStream>(InputVolume({input})));
-}
-
-TEST(TestTfNodesInt8, EmbeddingBag) {
-  const std::string filename = std::string(tf_root_dir) + "embedding_bag.pb";
-
-  const int batch_size = 10;
-  const int emb_size = 5;
-
-  const auto input = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, emb_size}, 50);
-
-  std::unordered_map<std::string, TF_Tensor*> input_map;
-  input_map["Placeholder"] = input.get();
-  const std::vector<std::string> output_names{"sub"};
 
   TestTFInference(filename, "int8", input_map, output_names, 1e-3,
                   std::make_shared<TestBatchStream>(InputVolume({input})));
