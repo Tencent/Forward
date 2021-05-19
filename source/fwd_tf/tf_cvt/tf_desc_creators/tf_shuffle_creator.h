@@ -85,30 +85,39 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
 
       // 将输入返回
       op_inputs.push_back(input);
+      std::vector<int> dims;
       if (reshape.OpType() == "Shape") {
-        std::vector<int64_t> dims;
+        std::vector<int64_t> dims_64;
         const auto tensor_to_get_shape = reshape.Input(0);
-        dims.resize(tensor_to_get_shape.GetTensorNumDims());
-        tensor_to_get_shape.GetTensorShape(dims.data(), dims.size());
-        layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
+        dims_64.resize(tensor_to_get_shape.GetTensorNumDims());
+        tensor_to_get_shape.GetTensorShape(dims_64.data(), dims_64.size());
+        dims.assign(dims_64.begin(), dims_64.end());
       } else if (reshape.OpType() == "Pack") {
-        std::vector<int> dims{0};
+        // keep batch dim
+        dims.push_back(0);
+        // assign other params in Pack Node
         for (int i = 1; i < reshape.NumInputs(); ++i) {
           auto reshape_dim = reshape.Input(i).GetConstantTensor();
           T_CHECK(reshape_dim.Valid());
           dims.push_back(reshape_dim.AsInt());
         }
-        layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
       } else {
-        std::vector<int> dims;
         auto reshape_dims = reshape.GetConstantTensor();
         T_CHECK(reshape_dims.Valid());
         dims = reshape_dims.AsIntList();
-        layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
       }
-
-      layer_desc->doFirstTrans = false;
       layer_desc->doReshape = true;
+      layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
+
+      // When inputs are NHWC, we do NHWC->NCHW on those inputs to match TensorRT's data format.
+      // If the number dimensions of Reshape changed, we have to do NCHW->NHWC to keep 
+      // data storages correct for following layers.
+      if (input.GetTensorNumDims() == 4 && dims.size() != 4) {
+        layer_desc->doFirstTrans = true;
+        layer_desc->firstTranspose = {0, 2, 3, 1, 0, 0, 0, 0};
+      } else {
+        layer_desc->doFirstTrans = false;
+      }
       layer_desc->doSecondTrans = false;
     } else if (type == "ExpandDims") {
       T_CHECK_EQ(op.NumInputs(), 2);
