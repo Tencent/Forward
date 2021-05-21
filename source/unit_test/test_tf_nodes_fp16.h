@@ -242,7 +242,7 @@ TEST(TestTfNodesFp16, Reduce) {
   TestTFInference(filename, "float16", input_map, output_names, 1e-2);
 }
 
-TEST(TestTfNodes, Reshape) {
+TEST(TestTfNodesFp16, Reshape) {
   const std::string filename = std::string(tf_root_dir) + "reshape.pb";
 
   const int batch_size = 1;

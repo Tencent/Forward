@@ -242,7 +242,7 @@ TEST(TestTfNodesInt8, Reduce) {
                   std::make_shared<TestBatchStream>(InputVolume({input})));
 }
 
-TEST(TestTfNodes, Reshape) {
+TEST(TestTfNodesInt8, Reshape) {
   const std::string filename = std::string(tf_root_dir) + "reshape.pb";
 
   const int batch_size = 1;
