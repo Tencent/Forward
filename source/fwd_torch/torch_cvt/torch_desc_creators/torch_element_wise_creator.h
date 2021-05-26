@@ -62,7 +62,8 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
     // Inputs can be constant
     for (int i = 0; i < 2; i++) {
       auto iv = inputs[i ^ isRSub];
-      if (iv->node()->kind().is_prim() || iv->node()->kind() == c10::aten::size) {
+      if (iv->node()->kind() == c10::prim::GetAttr || iv->node()->kind() == c10::prim::Constant ||
+          iv->node()->kind() == c10::aten::size) {
         if (!CreateConstantInput(module, iv, layer_desc->inputs[i])) return {};
       } else {
         input_values.push_back(iv);
