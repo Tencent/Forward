@@ -38,19 +38,12 @@
 
 FWD_NAMESPACE_BEGIN
 
-/**
- * \brief TRT Engine 的元数据
- */
+/// Meta Data of Forward Engine. This meta data is required to Forward but not required to TensorRT.
+/// The TRT engine built by TensorRT can be loaded by Forward with a handicraft meta data file.
 class EngineMetaData {
  public:
-  /**
-   * \brief 构造器
-   */
   EngineMetaData() = default;
 
-  /**
-   * \brief 析构器
-   */
   ~EngineMetaData() = default;
 
   InferMode Mode() const { return mode_; }
@@ -75,45 +68,29 @@ class EngineMetaData {
 
   void SetOutputPositions(const std::vector<int>& output_pos) { output_pos_ = output_pos; }
 
-  /**
-   * \brief 从文件反序列化元数据
-   * \param meta_file 文件路径
-   * \return 是否加载成功
-   */
+  void SetTorchModulePath(const std::string& path) { torch_module_path_ = path; }
+
+  const std::string& TorchModulePath() const { return torch_module_path_; }
+
   bool LoadMetaData(const std::string& meta_file);
 
-  /**
-   * \brief 保存元数据到文件
-   * \param meta_file 文件路径
-   * \return 是否保存成功
-   */
   bool SaveMetaData(const std::string& meta_file) const;
 
  private:
-  /**
-   * \brief 推理模式
-   */
   InferMode mode_{InferMode::FLOAT};
 
-  /**
-   * \brief 最大批量值
-   */
   int max_batch_size_{-1};
 
-  /**
-   * \brief 最优批量值：TrtEngine 会针对该批量值进行性能优化
-   */
   int opt_batch_size_{-1};
 
-  /**
-   * \brief 未被使用的 输入序号
-   */
+  std::string torch_module_path_;
+
+  /// unused input indices in the given dummy inputs
   std::set<int> unused_input_indices_;
 
-  /**
-   * 输出顺序，用于修正 TensorRT 输出位置是按照拓扑顺序进行 binding，
-   * 导致输出与 Torch 顺序不一致的问题，SaveEngine时需要保存此信息
-   */
+  /// output binding indices in the TRT engine.
+  /// Because the order of MarkOutput in the Forward may not be the same as the order of outputs
+  /// marked by PyTorch, the order of output indices should be saved in meta data.
   std::vector<int> output_pos_;
 };
 

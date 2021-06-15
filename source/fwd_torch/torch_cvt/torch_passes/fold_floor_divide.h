@@ -32,7 +32,6 @@
 
 #include "common/common_macros.h"
 
-#if FWD_TORCH_VERSION > 160
 namespace torch {
 namespace pass {
 
@@ -42,4 +41,3 @@ namespace pass {
 void FoldFloorDivide(std::shared_ptr<torch::jit::Graph>& graph);
 }  // namespace pass
 }  // namespace torch
-#endif

@@ -21,6 +21,7 @@
 #include "trt_engine/trt_network_crt/plugins/qkv_to_context_plugin/fused_multihead_attention.h"
 #include "trt_engine/trt_network_crt/plugins/qkv_to_context_plugin/fused_multihead_attention_common.h"
 
+namespace fwd {
 namespace bert {
 
 struct Fused_multihead_attention_params_v2 {
@@ -450,7 +451,7 @@ class FusedMultiHeadAttentionXMMAKernelV2
   virtual void run(Fused_multihead_attention_params_v2& params, cudaStream_t ss) const {
     assert(params.d == 64);
     if (params.interleaved) {
-      assert(mDataType == bert::DATA_TYPE_INT8);
+      assert(mDataType == fwd::bert::DATA_TYPE_INT8);
     }
 
     bool forceUnroll = params.force_unroll;
@@ -461,27 +462,27 @@ class FusedMultiHeadAttentionXMMAKernelV2
         int mS;
         int mMaxBatch;
       } unrollList[] = {
-        {kSM_75, bert::DATA_TYPE_FP16, 256, 1},
-        {kSM_75, bert::DATA_TYPE_FP16, 384, 1},
-        {kSM_75, bert::DATA_TYPE_INT8, 128, 1},
-        {kSM_75, bert::DATA_TYPE_INT8, 192, 2},
-        {kSM_75, bert::DATA_TYPE_INT8, 256, 1},
-        {kSM_75, bert::DATA_TYPE_INT8, 384, 1},
+        {kSM_75, fwd::bert::DATA_TYPE_FP16, 256, 1},
+        {kSM_75, fwd::bert::DATA_TYPE_FP16, 384, 1},
+        {kSM_75, fwd::bert::DATA_TYPE_INT8, 128, 1},
+        {kSM_75, fwd::bert::DATA_TYPE_INT8, 192, 2},
+        {kSM_75, fwd::bert::DATA_TYPE_INT8, 256, 1},
+        {kSM_75, fwd::bert::DATA_TYPE_INT8, 384, 1},
 #if CUDA_VERSION >= 11000
-        {kSM_80, bert::DATA_TYPE_FP16, 128, 4},
-        {kSM_80, bert::DATA_TYPE_FP16, 256, 4},
-        {kSM_80, bert::DATA_TYPE_FP16, 384, 4},
-        {kSM_80, bert::DATA_TYPE_INT8, 128, 4},
-        {kSM_80, bert::DATA_TYPE_INT8, 192, 16},
-        {kSM_80, bert::DATA_TYPE_INT8, 256, 8},
-        {kSM_80, bert::DATA_TYPE_INT8, 384, 8},
+        {kSM_80, fwd::bert::DATA_TYPE_FP16, 128, 4},
+        {kSM_80, fwd::bert::DATA_TYPE_FP16, 256, 4},
+        {kSM_80, fwd::bert::DATA_TYPE_FP16, 384, 4},
+        {kSM_80, fwd::bert::DATA_TYPE_INT8, 128, 4},
+        {kSM_80, fwd::bert::DATA_TYPE_INT8, 192, 16},
+        {kSM_80, fwd::bert::DATA_TYPE_INT8, 256, 8},
+        {kSM_80, fwd::bert::DATA_TYPE_INT8, 384, 8},
 
-        {kSM_86, bert::DATA_TYPE_FP16, 128, 4},
-        {kSM_86, bert::DATA_TYPE_FP16, 256, 4},
-        {kSM_86, bert::DATA_TYPE_INT8, 128, 4},
-        {kSM_86, bert::DATA_TYPE_INT8, 192, 16},
-        {kSM_86, bert::DATA_TYPE_INT8, 256, 8},
-        {kSM_86, bert::DATA_TYPE_INT8, 384, 8},
+        {kSM_86, fwd::bert::DATA_TYPE_FP16, 128, 4},
+        {kSM_86, fwd::bert::DATA_TYPE_FP16, 256, 4},
+        {kSM_86, fwd::bert::DATA_TYPE_INT8, 128, 4},
+        {kSM_86, fwd::bert::DATA_TYPE_INT8, 192, 16},
+        {kSM_86, fwd::bert::DATA_TYPE_INT8, 256, 8},
+        {kSM_86, fwd::bert::DATA_TYPE_INT8, 384, 8},
 #endif
       };
       for (unsigned int i = 0u; i < sizeof(unrollList) / sizeof(unrollList[0]); ++i) {
@@ -525,3 +526,4 @@ inline const FusedMultiHeadAttentionXMMAKernelV2* getXMMAKernelsV2(Data_type typ
 }
 
 }  // namespace bert
+}  // namespace fwd

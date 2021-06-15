@@ -125,16 +125,19 @@ bool Parser::ParseValue(TrtLayerDesc* parent, const JitValue* value) {
     return false;
   }
 
+  if (network_.torch_module_path.empty() && layer_desc->Name() == TrtTorchModuleDesc::NAME()) {
+    network_.torch_module_path = module_.ModulePath();
+  }
+
   // 如果输出是 TensorList，则将所有输出添加到 Parent 的输入：目前针对的是 Split
   // 节点。
-  if (layer_desc->Name() == TrtSplitDesc::NAME()) {
+  if (parent->Name() == TrtIdentityDesc::NAME() &&
+      value->type()->kind() == c10::TypeKind::ListType) {
     const auto& output_value = module_.Get(value);
     if (output_value.isTensorList()) {
       for (size_t i = 0; i < output_value.toTensorList().size(); ++i) {
         parent->inputs.push_back({layer_desc, static_cast<int>(i)});
       }
-    } else {
-      parent->inputs.push_back({layer_desc, value_idx});
     }
   } else {
     parent->inputs.push_back({layer_desc, value_idx});

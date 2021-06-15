@@ -114,7 +114,7 @@ class TorchNormalizationCreator : public ILayerDescCreator {
     input_values.push_back(inputs[0]);
 
     const auto dummy = module.Get(inputs[0]).toTensor();
-    const auto normalized_shape = ToIntVector(module.Get(inputs[1]));
+    const auto normalized_shape = module.Get(inputs[1]).toIntVector();
     const auto eps = module.Get(inputs[4]).toDouble();
 
     auto layer_desc = std::make_shared<TrtNormalizationDesc>();

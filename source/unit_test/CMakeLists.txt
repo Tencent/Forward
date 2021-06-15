@@ -32,7 +32,6 @@ target_link_libraries(unit_test
         gtest
         ${TensorRT_LIBRARIES}
 )
-CUDA_ADD_CUBLAS_TO_TARGET(unit_test)
 
 if (ENABLE_TENSORFLOW)
     target_link_libraries(unit_test fwd_tf tensorflow)

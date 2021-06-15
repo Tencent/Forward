@@ -37,7 +37,7 @@ source_group("engine"       FILES ${KERAS_LIB_SOURCES})
 source_group("converter"    FILES ${KERAS_CVT_SOURCES})
 source_group("creators"     FILES ${KERAS_CRT_SOURCES})
 
-target_link_libraries(fwd_keras PUBLIC hdf5_cpp nlohmann_json::nlohmann_json)
+target_link_libraries(fwd_keras PUBLIC hdf5_cpp)
 
 if (ENABLE_TENSORRT)
     target_link_libraries(fwd_keras PUBLIC trt_engine)

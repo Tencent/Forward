@@ -31,7 +31,7 @@
 
 #include "unit_test/unit_test.h"
 
-TEST(TestTorchVision131Fp16, AlexNet) {
+TEST(TestTorchVisionFp16, AlexNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/alexnet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -41,7 +41,7 @@ TEST(TestTorchVision131Fp16, AlexNet) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, GoogLeNet) {
+TEST(TestTorchVisionFp16, GoogLeNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/googlenet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -51,7 +51,7 @@ TEST(TestTorchVision131Fp16, GoogLeNet) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, Inception_v3) {
+TEST(TestTorchVisionFp16, Inception_v3) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/inception_v3.pth";
   const auto input = torch::randn({1, 3, 299, 299}, device);
 
@@ -61,7 +61,7 @@ TEST(TestTorchVision131Fp16, Inception_v3) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, ResNet50) {
+TEST(TestTorchVisionFp16, ResNet50) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/resnet50.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -71,7 +71,7 @@ TEST(TestTorchVision131Fp16, ResNet50) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, WideResNet50_2) {
+TEST(TestTorchVisionFp16, WideResNet50_2) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/wide_resnet50_2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -81,7 +81,7 @@ TEST(TestTorchVision131Fp16, WideResNet50_2) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, DenseNet121) {
+TEST(TestTorchVisionFp16, DenseNet121) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/densenet121.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -91,7 +91,7 @@ TEST(TestTorchVision131Fp16, DenseNet121) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, MNASNet0_75) {
+TEST(TestTorchVisionFp16, MNASNet0_75) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/mnasnet0_75.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -101,7 +101,7 @@ TEST(TestTorchVision131Fp16, MNASNet0_75) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, Mobilenet_v2) {
+TEST(TestTorchVisionFp16, Mobilenet_v2) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/mobilenet_v2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -111,7 +111,7 @@ TEST(TestTorchVision131Fp16, Mobilenet_v2) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, ShuffleNet_v2_x1_5) {
+TEST(TestTorchVisionFp16, ShuffleNet_v2_x1_5) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/shufflenet_v2_x1_5.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -121,7 +121,7 @@ TEST(TestTorchVision131Fp16, ShuffleNet_v2_x1_5) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, SqueezeNet1_1) {
+TEST(TestTorchVisionFp16, SqueezeNet1_1) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/squeezenet1_1.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -131,7 +131,7 @@ TEST(TestTorchVision131Fp16, SqueezeNet1_1) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, VGG11_bn) {
+TEST(TestTorchVisionFp16, VGG11_bn) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/vgg11_bn.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -141,7 +141,7 @@ TEST(TestTorchVision131Fp16, VGG11_bn) {
   TestTorchInference(model_path, input_map, "float16", 0.05);
 }
 
-TEST(TestTorchVision131Fp16, EfficientNet) {
+TEST(TestTorchVisionFp16, EfficientNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/effnet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 

@@ -34,6 +34,7 @@
 #include <vector>
 
 #include "common/common_macros.h"
+#include "common/fwd_common.h"
 
 FWD_NAMESPACE_BEGIN
 
@@ -70,6 +71,17 @@ class KerasEngine {
    * \return
    */
   bool Save(const std::string& engine_path) const;
+
+  /**
+   * \brief 推理
+   * \param inputs
+   * \param input_dims
+   * \param outputs
+   * \param output_dims
+   * \param is_device
+   * \return
+   */
+  bool Forward(const std::vector<Tensor>& inputs, std::vector<Tensor>& outputs) const;
 
   /**
    * \brief 推理

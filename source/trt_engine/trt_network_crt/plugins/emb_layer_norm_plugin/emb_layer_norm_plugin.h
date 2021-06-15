@@ -23,6 +23,7 @@
 
 #include "trt_engine/trt_network_crt/plugins/common/bert_common.h"
 
+namespace fwd {
 namespace bert {
 
 static const char* FWD_EMB_LAYER_NORM_VERSION{"1"};
@@ -87,11 +88,11 @@ class EmbLayerNormPluginDynamic : public nvinfer1::IPluginV2DynamicExt {
   const std::string mLayerName;
   std::string mNamespace;
 
-  bert::cuda_unique_ptr<float> mGammaDev;
-  bert::cuda_unique_ptr<float> mBetaDev;
-  bert::cuda_unique_ptr<void> mWordEmbDev;
-  bert::cuda_unique_ptr<void> mTokEmbDev;
-  bert::cuda_unique_ptr<void> mPosEmbDev;
+  fwd::bert::cuda_unique_ptr<float> mGammaDev;
+  fwd::bert::cuda_unique_ptr<float> mBetaDev;
+  fwd::bert::cuda_unique_ptr<void> mWordEmbDev;
+  fwd::bert::cuda_unique_ptr<void> mTokEmbDev;
+  fwd::bert::cuda_unique_ptr<void> mPosEmbDev;
   size_t mLd;  // leading dim = hidden size
   size_t mS;   // sequence length
   size_t mWordVocabSize;
@@ -139,8 +140,9 @@ class EmbLayerNormPluginDynamicCreator : public nvinfer1::IPluginCreator {
   const char* getPluginNamespace() const override;
 
  private:
-  static nvinfer1::PluginFieldCollection mFC;
-  static std::vector<nvinfer1::PluginField> mPluginAttributes;
+  nvinfer1::PluginFieldCollection mFC;
+  std::vector<nvinfer1::PluginField> mPluginAttributes;
   std::string mNamespace;
 };
 }  // namespace bert
+}  // namespace fwd

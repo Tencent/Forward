@@ -45,11 +45,7 @@ class TLayerDescCreator<TrtClampDesc> : public ILayerDescCreator {
 
     const auto kind = node->kind();
 
-#if FWD_TORCH_VERSION > 160
-    if (kind == c10::aten::clamp_) return true;
-#endif
-
-    return kind == c10::aten::clamp || kind == c10::aten::hardtanh ||
+    return kind == c10::aten::clamp || kind == c10::aten::clamp_ || kind == c10::aten::hardtanh ||
            kind == c10::Symbol::fromQualString("aten::hardtanh_");
   }
 

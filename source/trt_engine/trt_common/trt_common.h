@@ -27,6 +27,7 @@
 #pragma once
 
 #include <NvInfer.h>
+#include <easylogging++.h>
 
 #include <functional>
 #include <memory>
@@ -98,6 +99,40 @@ inline nvinfer1::DataType GetDataType(bool use_fp16, bool use_int8, bool is_cali
   if (use_fp16) dtype = nvinfer1::DataType::kHALF;
   if (use_int8 && !is_calib_mode) dtype = nvinfer1::DataType::kINT8;
   return dtype;
+}
+
+inline bool CheckAndCopyFile(const std::string& dest_path, const std::string& src_path,
+                             bool force_copy = false) {
+  if (!force_copy) {
+    // check if desc_file is existed
+    std::ifstream file(dest_path);
+    if (file.is_open()) {
+      LOG(INFO) << dest_path << " has already been existed.";
+      file.close();
+      return true;
+    }
+    file.close();
+  }
+
+  std::ifstream src_file(src_path, std::ios::binary);
+  if (!src_file.is_open()) {
+    LOG(ERROR) << "Open src file " << src_path << "failed! ";
+    return false;
+  }
+
+  std::ofstream desc_file(dest_path, std::ios::binary);
+  if (!desc_file.is_open()) {
+    LOG(ERROR) << "Open dest file " << dest_path << "failed! ";
+    return false;
+  }
+
+  // copy
+  desc_file << src_file.rdbuf();
+
+  src_file.close();
+  desc_file.close();
+
+  return true;
 }
 //////////////////////////////////////////
 //                                      //

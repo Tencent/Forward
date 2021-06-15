@@ -147,7 +147,7 @@ class TLayerDescCreator<TrtAdaptiveLinDesc> : public ILayerDescCreator {
       if (!CheckMeanAndVar(module, div, var)) return false;
 
       // check reduce dims
-      const auto reduce_dims = ToIntVector(module.Get(var->inputs()[1]));
+      const auto reduce_dims = module.Get(var->inputs()[1]).toIntVector();
       if (reduce_dims != c10::IntArrayRef({1, 2, 3}) && reduce_dims != c10::IntArrayRef({2, 3})) {
         return false;
       }
@@ -189,7 +189,7 @@ class TLayerDescCreator<TrtAdaptiveLinDesc> : public ILayerDescCreator {
                      const torch::jit::Node*& var1_node, c10::IntArrayRef& reduce_dims1,
                      bool& unbiased1) const {
     var1_node = add1_node->inputs()[0]->node();
-    reduce_dims1 = ToIntVector(module.Get(var1_node->inputs()[1]));
+    reduce_dims1 = module.Get(var1_node->inputs()[1]).toIntVector();
     unbiased1 = module.Get(var1_node->inputs()[2]).toBool();
   }
 
@@ -264,7 +264,7 @@ class TLayerDescCreator<TrtAdaptiveLinDesc> : public ILayerDescCreator {
     var = add->inputs()[0]->node();
     if ((mean->inputs()[0]->node() != input) || !(var->kind() == c10::aten::var) ||
         (var->inputs()[0]->node() != input) ||
-        ToIntVector(module.Get(mean->inputs()[1])) != ToIntVector(module.Get(var->inputs()[1]))) {
+        module.Get(mean->inputs()[1]).toIntVector() != module.Get(var->inputs()[1]).toIntVector()) {
       return false;
     }
     return true;

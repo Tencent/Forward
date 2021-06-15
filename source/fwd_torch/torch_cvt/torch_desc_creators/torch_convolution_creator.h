@@ -52,11 +52,7 @@ class TorchConvolutionCreator : public ILayerDescCreator {
     LOG(INFO) << "TorchConvolutionCreator::Create";
 
     const auto inputs = node->inputs();
-#if FWD_TORCH_VERSION > 160
     T_CHECK(inputs.size() == 12 || inputs.size() == 13);
-#else
-    T_CHECK_EQ(inputs.size(), 12);
-#endif
 
     const bool transposed = module.Get(node->inputs()[6]).toBool();
     if (!transposed) {

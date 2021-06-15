@@ -44,6 +44,7 @@ using namespace nvinfer1;
 
 #undef interface
 
+namespace fwd {
 namespace bert {
 
 template <typename T, int TPB, int VPT>
@@ -1057,3 +1058,4 @@ void FusedMHARunnerInt8v2::run(const nvinfer1::PluginTensorDesc* inputDesc,
 bool FusedMHARunnerInt8v2::isValid(int s) const { return pimpl->isValid(s); }
 
 }  // namespace bert
+}  // namespace fwd

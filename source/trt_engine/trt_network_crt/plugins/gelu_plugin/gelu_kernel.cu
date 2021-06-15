@@ -24,8 +24,6 @@
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
 
-#include <cuda.h>
-#if CUDA_VERSION >= 10000
 #include <NvInfer.h>
 
 #include <cassert>
@@ -37,6 +35,7 @@
 
 using namespace nvinfer1;
 
+namespace fwd {
 namespace bert {
 
 // constants for approximating the normal cdf
@@ -124,5 +123,4 @@ void computeGeluBias(half* output, const half* input, const half* bias, const in
   CUDA_CHECK(cudaPeekAtLastError());
 }
 }  // namespace bert
-
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

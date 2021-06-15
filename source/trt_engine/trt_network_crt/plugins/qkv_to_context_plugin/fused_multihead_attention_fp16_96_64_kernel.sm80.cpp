@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+namespace fwd {
 namespace bert {
 
 unsigned char fused_multihead_attention_fp16_96_64_kernel_sm80_cu_o[] = {
@@ -1762,3 +1763,4 @@ unsigned char fused_multihead_attention_fp16_96_64_kernel_sm80_cu_o[] = {
     0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 unsigned int fused_multihead_attention_fp16_96_64_kernel_sm80_cu_o_len = 27880;
 }  // namespace bert
+}  // namespace fwd

@@ -27,6 +27,7 @@
 #include "trt_engine/trt_common/trt_meta_data.h"
 
 #include <easylogging++.h>
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -36,75 +37,61 @@
 
 FWD_NAMESPACE_BEGIN
 
+using json = nlohmann::json;
+
+constexpr const char* INFER_MODE = "infer_mode";
+constexpr const char* OPT_BATCH_SIZE = "opt_batch_size";
+constexpr const char* MAX_BATCH_SIZE = "max_batch_size";
+constexpr const char* UNUSED_INPUT_INDICES = "unused_input_indices";
+constexpr const char* OUTPUT_INDICES = "output_indices";
+constexpr const char* TORCH_MODULE_PATH = "torch_module_path";
+
 bool EngineMetaData::LoadMetaData(const std::string& meta_file) {
+  json meta_json;
   std::ifstream meta(meta_file);
   if (!meta.is_open()) {
     LOG(ERROR) << "Error loading engine meta file: " << meta_file;
     return false;
   }
+  meta >> meta_json;
+  meta.close();
 
-  // infer mode
-  int infer_mode;
-  meta >> infer_mode;
-  mode_ = static_cast<InferMode>(infer_mode);
-  static const std::string MODE2STR[]{"FP32", "HALF", "INT8", "INT8_CALIB"};
-  LOG(INFO) << "Set InferMode to " << MODE2STR[infer_mode];
+  try {
+    mode_ = static_cast<InferMode>(meta_json[INFER_MODE].get<int>());
+    opt_batch_size_ = meta_json[OPT_BATCH_SIZE].get<int>();
+    max_batch_size_ = meta_json[MAX_BATCH_SIZE].get<int>();
+    std::set<int> unused_input_indices(meta_json[UNUSED_INPUT_INDICES].begin(),
+                                       meta_json[UNUSED_INPUT_INDICES].end());
+    unused_input_indices_.swap(unused_input_indices);
+    std::vector<int> output_pos(meta_json[OUTPUT_INDICES].begin(), meta_json[OUTPUT_INDICES].end());
+    output_pos_.swap(output_pos);
 
-  meta >> opt_batch_size_;
-  LOG(INFO) << "Set opt_batch_size to " << opt_batch_size_;
-  meta >> max_batch_size_;
-  LOG(INFO) << "Set max_batch_size to " << max_batch_size_;
-
-  // unused inputs
-  int length, temp;
-  meta >> length;
-  LOG(INFO) << "Detect " << length << " unused inputs";
-  unused_input_indices_.clear();
-  for (int i = 0; i < length; ++i) {
-    meta >> temp;
-    unused_input_indices_.insert(temp);
+    torch_module_path_ = meta_json[TORCH_MODULE_PATH].get<std::string>();
+  } catch (const std::exception& e) {
+    LOG(ERROR) << "Parse meta file : " << meta_file
+               << " to json object failed. Please check meta file's format";
+    return false;
   }
 
-  // output positions
-  meta >> length;
-  output_pos_.clear();
-  LOG(INFO) << "Detect " << length << " outputs";
-  for (int i = 0; i < length; ++i) {
-    meta >> temp;
-    output_pos_.push_back(temp);
-  }
   return true;
 }
 
 bool EngineMetaData::SaveMetaData(const std::string& meta_file) const {
+  json meta_json;
+  meta_json[INFER_MODE] = static_cast<int>(mode_);
+  meta_json[OPT_BATCH_SIZE] = opt_batch_size_;
+  meta_json[MAX_BATCH_SIZE] = max_batch_size_;
+  meta_json[UNUSED_INPUT_INDICES] = unused_input_indices_;
+  meta_json[OUTPUT_INDICES] = output_pos_;
+  meta_json[TORCH_MODULE_PATH] = torch_module_path_;
+
   std::ofstream meta(meta_file);
   if (!meta.is_open()) {
     LOG(ERROR) << "create engine meta file " << meta_file << " failed";
     return false;
   }
-
-  // save infer mode, int32
-  meta << static_cast<int>(mode_) << "\n";
-
-  // save opt_batch_size
-  meta << opt_batch_size_ << "\n";
-
-  // save max_batch_size
-  meta << max_batch_size_ << "\n";
-
-  // save unused inputs, length, u1, u2, ... total (length + 1) int
-  meta << static_cast<int>(unused_input_indices_.size()) << " ";
-  for (int elem : unused_input_indices_) {
-    meta << elem << " ";
-  }
-  meta << "\n";
-
-  // save output position, length, p1, p2, ... total (length + 1) int
-  meta << static_cast<int>(output_pos_.size()) << " ";
-  for (int elem : output_pos_) {
-    meta << elem << " ";
-  }
-  meta << "\n";
+  meta << std::setw(4) << meta_json << std::endl;
+  meta.close();
 
   return true;
 }

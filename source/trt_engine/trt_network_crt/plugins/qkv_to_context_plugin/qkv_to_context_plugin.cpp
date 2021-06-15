@@ -15,10 +15,6 @@
  */
 
 // Need 10.1 for cublasGemmStridedBatchedEx
-#include <cuda.h>
-
-#if CUDA_VERSION >= 10000
-
 #include <NvInfer.h>
 
 #include <cassert>
@@ -34,18 +30,11 @@
 
 using namespace nvinfer1;
 
+namespace fwd {
 namespace bert {
-
-// Static class fields initialization
-PluginFieldCollection QKVToContextPluginDynamicCreator::mFC{};
-std::vector<PluginField> QKVToContextPluginDynamicCreator::mPluginAttributes;
 
 constexpr uint32_t IIDX = 0;  // index of the input tensor
 constexpr uint32_t MIDX = 1;  // index of the mask
-
-// Static class fields initialization
-PluginFieldCollection QKVToContextVarSeqlenPluginCreator::mFC{};
-std::vector<PluginField> QKVToContextVarSeqlenPluginCreator::mPluginAttributes;
 
 QKVToContextPluginDynamic::QKVToContextPluginDynamic(const std::string name,
                                                      const nvinfer1::DataType type,
@@ -925,4 +914,4 @@ const char* QKVToContextVarSeqlenPluginCreator::getPluginNamespace() const {
   return mNamespace.c_str();
 }
 }  // namespace bert
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

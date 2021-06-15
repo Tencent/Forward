@@ -132,7 +132,7 @@ inline void TestTorchInferenceClassify(const std::string& model_file,
   }
 }
 
-TEST(TestTorchVision131Int8, AlexNet) {
+TEST(TestTorchVisionInt8, AlexNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/alexnet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -142,7 +142,7 @@ TEST(TestTorchVision131Int8, AlexNet) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, GoogLeNet) {
+TEST(TestTorchVisionInt8, GoogLeNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/googlenet.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -152,7 +152,7 @@ TEST(TestTorchVision131Int8, GoogLeNet) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, Inception_v3) {
+TEST(TestTorchVisionInt8, Inception_v3) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/inception_v3.pth";
   const auto input = torch::randn({1, 3, 299, 299}, device).to(c10::kHalf);
 
@@ -162,7 +162,7 @@ TEST(TestTorchVision131Int8, Inception_v3) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, ResNet50) {
+TEST(TestTorchVisionInt8, ResNet50) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/resnet50.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -172,7 +172,7 @@ TEST(TestTorchVision131Int8, ResNet50) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, WideResNet50_2) {
+TEST(TestTorchVisionInt8, WideResNet50_2) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/wide_resnet50_2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -182,7 +182,7 @@ TEST(TestTorchVision131Int8, WideResNet50_2) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, DenseNet121) {
+TEST(TestTorchVisionInt8, DenseNet121) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/densenet121.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -192,7 +192,7 @@ TEST(TestTorchVision131Int8, DenseNet121) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, MNASNet0_75) {
+TEST(TestTorchVisionInt8, MNASNet0_75) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/mnasnet0_75.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -202,7 +202,7 @@ TEST(TestTorchVision131Int8, MNASNet0_75) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, Mobilenet_v2) {
+TEST(TestTorchVisionInt8, Mobilenet_v2) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/mobilenet_v2.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -212,7 +212,7 @@ TEST(TestTorchVision131Int8, Mobilenet_v2) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, ShuffleNet_v2_x1_5) {
+TEST(TestTorchVisionInt8, ShuffleNet_v2_x1_5) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/shufflenet_v2_x1_5.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -222,7 +222,7 @@ TEST(TestTorchVision131Int8, ShuffleNet_v2_x1_5) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, SqueezeNet1_1) {
+TEST(TestTorchVisionInt8, SqueezeNet1_1) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/squeezenet1_1.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -232,7 +232,7 @@ TEST(TestTorchVision131Int8, SqueezeNet1_1) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, VGG11_bn) {
+TEST(TestTorchVisionInt8, VGG11_bn) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/vgg11_bn.pth";
   const auto input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 
@@ -242,7 +242,7 @@ TEST(TestTorchVision131Int8, VGG11_bn) {
   TestTorchInferenceClassify(model_path, input_map, "int8");
 }
 
-TEST(TestTorchVision131Int8, EfficientNet) {
+TEST(TestTorchVisionInt8, EfficientNet) {
   const auto model_path = std::string(models_dir) + "torch_vision_models/effnet.pth";
   const c10::IValue input = torch::randn({1, 3, 224, 224}, device).to(c10::kHalf);
 

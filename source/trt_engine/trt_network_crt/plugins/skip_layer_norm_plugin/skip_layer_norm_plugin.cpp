@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#include <cuda.h>
-
-#if CUDA_VERSION >= 10000
 #include <NvInfer.h>
 
 #include <cassert>
@@ -26,14 +23,8 @@
 #include "trt_engine/trt_network_crt/plugins/common/serialize.hpp"
 #include "trt_engine/trt_network_crt/plugins/skip_layer_norm_plugin/skip_layer_norm_plugin.h"
 
+namespace fwd {
 namespace bert {
-
-// Static class fields initialization
-nvinfer1::PluginFieldCollection SkipLayerNormPluginDynamicCreator::mFC{};
-std::vector<nvinfer1::PluginField> SkipLayerNormPluginDynamicCreator::mPluginAttributes;
-
-nvinfer1::PluginFieldCollection SkipLayerNormVarSeqlenPluginCreator::mFC{};
-std::vector<nvinfer1::PluginField> SkipLayerNormVarSeqlenPluginCreator::mPluginAttributes;
 
 static inline nvinfer1::DataType getParamWordType(nvinfer1::DataType cfgType) {
   if (cfgType == nvinfer1::DataType::kINT8) {
@@ -800,5 +791,4 @@ const char* SkipLayerNormVarSeqlenPluginCreator::getPluginNamespace() const {
   return mNamespace.c_str();
 }
 }  // namespace bert
-
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

@@ -69,7 +69,12 @@
 #include "trt_engine/trt_network_crt/layer_creators/trt_unary_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_upsample_bilinear_creator.h"
 
+#ifdef ENABLE_TORCH
+#include "trt_engine/trt_network_crt/layer_creators/trt_torch_module_creator.h"
+#endif  //  ENABLE_TORCH
+
 // register BERT-related plugins
+namespace fwd {
 namespace bert {
 REGISTER_TENSORRT_PLUGIN(EmbLayerNormPluginDynamicCreator);
 // REGISTER_TENSORRT_PLUGIN(EmbLayerNormVarSeqlenPluginCreator);
@@ -82,6 +87,7 @@ REGISTER_TENSORRT_PLUGIN(SkipLayerNormPluginDynamicCreator);
 // REGISTER_TENSORRT_PLUGIN(SkipLayerNormInterleavedPluginCreator);
 
 }  // namespace bert
+}  // namespace fwd
 
 FWD_TRT_NAMESPACE_BEGIN
 
@@ -99,6 +105,10 @@ REGISTER_TENSORRT_PLUGIN(ReducePluginCreator);
 REGISTER_TENSORRT_PLUGIN(ReflectionPadding2DPluginCreator);
 REGISTER_TENSORRT_PLUGIN(SplitPluginCreator);
 REGISTER_TENSORRT_PLUGIN(UpsampleBilinear2DPluginCreator);
+
+#ifdef ENABLE_TORCH
+REGISTER_TENSORRT_PLUGIN(TorchModulePluginCreator);
+#endif  //  ENABLE_TORCH
 
 LayerCreatorManager::LayerCreatorManager() {
   // 这里注册时候，按照字母顺序吧，便于查找
@@ -149,6 +159,10 @@ LayerCreatorManager::LayerCreatorManager() {
   RegisterCreator<TrtUpsampleBilinearDesc>();
 
   RegisterCreator<TrtMatMulAddDesc>();
+
+#ifdef ENABLE_TORCH
+  RegisterCreator<TrtTorchModuleDesc>();
+#endif  // ENABLE_TORCH
 }
 
 ILayerCreator* LayerCreatorManager::FindCreator(const std::string& layer_name) const {

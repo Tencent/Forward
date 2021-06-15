@@ -115,6 +115,7 @@ std::shared_ptr<IForwardEngine> TrtForwardBuilder::Build(const TrtNetworkDesc& n
   meta_data_.SetUnusedInputIndices(network_desc.unused_input_indices);
   meta_data_.SetMaxBatchSize(network_desc.batch_size);
   if (meta_data_.OptBatchSize() < 0) meta_data_.SetOptBatchSize(network_desc.batch_size);
+  meta_data_.SetTorchModulePath(network_desc.torch_module_path);
 
   if (!DumpNetwork(network.get())) {
     LOG(ERROR) << "DumpNetwork failed.";

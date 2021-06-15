@@ -170,9 +170,12 @@ set_target_properties(simple-utils PROPERTIES FOLDER third_party)
 # Cub-1.8.0
 include_directories(${PROJECT_SOURCE_DIR}/source/third_party/cub-1.8.0)
 
+# json
+add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/json)
+include_directories(${PROJECT_SOURCE_DIR}/source/third_party/json/single_include)
+
 # TensorRT
 find_package(TensorRT)
-
 if(NOT TensorRT_FOUND) # use sources
   message(
     FATAL_ERROR
@@ -201,11 +204,6 @@ endif(MSVC)
 # common
 include_directories(${PROJECT_SOURCE_DIR}/source)
 
-# TensorRT
-if(ENABLE_TENSORRT)
-  add_subdirectory(${PROJECT_SOURCE_DIR}/source/trt_engine)
-endif(ENABLE_TENSORRT)
-
 # Torch
 if(ENABLE_TORCH)
   if(BUILD_PYTHON_LIB)
@@ -223,6 +221,14 @@ if(ENABLE_TORCH)
     list(APPEND CMAKE_PREFIX_PATH ${TORCH_CMAKE_PATH})
   endif()
 
+  # Set TORCH_CUDA_ARCH_LIST for Windows
+  # set(TORCH_CUDA_ARCH_LIST 6.0 6.1 7.0 7.5)
+  foreach(arch ${GPU_ARCHS})
+    string(SUBSTRING ${arch} 0 1 major)
+    string(SUBSTRING ${arch} 1 1 minor)
+    list(APPEND TORCH_CUDA_ARCH_LIST ${major}.${minor})
+  endforeach()
+    
   find_package(Torch)
   if(NOT TORCH_FOUND)
     message(
@@ -243,17 +249,22 @@ if(ENABLE_TORCH)
   endif(MSVC)
 
   message(STATUS "Find Torch VERSION: ${Torch_VERSION}")
+  if (${Torch_VERSION} VERSION_LESS "1.7.0")
+    message(FATAL_ERROR "Forward requires TORCH_VERSION >= 1.7.0, but the given is ${Torch_VERSION}")
+  endif()
   add_definitions(-DTORCH_VERSION_MAJOR=${Torch_VERSION_MAJOR})
   add_definitions(-DTORCH_VERSION_MINOR=${Torch_VERSION_MINOR})
   add_definitions(-DTORCH_VERSION_PATCH=${Torch_VERSION_PATCH})
-  if (${Torch_VERSION} VERSION_GREATER_EQUAL "1.7.0")
-      set(CMAKE_CXX_STANDARD 14)
-      set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  endif()
+  
+  set(CMAKE_CXX_STANDARD 14)
 
   include_directories(${TORCH_INCLUDE_DIRS})
-  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_torch)
   add_definitions(-DENABLE_TORCH=1)
+
+  if (TORCH_CUDA_LIBRARIES)
+    message(STATUS "TORCH_HAS_CUDA, TORCH_CUDA_LIBRARIES = ${TORCH_CUDA_LIBRARIES}")
+    add_definitions(-DTORCH_HAS_CUDA=1)
+  endif()
 endif() # ENABLE_TORCH
 
 # TensorFlow
@@ -271,8 +282,6 @@ if(ENABLE_TENSORFLOW)
   endif()
 
   include_directories(${TENSORFLOW_LIB_DIR}/include)
-
-  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_tf)
 
   message("LINK_DIR = ${PROJECT_SOURCE_DIR}/source/third_party/tensorflow/lib")
   link_directories(${PROJECT_SOURCE_DIR}/source/third_party/tensorflow/lib)
@@ -305,14 +314,11 @@ if(ENABLE_TENSORFLOW)
   endif()
 endif()
 
+# Keras dependencies
 if(ENABLE_KERAS)
   if(ENABLE_UNIT_TESTS AND NOT ENABLE_TENSORFLOW)
     message(FATAL_ERROR "Unit test Keras must ENABLE_TENSORFLOW")
   endif()
-  # json
-  add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/json)
-  include_directories(
-    ${PROJECT_SOURCE_DIR}/source/third_party/json/single_include)
   # hdf5
   # find_package(HDF5)
   if (HDF5_FOUND)
@@ -325,9 +331,29 @@ if(ENABLE_KERAS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/hdf5)
   endif()
 
-  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_keras)
   include_directories(${TENSORFLOW_LIB_DIR}/include)
   add_definitions(-DENABLE_KERAS=1)
+endif(ENABLE_KERAS)
+
+
+# trt_engine
+if(ENABLE_TENSORRT)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/source/trt_engine)
+endif(ENABLE_TENSORRT)
+
+# fwd_torch
+if (ENABLE_TORCH)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_torch)
+endif(ENABLE_TORCH)
+
+# fwd_tf
+if (ENABLE_TENSORFLOW)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_tf)
+endif(ENABLE_TENSORFLOW)
+
+#fwd_keras
+if (ENABLE_KERAS)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_keras)
 endif(ENABLE_KERAS)
 
 # build python lib
@@ -340,6 +366,7 @@ if(BUILD_PYTHON_LIB)
   # pyinfer
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/py_fwd)
 endif()
+
 
 # fwd test
 if(ENABLE_INFER_TESTS)

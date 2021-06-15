@@ -57,6 +57,10 @@ set(PLUGIN_LISTS
     upsampler_plugin
     )
 
+if (ENABLE_TORCH)
+    list(APPEND PLUGIN_LISTS torch_module_plugin)
+endif()
+
 file(GLOB TRT_ENGINE_SOURCES trt_engine/*.h trt_engine/*.cpp)
 file(GLOB TRT_COMMON_SOURCES trt_common/*.h trt_common/*.cpp)
 file(GLOB TRT_NET_CRT_SOURCES trt_network_crt/*.h trt_network_crt/*.cpp)
@@ -86,7 +90,7 @@ source_group("network_crt/plugins/headers"  FILES ${PLUGIN_HEADERS})
 source_group("network_crt/plugins/cpp"  FILES ${PLUGIN_SOURCES})
 source_group("network_crt/plugins/cu"  FILES ${PLUGIN_CU_SOURCES})
 
-target_link_libraries(trt_engine ${TensorRT_LIBRARIES} simple-utils)
+target_link_libraries(trt_engine ${TensorRT_LIBRARIES} simple-utils nlohmann_json::nlohmann_json)
 
 if (MSVC)
     target_link_libraries(trt_engine cudnn)

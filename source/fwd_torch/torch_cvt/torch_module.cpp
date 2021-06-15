@@ -26,20 +26,15 @@
 
 #include "fwd_torch/torch_cvt/torch_module.h"
 
-#include <torch/csrc/jit/passes/fuse_linear.h>
-
 #include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#if FWD_TORCH_VERSION > 160
+#include <torch/csrc/jit/passes/fuse_linear.h>
 #include <torch/csrc/jit/passes/inliner.h>
-
 #include "torch_passes/fold_floor_divide.h"
-#endif
-
 #include "torch_passes/fuse_adaptive_lin.h"
 #include "torch_passes/fuse_lrn.h"
 #include "torch_passes/fuse_transformer_encoder.h"
@@ -73,11 +68,13 @@ inline void RemoveRedundantNodesOnBlock(torch::jit::Block* block) {
   }
 }
 
-bool TorchModule::Load(const std::string& module_path, InferMode mode) {
+bool TorchModule::Load(const std::string& module_path, InferMode mode,
+                       c10::DeviceType device_type) {
   try {
-    module_ = ::torch::jit::load(module_path);
+    module_path_ = module_path;
+    module_ = torch::jit::load(module_path);
     module_.eval();
-    module_.to(c10::kCPU);
+    module_.to(device_type);
   } catch (const c10::Error& e) {
     LOG(ERROR) << "error when load model: " << e.msg();
     return false;
@@ -126,9 +123,7 @@ bool TorchModule::EvalAll(const std::vector<c10::IValue>& inputs) {
 }
 
 void TorchModule::PreProcessGraph() {
-#if FWD_TORCH_VERSION > 160
   torch::jit::Inline(*graph_);
-#endif  // NEW_TORCH_API
 
   // 这里涉及到 jit graph 的优化
   //  合并线性层的操作，t + addmm, matmul + add, matmul -> linear
@@ -159,9 +154,7 @@ void TorchModule::PostProcessGraph() {
 
   // graph_->dump();
 
-#if FWD_TORCH_VERSION > 160
   torch::pass::FoldFloorDivide(graph_);
-#endif  // NEW_TORCH_API
 }
 
 void TorchModule::RemoveUnusedInputs() {

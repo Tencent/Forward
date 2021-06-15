@@ -40,6 +40,10 @@
 #include "trt_engine/trt_engine/trt_buffer_manager.h"
 #include "trt_engine/trt_network_crt/trt_network_creator.h"
 
+#ifdef ENABLE_TORCH
+#include "trt_engine/trt_network_crt/plugins/torch_module_plugin/torch_module_plugin.h"
+#endif  //  ENABLE_TORCH
+
 FWD_NAMESPACE_BEGIN
 
 TrtForwardEngine::TrtForwardEngine() {
@@ -154,6 +158,17 @@ bool TrtForwardEngine::Load(const std::string& engine_file) {
   LOG(INFO) << "Loading engine " << engine_file;
 
   if (!meta_data_->LoadMetaData(engine_file + ".meta")) return false;
+
+#ifdef ENABLE_TORCH
+  // When torch_module_path is given in the meta data, check if the original module file
+  // TORCH_MODULE_PLUGIN_MODULE_PATH exist. If it is not exist, then copy the original module from
+  // meta_data_->TorchModulePath(). The torch module plugin will automatically load the original
+  // module from TORCH_MODULE_PLUGIN_MODULE_PATH as the referred module to build a new sub_module.
+  if (!meta_data_->TorchModulePath().empty() &&
+      !TrtCommon::CheckAndCopyFile(trt_::TORCH_MODULE_PLUGIN_MODULE_PATH,
+                                   meta_data_->TorchModulePath()))
+    return false;
+#endif  // ENABLE_TORCH
 
   if (!LoadEngine(engine_file)) return false;
 

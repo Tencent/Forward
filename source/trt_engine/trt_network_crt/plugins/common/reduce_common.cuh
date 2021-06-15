@@ -37,11 +37,7 @@ __inline__ __device__ float pow(float X, float Y) { return (Y == 1.0f) ? X : pow
 template <typename T>
 __device__ __forceinline__ T WARP_SHFL_DOWN(T value, unsigned int delta, int width = WARP_SIZE,
                                             unsigned int mask = 0xffffffff) {
-#if CUDA_VERSION >= 9000
   return __shfl_down_sync(mask, value, delta, width);
-#else
-  return __shfl_down(value, delta, width);
-#endif
 }
 
 template <typename T, int SIZE = WARP_SIZE>

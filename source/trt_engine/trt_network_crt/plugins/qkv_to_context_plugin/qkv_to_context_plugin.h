@@ -17,9 +17,6 @@
 // Need 10.1 for cublasGemmStridedBatchedEx
 #pragma once
 
-#include <cuda.h>
-#if CUDA_VERSION >= 10000
-
 #include <NvInferPlugin.h>
 #include <cublas_v2.h>
 
@@ -28,6 +25,7 @@
 
 #include "trt_engine/trt_network_crt/plugins/common/bert_common.h"
 
+namespace fwd {
 namespace bert {
 
 static const char* FWD_QKV_TO_CONTEXT_PLUGIN_VERSION{"1"};
@@ -227,8 +225,8 @@ class QKVToContextPluginDynamicCreator : public nvinfer1::IPluginCreator {
   const char* getPluginNamespace() const override;
 
  private:
-  static nvinfer1::PluginFieldCollection mFC;
-  static std::vector<nvinfer1::PluginField> mPluginAttributes;
+  nvinfer1::PluginFieldCollection mFC;
+  std::vector<nvinfer1::PluginField> mPluginAttributes;
   std::string mNamespace;
 };
 
@@ -333,8 +331,8 @@ class QKVToContextVarSeqlenPluginCreator : public nvinfer1::IPluginCreator {
   const char* getPluginNamespace() const override;
 
  private:
-  static nvinfer1::PluginFieldCollection mFC;
-  static std::vector<nvinfer1::PluginField> mPluginAttributes;
+  nvinfer1::PluginFieldCollection mFC;
+  std::vector<nvinfer1::PluginField> mPluginAttributes;
   std::string mNamespace;
 };
 
@@ -478,5 +476,4 @@ class FusedMHARunnerInt8v2 : public MHARunner {
 };
 
 }  // namespace bert
-
-#endif
+}  // namespace fwd

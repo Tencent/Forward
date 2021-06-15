@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <cuda.h>
-#if CUDA_VERSION >= 10000
 #include <NvInfer.h>
 
 #include <cassert>
@@ -27,11 +25,8 @@
 
 using namespace nvinfer1;
 
+namespace fwd {
 namespace bert {
-
-// Static class fields initialization
-PluginFieldCollection EmbLayerNormPluginDynamicCreator::mFC{};
-std::vector<PluginField> EmbLayerNormPluginDynamicCreator::mPluginAttributes;
 
 EmbLayerNormPluginDynamic::EmbLayerNormPluginDynamic(const std::string& name,
                                                      const nvinfer1::DataType type,
@@ -511,5 +506,4 @@ const char* EmbLayerNormPluginDynamicCreator::getPluginNamespace() const {
   return mNamespace.c_str();
 }
 }  // namespace bert
-
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

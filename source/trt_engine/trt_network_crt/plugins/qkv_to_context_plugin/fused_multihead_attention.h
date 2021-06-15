@@ -29,6 +29,7 @@
 #include "trt_engine/trt_network_crt/plugins/common/cuda_driver_wrapper.h"
 #include "trt_engine/trt_network_crt/plugins/qkv_to_context_plugin/fused_multihead_attention_common.h"
 
+namespace fwd {
 namespace bert {
 
 inline void cuErrCheck_(CUresult stat, const fwd::CUDADriverWrapper& wrap, const char* file,
@@ -43,7 +44,7 @@ inline void cuErrCheck_(CUresult stat, const fwd::CUDADriverWrapper& wrap, const
 #define cuErrCheck(stat, wrap) \
   { cuErrCheck_((stat), wrap, __FILE__, __LINE__); }
 
-static inline size_t get_size_in_bytes(size_t n, bert::Data_type dtype) {
+static inline size_t get_size_in_bytes(size_t n, fwd::bert::Data_type dtype) {
   switch (dtype) {
     case DATA_TYPE_E8M10:
       return n * 4;
@@ -336,3 +337,4 @@ inline const FusedMultiHeadAttentionXMMAKernel* getXMMAKernels(Data_type type, u
 }
 
 }  // namespace bert
+}  // namespace fwd

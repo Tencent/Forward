@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-#include <cuda.h>
-
-#if CUDA_VERSION >= 10000
-
 #include <NvInfer.h>
 
 #include <cassert>
@@ -30,6 +26,7 @@
 
 using namespace nvinfer1;
 
+namespace fwd {
 namespace bert {
 
 constexpr float f3_{3.0f};
@@ -77,7 +74,7 @@ nvinfer1::ITensor* CreateGeluPlugin(nvinfer1::INetworkDefinition* network, nvinf
   auto dtype = use_fp16 ? nvinfer1::DataType::kHALF : nvinfer1::DataType::kFLOAT;
 
   nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-      bert::FWD_GELU_PLUGIN_NAME, bert::FWD_GELU_PLUGIN_VERSION);
+      fwd::bert::FWD_GELU_PLUGIN_NAME, fwd::bert::FWD_GELU_PLUGIN_VERSION);
   std::vector<nvinfer1::PluginField> field_data;
   field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
 
@@ -89,13 +86,9 @@ nvinfer1::ITensor* CreateGeluPlugin(nvinfer1::INetworkDefinition* network, nvinf
   nvinfer1::IPluginV2Layer* gelu_layer = network->addPluginV2(&input, 1, *plugin_obj);
   T_CHECK(gelu_layer);
 
-  fwd::TrtCommon::SetOutputRange(gelu_layer, bert::MAX_GELU_VAL);
+  fwd::TrtCommon::SetOutputRange(gelu_layer, fwd::bert::MAX_GELU_VAL);
   return gelu_layer->getOutput(0);
 }
-
-// Static class fields initialization
-PluginFieldCollection GeluPluginDynamicCreator::mFC{};
-std::vector<PluginField> GeluPluginDynamicCreator::mPluginAttributes;
 
 GeluPluginDynamic::GeluPluginDynamic(const std::string name, const nvinfer1::DataType type,
                                      const Weights& bias)
@@ -315,5 +308,4 @@ void GeluPluginDynamicCreator::setPluginNamespace(const char* libNamespace) {
 const char* GeluPluginDynamicCreator::getPluginNamespace() const { return mNamespace.c_str(); }
 
 }  // namespace bert
-
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

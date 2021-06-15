@@ -80,8 +80,6 @@ class TLayerDescCreator<TrtRNNv2Desc> : public ILayerDescCreator {
     const auto batch_first = module.Get(inputs[8]).toBool();
     layer_desc->batchFirst = batch_first;
 
-    const auto trt_type = ConvertTorch2TrtDtype(params.get(0).scalar_type());
-
     // params 排布顺序 : layer0
     //     : input_weights,
     //         hidden_weights,

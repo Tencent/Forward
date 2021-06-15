@@ -60,6 +60,7 @@ __device__ inline kv_half2 operator+(const kv_half2& a, const kv_half2& b) {
 template <typename T>
 using kvp = cub::KeyValuePair<T, T>;
 
+namespace fwd {
 namespace bert {
 
 #define DESER(d, m) m = readFromBuffer<decltype(m)>(d)
@@ -318,3 +319,4 @@ __device__ inline float myExp<float>(const float x) {
 }
 
 }  // namespace bert
+}  // namespace fwd

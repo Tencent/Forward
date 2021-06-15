@@ -61,13 +61,8 @@ class TLayerDescCreator<TrtIndexDesc> : public ILayerDescCreator {
 
     layer_desc->axis.resize(8, 0);
     layer_desc->nbIndexDims = 0;
-#if FWD_TORCH_VERSION > 160
     if (module.Get(inputs[1]).isList()) {
       const auto indices = module.Get(inputs[1]).toList();
-#else
-    if (module.Get(inputs[1]).isGenericList()) {
-      const auto indices = module.Get(inputs[1]).toGenericList();
-#endif
       layer_desc->nbDims = indices.size();
 
       for (size_t i = 0; i < indices.size(); i++) {

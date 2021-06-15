@@ -90,17 +90,6 @@ inline void ExtractAllInputs(const JitValue* input, std::vector<const JitValue*>
   } else {
     unpacked_inputs.push_back(input);
   }
-  // else if (kind == c10::prim::ListUnpack) {
-  //   unpacked_inputs.push_back(input->node()->input());
-  // }
-  // else if (kind == c10::aten::contiguous || kind == c10::aten::detach ||
-  //          kind == c10::aten::device || kind == c10::aten::dropout ||
-  //          kind == c10::aten::squeeze ||
-  //          kind == c10::Symbol::fromQualString("aten::dropout_") ||
-  //          kind == c10::aten::feature_dropout || kind == c10::aten::to ||
-  //          kind == c10::aten::expand_as) {
-  //   ExtractAllInputs(input->node()->inputs()[0], unpacked_inputs);
-  // }
 }
 
 /**
@@ -302,24 +291,6 @@ inline std::string StringOf(c10::ScalarType type) {
       return "INT32";
     default:
       return "INVALID";
-  }
-}
-
-/**
- * \brief 将 Torch 数据类型符号转换为 TRT 数据类型符号
- * \param torch_dtype
- * \return
- */
-inline nvinfer1::DataType ConvertTorch2TrtDtype(c10::ScalarType torch_dtype) {
-  switch (torch_dtype) {
-    case c10::ScalarType::Float:
-      return nvinfer1::DataType::kFLOAT;
-      break;
-    case c10::ScalarType::Half:
-      return nvinfer1::DataType::kHALF;
-      break;
-    default:
-      return nvinfer1::DataType::kFLOAT;
   }
 }
 

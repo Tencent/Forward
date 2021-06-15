@@ -24,9 +24,6 @@
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
 
-#include <cuda.h>
-#if CUDA_VERSION >= 10000
-
 #include <NvInfer.h>
 
 #include <cassert>
@@ -38,6 +35,7 @@
 
 using namespace nvinfer1;
 
+namespace fwd {
 namespace bert {
 
 template <int TPB, int VPT, bool hasBias>
@@ -283,5 +281,4 @@ template int computeSkipLayerNorm<half, false>(cudaStream_t, const int, const in
                                                const half*);
 
 }  // namespace bert
-
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 #pragma once
-#include <cuda.h>
-#if CUDA_VERSION >= 10000
 #include <NvInfer.h>
 #include <NvInferRuntimeCommon.h>
 #include <cublas_v2.h>
@@ -66,6 +64,7 @@ constexpr size_t packedMaskSize96 = xmmasM128 * threadsPerCta128;
 constexpr size_t packedMaskSize128 = xmmasM128 * threadsPerCta128;
 constexpr size_t packedMaskSize384 = xmmasM384 * threadsPerCta384;
 
+namespace fwd {
 namespace bert {
 
 inline int getSMVersion() {
@@ -261,14 +260,14 @@ struct CudaDeleter {
 };
 
 template <typename T>
-using cuda_unique_ptr = std::unique_ptr<T, bert::CudaDeleter<T>>;
+using cuda_unique_ptr = std::unique_ptr<T, fwd::bert::CudaDeleter<T>>;
 
 template <typename T>
 using cuda_shared_ptr = std::shared_ptr<T>;
 
 template <typename T>
 void make_cuda_shared(cuda_shared_ptr<T>& ptr, void* cudaMem) {
-  ptr.reset(static_cast<T*>(cudaMem), bert::CudaDeleter<T>());
+  ptr.reset(static_cast<T*>(cudaMem), fwd::bert::CudaDeleter<T>());
 }
 
 struct WeightsWithOwnership : public nvinfer1::Weights {
@@ -412,5 +411,4 @@ inline nvinfer1::DataType fieldTypeToDataType(const nvinfer1::PluginFieldType ft
 }
 
 }  // namespace bert
-
-#endif
+}  // namespace fwd

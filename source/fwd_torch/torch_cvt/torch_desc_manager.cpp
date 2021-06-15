@@ -67,6 +67,7 @@
 #include "torch_desc_creators/torch_slice_creator.h"
 #include "torch_desc_creators/torch_softmax_creator.h"
 #include "torch_desc_creators/torch_split_creator.h"
+#include "torch_desc_creators/torch_submodule_creator.h"
 #include "torch_desc_creators/torch_unary_creator.h"
 #include "torch_desc_creators/torch_upsample_bilinear_creator.h"
 
@@ -116,6 +117,7 @@ TorchDescManager::TorchDescManager() {
   // 这种简单的模式就放在下面
   RegisterCreator<TrtIdentityDesc>();
   RegisterCreator<TrtNoopDesc>();
+  RegisterCreator<TrtTorchModuleDesc>();
 }
 
 ILayerDescCreator* TorchDescManager::FindDescCreator(const JitNode* node,

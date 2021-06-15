@@ -290,7 +290,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     if (inputs[0]->node()->kind() == c10::prim::GetAttr ||
         inputs[0]->node()->kind() == c10::prim::Constant) {
       auto input = module.Get(inputs[0]).toTensor();
-      const auto size = ToIntVector(module.Get(inputs[1]));
+      const auto size = module.Get(inputs[1]).toIntVector();
       input = input.expand(size).contiguous();
 
       auto layer_desc = std::make_shared<TrtConstantDesc>();

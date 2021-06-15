@@ -26,7 +26,6 @@
 
 #include "fwd_torch/torch_cvt/torch_passes/fold_floor_divide.h"
 
-#if FWD_TORCH_VERSION > 160
 #include <torch/csrc/jit/passes/dead_code_elimination.h>
 
 // Note: from torch source, but just remove Constant If
@@ -357,4 +356,3 @@ void torch::pass::FoldFloorDivide(std::shared_ptr<torch::jit::Graph>& graph) {
 
   torch::jit::EliminateDeadCode(graph);
 }
-#endif

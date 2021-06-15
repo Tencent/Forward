@@ -45,30 +45,18 @@ class TLayerCreator<TrtIdentityDesc> : public ILayerCreator {
     const auto identity_desc = dynamic_cast<const TrtIdentityDesc*>(layer_desc);
     T_CHECK(identity_desc);
 
-    if (!input_tensors.empty()) {
-      if (!identity_desc->copy) {
-        return input_tensors;
-      }
+    // if no input tensors is given, create a constant layer
+    if (input_tensors.empty()) return CreateConstantLayer(identity_desc, network);
 
-      ITensorVector outputs;
-      for (auto* input : input_tensors) {
-        // kINT32 is not valid input. To avoid error, just return the input.
-        if (input->getType() == nvinfer1::DataType::kINT32) {
-          LOG(WARNING) << "kINT32 value cannot be copied by identity layer. "
-                          "Continue with raw tensor.";
-          outputs.push_back(input);
-        } else {
-          auto identity = network->addIdentity(*input);
-          if (identity == nullptr) {
-            LOG(ERROR) << "Create Network: Fail to create [identity] layer.";
-            return {};
-          }
-          outputs.push_back(identity->getOutput(0));
-        }
-      }
-      return outputs;
-    }
+    // if copy is true, create CopyLayer
+    if (identity_desc->copy) CreateCopyLayer(input_tensors, network);
 
+    return input_tensors;
+  }
+
+ private:
+  ITensorVector CreateConstantLayer(const fwd::TrtIdentityDesc* const& identity_desc,
+                                    nvinfer1::INetworkDefinition* network) {
     // 常量 Identity 处理
     if (!identity_desc->input.inUse) {
       return {};
@@ -85,6 +73,27 @@ class TLayerCreator<TrtIdentityDesc> : public ILayerCreator {
       return {};
     }
     return {identity->getOutput(0)};
+  }
+
+  ITensorVector CreateCopyLayer(const fwd::trt_::ITensorVector& input_tensors,
+                                nvinfer1::INetworkDefinition* network) {
+    ITensorVector outputs;
+    for (auto* input : input_tensors) {
+      // kINT32 is not valid input. To avoid error, just return the input.
+      if (input->getType() == nvinfer1::DataType::kINT32) {
+        LOG(WARNING) << "kINT32 value cannot be copied by identity layer. "
+                        "Continue with raw tensor.";
+        outputs.push_back(input);
+      } else {
+        auto identity = network->addIdentity(*input);
+        if (identity == nullptr) {
+          LOG(ERROR) << "Create Network: Fail to create [identity] layer.";
+          return {};
+        }
+        outputs.push_back(identity->getOutput(0));
+      }
+    }
+    return outputs;
   }
 };
 

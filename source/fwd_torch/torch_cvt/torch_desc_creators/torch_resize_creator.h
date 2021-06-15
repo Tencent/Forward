@@ -82,7 +82,7 @@ class TLayerDescCreator<TrtResizeDesc> : public ILayerDescCreator {
       layer_desc->outputDimensions.d[2] = dummy.size(2) * scales[0];
       layer_desc->outputDimensions.d[3] = dummy.size(3) * scales[1];
     } else {
-      const auto output_size = ToIntVector(module.Get(inputs[1]));
+      const auto output_size = module.Get(inputs[1]).toIntVector();
       layer_desc->outputDimensions.d[2] = output_size[0];
       layer_desc->outputDimensions.d[3] = output_size[1];
 

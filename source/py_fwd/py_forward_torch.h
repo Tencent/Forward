@@ -29,6 +29,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <torch/csrc/jit/python/pybind_utils.h>
 #include <torch/extension.h>
 
 #include <memory>
@@ -38,12 +39,6 @@
 
 #include "fwd_torch/torch_cvt/torch_helper.h"
 #include "fwd_torch/torch_engine/torch_engine.h"
-
-#if FWD_TORCH_VERSION > 140
-#include <torch/csrc/jit/python/pybind_utils.h>
-#else
-#include <torch/csrc/jit/pybind_utils.h>
-#endif
 
 namespace py = pybind11;
 
@@ -57,11 +52,7 @@ struct type_caster<torch::jit::IValue> {
 
   bool load(handle src, bool) {
     try {
-#if FWD_TORCH_VERSION > 131
       value = torch::jit::toTypeInferredIValue(src);
-#else
-      value = torch::jit::toIValue(src);
-#endif
       return true;
     } catch (std::exception& e) {
       return false;

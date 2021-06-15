@@ -59,7 +59,8 @@ class TorchModule {
    * \param mode 推理模式
    * \return 加载是否成功
    */
-  bool Load(const std::string& module_path, InferMode mode);
+  bool Load(const std::string& module_path, InferMode mode = InferMode::FLOAT,
+            c10::DeviceType device_type = c10::kCPU);
 
   /**
    * \brief 利用伪输入对 Module 进行推断，从而获取所有中间节点的参数信息并缓存
@@ -67,6 +68,11 @@ class TorchModule {
    * \return 成功则返回 true
    */
   bool EvalAll(const std::vector<c10::IValue>& inputs);
+
+  /**
+   * \brief Graph 后处理（在 EvalAll 之后），此类修改之后则无法再执行 EvalAll。
+   */
+  void PostProcessGraph();
 
   /**
    * \brief 根据 torch jit value 得到对应的 IValue
@@ -98,17 +104,20 @@ class TorchModule {
 
   at::ArrayRef<JitValue*> Outputs() const;
 
+  const std::shared_ptr<torch::jit::Graph>& Graph() const { return graph_; }
+
+  const std::string& ModulePath() const { return module_path_; }
+
+  const torch::jit::named_attribute_list NamedAttributes() const {
+    return module_.named_attributes(false);
+  }
+
  private:
   /**
    * \brief Graph 预处理（在 EvalAll 之前），此类修改不会影响后续的 EvalAll
    * 操作。
    */
   void PreProcessGraph();
-
-  /**
-   * \brief Graph 后处理（在 EvalAll 之后），此类修改之后则无法再执行 EvalAll。
-   */
-  void PostProcessGraph();
 
   /**
    * \brief 拆解 Graph 内的 Tuple/List 类型输入，直至所有 Graph 输入类型 变为
@@ -125,6 +134,9 @@ class TorchModule {
    * \brief 推理模式
    */
   InferMode mode_{InferMode::FLOAT};
+
+  // path cache for TorchScriptModule
+  std::string module_path_;
 
   /**
    * \brief 未被使用的输入序号

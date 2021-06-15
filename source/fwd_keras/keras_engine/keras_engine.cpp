@@ -61,6 +61,15 @@ bool KerasEngine::Save(const std::string& engine_path) const {
   return true;
 }
 
+bool KerasEngine::Forward(const std::vector<Tensor>& inputs, std::vector<Tensor>& outputs) const {
+  if (!engine_->Forward(inputs, outputs)) {
+    LOG(ERROR) << "KerasEngine forward failed.";
+    return false;
+  }
+
+  return true;
+}
+
 bool KerasEngine::Forward(const std::vector<void*>& inputs,
                           const std::vector<std::vector<int>>& input_dims,
                           std::vector<void*>& outputs, std::vector<std::vector<int>>& output_dims,
@@ -78,7 +87,7 @@ bool KerasEngine::Forward(const std::vector<void*>& inputs,
   std::vector<Tensor> output_buffers;
 
   if (!engine_->Forward(input_buffers, output_buffers)) {
-    LOG(ERROR) << "TrtEngine forward failed.";
+    LOG(ERROR) << "KerasEngine forward failed.";
     return false;
   }
 

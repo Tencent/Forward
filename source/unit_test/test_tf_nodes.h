@@ -34,7 +34,6 @@
 
 TEST(TestTfNodes, Version) { std::cout << "TensorFlow Version: " << TF_Version() << std::endl; }
 
-
 TEST(TestTfNodes, Activation) {
   const std::string filename = std::string(tf_root_dir) + "activation.pb";
 

@@ -24,9 +24,6 @@
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
 
-#include <cuda.h>
-#if CUDA_VERSION >= 10000
-
 #include <cassert>
 #include <cstring>
 #include <vector>
@@ -37,6 +34,7 @@
 
 using namespace nvinfer1;
 
+namespace fwd {
 namespace bert {
 
 __global__ void fillSBSMaskKernel(const uint32_t warps_m, const uint32_t warps_n, const uint32_t S,
@@ -235,5 +233,4 @@ template int embSkipLayerNorm<half>(cudaStream_t, int, int, int, const int*, con
                                     const half*, half*);
 
 }  // namespace bert
-
-#endif  // CUDA_VERSION >= 10000
+}  // namespace fwd

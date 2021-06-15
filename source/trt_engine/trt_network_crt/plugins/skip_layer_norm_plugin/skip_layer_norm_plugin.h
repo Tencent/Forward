@@ -23,6 +23,7 @@
 
 #include "trt_engine/trt_network_crt/plugins/common/bert_common.h"
 
+namespace fwd {
 namespace bert {
 
 // Clip plugin specific constants
@@ -88,16 +89,16 @@ class SkipLayerNormPluginDynamic : public nvinfer1::IPluginV2DynamicExt {
   std::string mNamespace;
 
   cuda_unique_ptr<void> mGammaDev;
-  bert::cuda_unique_ptr<void> mBetaDev;
+  fwd::bert::cuda_unique_ptr<void> mBetaDev;
   size_t mLd;  // leading dim
-  bert::WeightsWithOwnership mGamma;
-  bert::WeightsWithOwnership mBeta;
+  fwd::bert::WeightsWithOwnership mGamma;
+  fwd::bert::WeightsWithOwnership mBeta;
   nvinfer1::DataType mType;
   nvinfer1::DataType mCfgType;
 
   bool mHasBias;
-  bert::cuda_unique_ptr<void> mBiasDev;
-  bert::WeightsWithOwnership mBias;
+  fwd::bert::cuda_unique_ptr<void> mBiasDev;
+  fwd::bert::WeightsWithOwnership mBias;
 
   size_t mParamWordsize;
 
@@ -133,8 +134,8 @@ class SkipLayerNormPluginDynamicCreator : public nvinfer1::IPluginCreator {
   const char* getPluginNamespace() const override;
 
  private:
-  static nvinfer1::PluginFieldCollection mFC;
-  static std::vector<nvinfer1::PluginField> mPluginAttributes;
+  nvinfer1::PluginFieldCollection mFC;
+  std::vector<nvinfer1::PluginField> mPluginAttributes;
   std::string mNamespace;
 };
 
@@ -188,17 +189,17 @@ class SkipLayerNormVarSeqlenPlugin : public nvinfer1::IPluginV2DynamicExt {
   const std::string mLayerName;
   std::string mNamespace;
 
-  bert::cuda_unique_ptr<void> mGammaDev;
-  bert::cuda_unique_ptr<void> mBetaDev;
+  fwd::bert::cuda_unique_ptr<void> mGammaDev;
+  fwd::bert::cuda_unique_ptr<void> mBetaDev;
   size_t mLd;  // leading dim
-  bert::WeightsWithOwnership mGamma;
-  bert::WeightsWithOwnership mBeta;
+  fwd::bert::WeightsWithOwnership mGamma;
+  fwd::bert::WeightsWithOwnership mBeta;
   nvinfer1::DataType mType;
   nvinfer1::DataType mCfgType;
 
   bool mHasBias;
-  bert::cuda_unique_ptr<void> mBiasDev;
-  bert::WeightsWithOwnership mBias;
+  fwd::bert::cuda_unique_ptr<void> mBiasDev;
+  fwd::bert::WeightsWithOwnership mBias;
 
   size_t mParamWordsize;
   bool mParamsOnDevice;
@@ -235,9 +236,10 @@ class SkipLayerNormVarSeqlenPluginCreator : public nvinfer1::IPluginCreator {
   const char* getPluginNamespace() const override;
 
  private:
-  static nvinfer1::PluginFieldCollection mFC;
-  static std::vector<nvinfer1::PluginField> mPluginAttributes;
+  nvinfer1::PluginFieldCollection mFC;
+  std::vector<nvinfer1::PluginField> mPluginAttributes;
   std::string mNamespace;
 };
 
 }  // namespace bert
+}  // namespace fwd

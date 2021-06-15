@@ -43,5 +43,5 @@ if (ENABLE_TENSORFLOW)
 endif(ENABLE_TENSORFLOW)
 
 if (ENABLE_KERAS)
-    target_link_libraries(forward PUBLIC fwd_keras hdf5_cpp nlohmann_json::nlohmann_json)
+    target_link_libraries(forward PUBLIC fwd_keras hdf5_cpp)
 endif(ENABLE_KERAS)

@@ -150,11 +150,13 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
     node = node->inputs()[0]->node();  // weight -> LayerNorm
     if (node->kind() != c10::aten::layer_norm && !node->kind().is_prim()) return -2;
     node = node->inputs()[0]->node();  // LayerNorm -> embedding / output
+    if (!node->hasAttribute(c10::Symbol::attr("name"))) return -2;
     const std::string attr_name = node->s(c10::Symbol::attr("name"));
     if (attr_name == "embeddings") return -1;
 
     if (attr_name == "output") {
       node = node->inputs()[0]->node();
+      if (!node->hasAttribute(c10::Symbol::attr("name"))) return -2;
       const std::string layer_num = node->s(c10::Symbol::attr("name"));
       return std::stoi(layer_num);
     }

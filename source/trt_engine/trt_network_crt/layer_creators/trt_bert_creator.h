@@ -125,7 +125,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
         TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, bert_desc->calib_mode);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::FWD_EMB_LAYER_NORM_NAME, bert::FWD_EMB_LAYER_NORM_VERSION);
+        fwd::bert::FWD_EMB_LAYER_NORM_NAME, fwd::bert::FWD_EMB_LAYER_NORM_VERSION);
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back(NAME_MAP.at("EMB_BETA").c_str(), beta.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, beta.Count());
@@ -209,14 +209,14 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     // "bias");
 
     // requiring that sm >= 72
-    bool use_int8 = bert_desc->use_int8 && bert::getSMVersion() >= kSM_72;
+    bool use_int8 = bert_desc->use_int8 && fwd::bert::getSMVersion() >= kSM_72;
     // requiring that hidden_size is 768 or 1024
     if (bert_desc->hidden_size != 768 && bert_desc->hidden_size != 1024) use_int8 = false;
 
     const auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, use_int8, bert_desc->calib_mode);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::FWD_SKIP_LAYER_NORM_NAME, bert::FWD_SKIP_LAYER_NORM_VERSION);
+        fwd::bert::FWD_SKIP_LAYER_NORM_NAME, fwd::bert::FWD_SKIP_LAYER_NORM_VERSION);
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("beta", beta.Data(), nvinfer1::PluginFieldType::kFLOAT32, beta.Count());
     field_data.emplace_back("gamma", gamma.Data(), nvinfer1::PluginFieldType::kFLOAT32,
@@ -276,7 +276,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, true);
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        bert::FWD_QKV_TO_CONTEXT_PLUGIN_NAME, bert::FWD_QKV_TO_CONTEXT_PLUGIN_VERSION);
+        fwd::bert::FWD_QKV_TO_CONTEXT_PLUGIN_NAME, fwd::bert::FWD_QKV_TO_CONTEXT_PLUGIN_VERSION);
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("hidden_size", &hidden_size, nvinfer1::PluginFieldType::kINT32, 1);
@@ -368,7 +368,8 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
         // reluLayer->setName("relu");
         mid_act = relu_layer->getOutput(0);
       } else {
-        mid_act = bert::CreateGeluLayer(network, mid_out, bert_desc->use_fp16, bert_desc->use_int8);
+        mid_act =
+            fwd::bert::CreateGeluLayer(network, mid_out, bert_desc->use_fp16, bert_desc->use_int8);
       }
 
       T_CHECK(mid_act);

@@ -36,6 +36,12 @@
 
 #include "common/fwd_weights.h"
 
+namespace torch {
+namespace jit {
+class Module;
+}
+}  // namespace torch
+
 FWD_NAMESPACE_BEGIN
 
 // NormalizationType for normalization plugins
@@ -251,6 +257,12 @@ struct TrtNormDesc : TrtLayerDesc {
   bool div;
 };
 
+struct TrtRepeatDesc : TrtLayerDesc {
+  TRT_LAYER_DESC(Repeat)
+
+  std::vector<int> repeats;
+};
+
 struct TrtSeparableConvDesc : TrtLayerDesc {
   TRT_LAYER_DESC(SeparableConv);
 
@@ -281,10 +293,14 @@ struct TrtSplitDesc : TrtLayerDesc {
   bool dynamic_size{false};
 };
 
-struct TrtRepeatDesc : TrtLayerDesc {
-  TRT_LAYER_DESC(Repeat)
+struct TrtTorchModuleDesc : TrtLayerDesc {
+  TRT_LAYER_DESC(TrtTorchModuleDesc);
 
-  std::vector<int> repeats;
+  std::string module_path;
+  std::vector<int> node_ids;
+  std::vector<int> in_types;
+  std::vector<nvinfer1::DataType> out_types;
+  std::vector<nvinfer1::Dims> out_dims;
 };
 
 // This is added for TensorRT <= 7.0

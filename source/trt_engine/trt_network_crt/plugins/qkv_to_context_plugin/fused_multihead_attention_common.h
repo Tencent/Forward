@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+namespace fwd {
 namespace bert {
 enum Data_type {
   DATA_TYPE_BOOL,
@@ -30,3 +31,4 @@ enum Data_type {
   DATA_TYPE_INT32
 };
 }  // namespace bert
+}  // namespace fwd

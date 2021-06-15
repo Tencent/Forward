@@ -420,30 +420,30 @@ inline void TestKerasInference(const std::string& pb_path, const std::string& ke
     ASSERT_TRUE(keras_engine != nullptr);
 
     // keras inputs
-    std::vector<void*> input_buffers;
-    std::vector<std::vector<int>> input_dims;
+    std::vector<fwd::Tensor> real_inputs;
+    std::vector<fwd::Tensor> real_outputs;
     for (size_t i = 0; i < inputs.size(); ++i) {
-      input_buffers.push_back(TF_TensorData(inputs[i]));
-      std::vector<int> input_shape(TF_NumDims(inputs[i]));
-      for (size_t j = 0; j < input_shape.size(); j++) {
-        input_shape[j] = TF_Dim(inputs[i], j);
+      fwd::Tensor tensor;
+      tensor.data = TF_TensorData(inputs[i]);
+      tensor.dims = fwd::TrtUtils::ToVector(fwd::tf_::DimsOf(inputs[i]));
+      tensor.device_type = fwd::DeviceType::CPU;
+      if (TF_TensorType(inputs[i]) == TF_INT32) {
+        tensor.data_type = fwd::DataType::INT32;
+      } else if (TF_TensorType(inputs[i]) == TF_HALF) {
+        tensor.data_type = fwd::DataType::HALF;
       }
-      input_dims.push_back(input_shape);
+      real_inputs.push_back(tensor);
     }
 
-    // outputs
-    std::vector<void*> output_buffers;
-    std::vector<std::vector<int>> output_dims;
-    ASSERT_TRUE(
-        keras_engine->Forward(input_buffers, input_dims, output_buffers, output_dims, false));
-    ASSERT_EQ(output_buffers.size(), output_dims.size());
+    ASSERT_TRUE(keras_engine->Forward(real_inputs, real_outputs));
+    ASSERT_TRUE(!real_outputs.empty());
 
     // copy outputs back
-    for (size_t i = 0; i < output_dims.size(); ++i) {
-      const auto count = fwd::TrtUtils::Volume(output_dims[i]);
-      ASSERT_TRUE(output_buffers[i]);
+    for (size_t i = 0; i < real_outputs.size(); ++i) {
+      const auto count = fwd::TrtUtils::Volume(real_outputs[i].dims);
+      ASSERT_TRUE(real_outputs[i].data);
       std::vector<float> result(count);
-      CUDA_CHECK(cudaMemcpy(result.data(), output_buffers[i], count * sizeof(float),
+      CUDA_CHECK(cudaMemcpy(result.data(), real_outputs[i].data, count * sizeof(float),
                             cudaMemcpyDeviceToHost));
       results.push_back(result);
     }

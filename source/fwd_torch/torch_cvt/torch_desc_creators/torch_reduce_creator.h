@@ -128,7 +128,7 @@ class TLayerDescCreator<TrtReduceDesc> : public ILayerDescCreator {
     }
     layer_desc->reduceAxes = 0;
 
-    const auto reduce_dims = ToIntVector(module.Get(inputs[1]));
+    const auto reduce_dims = module.Get(inputs[1]).toIntVector();
     for (auto dim : reduce_dims) {
       layer_desc->reduceAxes |= (1 << dim);
     }

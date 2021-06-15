@@ -48,18 +48,21 @@ FWD_NAMESPACE_BEGIN
 //                         TrtOutputDesc
 //
 struct TrtNetworkDesc {
-  // OutputDesc will be handled as the start node of the network when building engine.
-  std::vector<std::shared_ptr<TrtOutputDesc>> outputs;
+  // max_batch_size for building engine
+  int batch_size{-1};
 
-  // InputDesc should be handled before handling the network
-  std::vector<std::shared_ptr<TrtInputDesc>> inputs;
+  // this variable will be set when TorchSubModuleDesc is created
+  std::string torch_module_path;
 
   // unused_input_indices are kept for the case that several inputs in the dummy input are not
   // used in the network.
   std::set<int> unused_input_indices;
 
-  // max_batch_size for building engine
-  int batch_size{-1};
+  // InputDesc should be handled before handling the network
+  std::vector<std::shared_ptr<TrtInputDesc>> inputs;
+
+  // OutputDesc will be handled as the start node of the network when building engine.
+  std::vector<std::shared_ptr<TrtOutputDesc>> outputs;
 };
 
 FWD_NAMESPACE_END
