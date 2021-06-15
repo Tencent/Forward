@@ -70,4 +70,4 @@ before_script:
   - cd build
   - cmake .. -DENABLE_LOGGING=ON -DENABLE_PROFILING=ON -DBUILD_PYTHON_LIB=ON -DENABLE_TORCH=ON -DENABLE_TENSORFLOW=ON -DENABLE_KERAS=ON -DENABLE_RNN=ON -DPYTHON_EXECUTABLE=$(which python3)
 
-script: make -j
+script: travis_wait make -j
