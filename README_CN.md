@@ -33,8 +33,8 @@ Forward 的环境依赖如下：
 - TensorRT >= 7.0.0.11,  (推荐 TensorRT-7.2.1.6)
 - CMake >= 3.12.2
 - GCC >= 5.4.0, ld >= 2.26.1
-- (Pytorch) pytorch == 1.3.1 或 pytorch == 1.7.1
-- (Tensorflow) TensorFlow == 1.15.0 (linux 需额外下载【[Tensorflow 1.15.0](https://github.com/neargye-forks/tensorflow/releases)】，将解压出来的 so 拷贝至 source/third_party/tensorflow/lib 目录下)
+- (Pytorch) pytorch >= 1.7.1
+- (Tensorflow) TensorFlow >= 1.15.0 (linux 需额外下载【[Tensorflow 1.15.0](https://github.com/neargye-forks/tensorflow/releases)】，将解压出来的 so 拷贝至 source/third_party/tensorflow/lib 目录下)
 - (Keras) HDF 5 (从 `source/third_party/hdf5` 源码构建)
 
 ### 项目构建
