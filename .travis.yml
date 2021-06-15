@@ -27,6 +27,9 @@ jobs:
     - TENSORRT=7.0.0
     - UBUNTU_VERSION=ubuntu1804
     - TORCH=1.7.0
+    - TENSORFLOW=2.2
+    - ENABLE_TORCH=ON
+    - ENABLE_KERAS=OFF
   - name: "CUDA 10.2 + TRT 7.2 + Torch 1.8"
     env:
     - CUDA=10.2.89-1
@@ -36,6 +39,21 @@ jobs:
     - TENSORRT=7.2.3
     - UBUNTU_VERSION=ubuntu1804
     - TORCH=1.8.0
+    - TENSORFLOW=2.3
+    - ENABLE_TORCH=ON
+    - ENABLE_KERAS=OFF
+  - name: "CUDA 10.2 + TRT 7.2 + Keras"
+    env:
+    - CUDA=10.2.89-1
+    - CUDA_SHORT=10.2
+    - CUDNN_MAJOR=8
+    - CUDNN=8.0.4.*
+    - TENSORRT=7.2.3
+    - UBUNTU_VERSION=ubuntu1804
+    - TORCH=1.8.0
+    - TENSORFLOW=2.3
+    - ENABLE_TORCH=OFF
+    - ENABLE_KERAS=ON
 
 before_install:
   - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
@@ -59,6 +77,7 @@ before_install:
 install: 
   - pip3 install --user $(whoami) --upgrade pip
   - pip3 install torch==${TORCH}+cpu -f https://download.pytorch.org/whl/torch_stable.html
+  - pip3 install tensorflow-cpu==${TENSORFLOW}
 
 before_script:
   - wget https://github.com/Neargye/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz -O tensorflow.tar.gz
@@ -68,6 +87,6 @@ before_script:
   - rm -rvf tensorflow_lib tensorflow.tar.gz
   - mkdir build
   - cd build
-  - cmake .. -DENABLE_LOGGING=ON -DENABLE_PROFILING=ON -DBUILD_PYTHON_LIB=ON -DENABLE_TORCH=ON -DENABLE_TENSORFLOW=ON -DENABLE_KERAS=ON -DENABLE_RNN=ON -DPYTHON_EXECUTABLE=$(which python3)
+  - cmake .. -DENABLE_LOGGING=OFF -DENABLE_PROFILING=OFF -DBUILD_PYTHON_LIB=ON -DENABLE_TORCH=${ENABLE_TORCH} -DENABLE_TENSORFLOW=ON -DENABLE_KERAS=${ENABLE_KERAS} -DENABLE_RNN=ON -DPYTHON_EXECUTABLE=$(which python3)
 
-script: travis_wait make -j
+script: make -j
