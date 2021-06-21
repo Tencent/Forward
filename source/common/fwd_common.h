@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "common/common_macros.h"
@@ -47,36 +47,16 @@ enum class InferMode {
 
 // Parse inference mode from string.
 inline InferMode ParseInferMode(const std::string& value) {
-  if (value == "float" || value == "float32") {
-    return InferMode::FLOAT;
+  const std::unordered_map<std::string, InferMode> STR_MODE_MAP = {
+      {"float", InferMode::FLOAT}, {"float32", InferMode::FLOAT},
+      {"half", InferMode::HALF},   {"float16", InferMode::HALF},
+      {"int8", InferMode::INT8},   {"int8_calib", InferMode::INT8_CALIB},
+  };
+  const auto mode = STR_MODE_MAP.find(value);
+  if (mode == STR_MODE_MAP.end()) {
+    return InferMode::INVALID;
   }
-  if (value == "half" || value == "float16") {
-    return InferMode::HALF;
-  }
-  if (value == "int8") {
-    return InferMode::INT8;
-  }
-  if (value == "int8_calib") {
-    return InferMode::INT8_CALIB;
-  }
-
-  return InferMode::INVALID;
-}
-
-// Convert inference mode to string.
-inline std::string ToString(InferMode mode) {
-  switch (mode) {
-    case InferMode::FLOAT:
-      return "float";
-    case InferMode::HALF:
-      return "half";
-    case InferMode::INT8:
-      return "int8";
-    case InferMode::INT8_CALIB:
-      return "int8_calib";
-    default:
-      return "invalid";
-  }
+  return mode->second;
 }
 
 // Enumerations of data type in Forward
@@ -84,25 +64,12 @@ enum class DataType {
   FLOAT,
   HALF,
   INT8,
+  INT16,
   INT32,
+  INT64,
+  DOUBLE,
   INVALID,
 };
-
-// return the string of DataType.
-inline std::string ToString(DataType type) {
-  switch (type) {
-    case DataType::FLOAT:
-      return "FLOAT";
-    case DataType::HALF:
-      return "HALF";
-    case DataType::INT8:
-      return "INT8";
-    case DataType::INT32:
-      return "INT32";
-    default:
-      return "INVALID";
-  }
-}
 
 // enumerations of device types
 enum class DeviceType {

@@ -262,17 +262,7 @@ DataType TrtForwardEngine::GetOutputType(int index) const {
     return {};
   }
 
-  switch (engine_->getBindingDataType(output_bindings[index])) {
-    case nvinfer1::DataType::kFLOAT:
-      return DataType::FLOAT;
-    case nvinfer1::DataType::kHALF:
-      return DataType::HALF;
-    case nvinfer1::DataType::kINT32:
-      return DataType::INT32;
-    default:
-      LOG(ERROR) << "Invalid output data type";
-  }
-  return {};
+  return TrtCommon::FwdDataType(engine_->getBindingDataType(output_bindings[index]));
 }
 
 InferMode TrtForwardEngine::GetMode() { return meta_data_->Mode(); }
@@ -281,8 +271,8 @@ bool TrtForwardEngine::CheckInputs(const IOMappingVector& inputs) const {
   // TODO(Paul Lu): 未考虑从名字拿到冗余输入的情况
 
   if (inputs.size() != input_binding_indices_.size()) {
-    LOG(ERROR) << "Invalid inputs : Expect " << input_binding_indices_.size() << " but received "
-               << inputs.size();
+    LOG(ERROR) << "Invalid inputs : Expect " << input_binding_indices_.size()
+               << " inputs but received " << inputs.size() << " inputs.";
     return false;
   }
 
@@ -297,8 +287,10 @@ bool TrtForwardEngine::CheckInputs(const IOMappingVector& inputs) const {
     const auto dtype = input.tensor.data_type;
     const auto b_type = TrtCommon::FwdDataType(engine_->getBindingDataType(i));
     if (b_type != input.tensor.data_type) {
-      LOG(ERROR) << "Invalid DataType: expect " << ToString(b_type) << " but received "
-                 << ToString(dtype);
+      const std::vector<std::string> TYPE_STRS = {"FLOAT", "HALF",  "INT8",   "INT16",
+                                                  "INT32", "INT64", "DOUBLE", "INVALID"};
+      LOG(ERROR) << "Invalid DataType: expect " << TYPE_STRS[static_cast<int>(b_type)]
+                 << " but received " << TYPE_STRS[static_cast<int>(dtype)];
       return false;
     }
 
@@ -308,8 +300,9 @@ bool TrtForwardEngine::CheckInputs(const IOMappingVector& inputs) const {
     binding_dims[0] = input.tensor.dims[0];
 #endif  // USE_DYNAMIC_BATCH
     if (binding_dims != input.tensor.dims) {
-      LOG(ERROR) << "Input dimension mismatch: got " << TrtUtils::ValueStrOf(input.tensor.dims)
-                 << ", but expected " << TrtUtils::ValueStrOf(binding_dims);
+      LOG(ERROR) << "Input [" << input.name << "] dimension mismatch: got "
+                 << TrtUtils::ValueStrOf(input.tensor.dims) << ", but expected "
+                 << TrtUtils::ValueStrOf(binding_dims);
       return false;
     }
   }

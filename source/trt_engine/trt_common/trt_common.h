@@ -56,8 +56,10 @@ inline unsigned int GetElementSize(nvinfer1::DataType t) {
       return 2;
     case nvinfer1::DataType::kINT8:
       return 1;
+    default:
+      throw std::runtime_error("Invalid DataType.");
+      return 0;
   }
-  throw std::runtime_error("Invalid DataType.");
 }
 
 inline fwd::DataType FwdDataType(nvinfer1::DataType type) {
@@ -72,25 +74,6 @@ inline fwd::DataType FwdDataType(nvinfer1::DataType type) {
       return fwd::DataType::INT8;
     default:
       return fwd::DataType::INVALID;
-  }
-}
-
-inline std::string StringOf(nvinfer1::DataType type) {
-  switch (type) {
-    case nvinfer1::DataType::kFLOAT:
-      return "FLOAT";
-    case nvinfer1::DataType::kHALF:
-      return "HALF";
-    case nvinfer1::DataType::kINT8:
-      return "INT8";
-    case nvinfer1::DataType::kINT32:
-      return "INT32";
-#if NV_TENSORRT_MAJOR >= 7
-    case nvinfer1::DataType::kBOOL:
-      return "BOOL";
-#endif  // NV_TENSORRT_MAJOR >= 7
-    default:
-      return "INVALID";
   }
 }
 

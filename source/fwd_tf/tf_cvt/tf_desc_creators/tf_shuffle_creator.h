@@ -110,7 +110,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
 
       // When inputs are NHWC, we do NHWC->NCHW on those inputs to match TensorRT's data format.
-      // If the number dimensions of Reshape changed, we have to do NCHW->NHWC to keep 
+      // If the number dimensions of Reshape changed, we have to do NCHW->NHWC to keep
       // data storages correct for following layers.
       if (input.GetTensorNumDims() == 4 && dims.size() != 4) {
         layer_desc->doFirstTrans = true;

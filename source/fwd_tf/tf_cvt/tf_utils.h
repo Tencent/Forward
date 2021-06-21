@@ -402,27 +402,23 @@ inline FwdWeights ToFwdWeights(const Tensor& tensor) { return ToFwdWeights(tenso
 
 inline TF_DataType TfDataType(DataType type) {
   switch (type) {
+    case DataType::FLOAT:
+      return TF_FLOAT;
     case DataType::HALF:
       return TF_HALF;
-    case DataType::INT32:
-      return TF_INT32;
     case DataType::INT8:
       return TF_INT8;
+    case DataType::INT16:
+      return TF_INT16;
+    case DataType::INT32:
+      return TF_INT32;
+    case DataType::DOUBLE:
+      return TF_DOUBLE;
+    case DataType::INT64:
+      return TF_INT64;
     default:
+      throw std::runtime_error("Cannot parse fwd::DataType::INVALID to a valid TF_TYPE");
       return TF_FLOAT;
-  }
-}
-
-inline nvinfer1::DataType NvDataType(const TF_DataType& type) {
-  switch (type) {
-    case TF_HALF:
-      return nvinfer1::DataType::kHALF;
-    case TF_INT32:
-      return nvinfer1::DataType::kINT32;
-    case TF_INT8:
-      return nvinfer1::DataType::kINT8;
-    default:
-      return nvinfer1::DataType::kFLOAT;
   }
 }
 

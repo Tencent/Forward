@@ -277,6 +277,25 @@ inline std::string ShapeOrValueStrOf(const at::Tensor& tensor) {
   return ss.str();
 }
 
+inline c10::ScalarType ToScalarType(DataType dtype) {
+  switch (dtype) {
+    case fwd::DataType::FLOAT:
+      return c10::kFloat;
+    case fwd::DataType::HALF:
+      return c10::kHalf;
+    case fwd::DataType::INT8:
+      return c10::kChar;
+    case fwd::DataType::INT32:
+      return c10::kInt;
+    case fwd::DataType::INT64:
+      return c10::kLong;
+    case fwd::DataType::DOUBLE:
+      return c10::kDouble;
+    default:
+      return c10::ScalarType::Undefined;
+  }
+}
+
 inline std::string StringOf(c10::ScalarType type) {
   switch (type) {
     case c10::kFloat:

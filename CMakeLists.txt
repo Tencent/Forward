@@ -38,43 +38,52 @@ set(CMAKE_CXX_STANDARD 11)
 
 include(CMakeDependentOption)
 
-# Enable TensorRT
-option(ENABLE_TENSORRT "Enable TensorRT" ON)
 # Enable Torch
 option(ENABLE_TORCH "Enable Torch" OFF)
 # Enable TensorFlow
 option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 # Enable Keras
 option(ENABLE_KERAS "Enable Keras" OFF)
+
 # Enable profiling
 option(ENABLE_PROFILING "Enable profiling" OFF)
-# Enable logging
-option(ENABLE_LOGGING "Enable logging" OFF)
 # Enable dynamic batch size
 option(ENABLE_DYNAMIC_BATCH "Enable dynamic batch size" OFF)
-# Build Python Lib
-option(BUILD_PYTHON_LIB "Build Python Lib" OFF)
-# Enable Inference Tests (need OpenCV)
-option(ENABLE_INFER_TESTS "Enable Inference Tests" OFF)
 # Enable RNN models forward
 option(ENABLE_RNN "Enable RNN models forward" OFF)
+# Build Python Lib
+option(BUILD_PYTHON_LIB "Build Python Lib" OFF)
+
+# Enable Inference Tests (need OpenCV)
+option(ENABLE_INFER_TESTS "Enable Inference Tests" OFF)
 # Enable unit tests
 option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 
+# Enable TensorRT
+set(ENABLE_TENSORRT ON)
+
+# Build shared libraries
+if (MSVC)
+  set(BUILD_SHARED_LIBS OFF)
+else()
+  set(BUILD_SHARED_LIBS ON)
+endif()
+
+# Use folders
 if(MSVC)
   set(USE_FOLDERS ON)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-  set(BUILD_SHARED_LIBS OFF)
-
-  if (BUILD_PYTHON_LIB) 
-    message(FATAL_ERROR "BUILD_PYTHON_LIB=ON is NOT SUPPORTED on WINDOWS platform.")
-  endif()
-else(MSVC)
-  set(BUILD_SHARED_LIBS ON)
 endif(MSVC)
 
-# Options CMAKE_DEPENDENT_OPTION(ENABLE_UNIT_TESTS "Enable unit tests" OFF
-# "BUILD_PYTHON_LIB" ON)
+# Special setting for PyTorch
+if (BUILD_PYTHON_LIB AND ENABLE_TORCH)
+  if (MSVC) 
+    message(FATAL_ERROR "BUILD_PYTHON_LIB=ON is NOT SUPPORTED for Torch on WINDOWS platform.")
+  endif()
+  # _GLIBCXX_USE_CXX11_ABI=0 only for pytorch
+  add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+  message(WARNING "_GLIBCXX_USE_CXX11_ABIT=0 is set for PyTorch libraries. Check dependencies for this flag.")
+endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -106,6 +115,7 @@ set(CMAKE_CUDA_FLAGS
     -Xcompiler=-Wno-deprecated-declarations \
 ")
 
+# GPU_ARCHS
 set(GPU_ARCHS
     "60;61;70;75"
     CACHE STRING "GPU SM")
@@ -141,19 +151,9 @@ if(ENABLE_DYNAMIC_BATCH)
   add_definitions(-DUSE_DYNAMIC_BATCH=1)
 endif()
 
-# _GLIBCXX_USE_CXX11_ABI=0 only for pytorch
-if (BUILD_PYTHON_LIB AND ENABLE_TORCH)
-add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-message(WARNING "_GLIBCXX_USE_CXX11_ABIT=0 is set for PyTorch libraries. Check dependencies for this flag.")
-endif()
-
 # easylogging
-if(NOT ENABLE_LOGGING)
-  add_definitions(-DELPP_DISABLE_INFO_LOGS=1)
-endif()
 add_definitions(-DELPP_THREAD_SAFE=1)
 include_directories(${PROJECT_SOURCE_DIR}/source/third_party/easyloggingpp)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/easyloggingpp)
 
 # Profiling
 if(ENABLE_PROFILING)
@@ -187,18 +187,10 @@ include_directories(${TensorRT_INCLUDE_DIRS})
 if(MSVC)
   configure_file(${TensorRT_ROOT}/lib/nvinfer.dll
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nvinfer.dll COPYONLY)
-  configure_file(${TensorRT_ROOT}/lib/nvinfer.dll
-                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/nvinfer.dll COPYONLY)
   configure_file(${TensorRT_ROOT}/lib/nvinfer_plugin.dll
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nvinfer_plugin.dll COPYONLY)
-  configure_file(
-    ${TensorRT_ROOT}/lib/nvinfer_plugin.dll
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/nvinfer_plugin.dll COPYONLY)
   configure_file(${TensorRT_ROOT}/lib/myelin64_1.dll
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/myelin64_1.dll COPYONLY)
-  configure_file(
-    ${TensorRT_ROOT}/lib/myelin64_1.dll
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/myelin64_1.dll COPYONLY)
 endif(MSVC)
 
 # common
@@ -240,12 +232,8 @@ if(ENABLE_TORCH)
   if(MSVC)
     configure_file(${TORCH_INSTALL_PREFIX}/lib/torch.dll
                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/torch.dll COPYONLY)
-    configure_file(${TORCH_INSTALL_PREFIX}/lib/torch.dll
-                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/torch.dll COPYONLY)
     configure_file(${TORCH_INSTALL_PREFIX}/lib/c10.dll
                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/c10.dll COPYONLY)
-    configure_file(${TORCH_INSTALL_PREFIX}/lib/c10.dll
-                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/c10.dll COPYONLY)
   endif(MSVC)
 
   message(STATUS "Find Torch VERSION: ${Torch_VERSION}")
@@ -276,9 +264,6 @@ if(ENABLE_TENSORFLOW)
     # VERSION_LESS 19.11) add_compile_options(/permissive-) endif()
     configure_file(${TENSORFLOW_LIB_DIR}/lib/tensorflow.dll
                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tensorflow.dll COPYONLY)
-    configure_file(
-      ${TENSORFLOW_LIB_DIR}/lib/tensorflow.dll
-      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/tensorflow.dll COPYONLY)
   endif()
 
   include_directories(${TENSORFLOW_LIB_DIR}/include)
@@ -294,11 +279,13 @@ if(ENABLE_TENSORFLOW)
       message(STATUS "Do not detected PYTHON_EXECUTABLE, set it to python3")
       set(PYTHON_EXECUTABLE python3)
     endif(NOT PYTHON_EXECUTABLE)
+    # tensorflow == 1.15
     execute_process(
       COMMAND
         ${PYTHON_EXECUTABLE} -c
         "import tensorflow; import os; print(os.path.dirname(tensorflow.pywrap_tensorflow.__file__), end='')"
       OUTPUT_VARIABLE TF_PYLIB_DIR)
+    # tensorflow >= 2.0
     execute_process(
       COMMAND
         ${PYTHON_EXECUTABLE} -c

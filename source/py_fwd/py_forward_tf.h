@@ -42,7 +42,14 @@ namespace py = pybind11;
 
 inline TF_DataType GetTFTypeFromDtype(const py::array& arr) {
   if (arr.dtype().kind() == 'f') {
-    return arr.dtype().itemsize() == 4 ? TF_FLOAT : TF_HALF;
+    switch (arr.dtype().itemsize()) {
+      case 2:
+        return TF_HALF;
+      case 4:
+        return TF_FLOAT;
+      case 8:
+        return TF_DOUBLE;
+    }
   }
   if (arr.dtype().kind() == 'i' || arr.dtype().kind() == 'u') {
     switch (arr.dtype().itemsize()) {

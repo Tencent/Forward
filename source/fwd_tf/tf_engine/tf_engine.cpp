@@ -131,9 +131,7 @@ std::vector<std::shared_ptr<TF_Tensor>> TfEngine::CopyFromBuffers(
 
   for (size_t i = 0; i < buffers.size(); ++i) {
     const auto data_type =
-        reinterpret_cast<TrtForwardEngine*>(engine_.get())->GetOutputType(i) == DataType::HALF
-            ? TF_HALF
-            : TF_FLOAT;
+        tf_::TfDataType(reinterpret_cast<TrtForwardEngine*>(engine_.get())->GetOutputType(i));
 
     std::vector<int64_t> dims_vec(buffers[i].dims.begin(), buffers[i].dims.end());
 

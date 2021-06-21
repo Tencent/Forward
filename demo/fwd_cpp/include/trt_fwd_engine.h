@@ -1,15 +1,13 @@
 // Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not
-// use this file except in compliance with the License. You may obtain a copy of
-// the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-// License for the specific language governing permissions and limitations under
+// Unless required by applicable law or agreed to in writing, software distributed under the License
+// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+// or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 //
 // ╔════════════════════════════════════════════════════════════════════════════════════════╗
@@ -37,7 +35,7 @@
 #include <vector>
 
 #include "common/i_forward_api.h"
-#include "common/trt_common.h"
+#include "trt_engine/trt_common/trt_common.h"
 
 FWD_NAMESPACE_BEGIN
 
@@ -53,18 +51,16 @@ class TrtForwardEngine : public IForwardEngine {
 
   ~TrtForwardEngine();
 
-  // return true if forwarding succeed. The vector of outputs store results of
-  // forwarding. The data ptr in Tensors can be in host memory or device memory,
-  // which is determined by DeviceType. The memory of the outputs is managed
-  // internally, so the caller should NOT delete the data ptr in the Tensor of
-  // outputs.
+  // return true if forwarding succeed. The vector of outputs store results of forwarding. The data
+  // ptr in Tensors can be in host memory or device memory, which is determined by DeviceType.
+  // The memory of the outputs is managed internally, so the caller should NOT delete the data ptr
+  // in the Tensor of outputs.
   bool Forward(const std::vector<Tensor>& inputs, std::vector<Tensor>& outputs) override;
 
-  // return true if forwarding with name succeed. The vector of outputs store
-  // results of forwarding. The data ptr in Tensors can be in host memory or
-  // device memory, which is determined by DeviceType. The memory of the outputs
-  // is managed internally, so the caller should NOT delete the data ptr in the
-  // Tensor of outputs.
+  // return true if forwarding with name succeed. The vector of outputs store results of forwarding.
+  // The data ptr in Tensors can be in host memory or device memory, which is determined by
+  // DeviceType. The memory of the outputs is managed internally, so the caller should NOT delete
+  // the data ptr in the Tensor of outputs.
   bool ForwardWithName(const IOMappingVector& inputs, IOMappingVector& outputs) override;
 
   // return true if engine_file is saved as engine_file.
@@ -92,16 +88,15 @@ class TrtForwardEngine : public IForwardEngine {
   InferMode GetMode() override;
 
  protected:
-  // return true if TensorRT engine execute successfully. Before the execution,
-  // the BATCH of engine will be set as the BATCH of inputs. After inputs and
-  // outputs are all set on the device, the engine execute.
+  // return true if TensorRT engine execute successfully. Before the execution, the BATCH of engine
+  // will be set as the BATCH of inputs. After inputs and outputs are all set on the device, the
+  // engine execute.
   bool Execute(const IOMappingVector& inputs, IOMappingVector& outputs);
 
   // return true if TensorRT engine is loaded from a saved engine_file.
   bool LoadEngine(const std::string& engine_file);
 
-  // Check if numbers of given inputs and numbers of required inputs in the
-  // Engine.
+  // Check if numbers of given inputs and numbers of required inputs in the Engine.
   bool CheckInputNums(std::vector<Tensor>& inputs) const;
 
   // Check DataTypes and Dimensions of given inputs

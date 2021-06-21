@@ -44,7 +44,14 @@ namespace py = pybind11;
 
 inline fwd::DataType GetFWDTypeFromDtype(const py::array& arr) {
   if (arr.dtype().kind() == 'f') {
-    return arr.dtype().itemsize() == 4 ? fwd::DataType::FLOAT : fwd::DataType::HALF;
+    switch (arr.dtype().itemsize()) {
+      case 2:
+        return fwd::DataType::HALF;
+      case 4:
+        return fwd::DataType::FLOAT;
+      case 8:
+        return fwd::DataType::DOUBLE;
+    }
   }
   if (arr.dtype().kind() == 'i' || arr.dtype().kind() == 'u') {
     switch (arr.dtype().itemsize()) {
@@ -52,6 +59,8 @@ inline fwd::DataType GetFWDTypeFromDtype(const py::array& arr) {
         return fwd::DataType::INT8;
       case 4:
         return fwd::DataType::INT32;
+      case 8:
+        return fwd::DataType::INT64;
       default:
         return fwd::DataType::INVALID;
     }

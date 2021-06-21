@@ -30,7 +30,7 @@
 
 // #include "unit_test/test_torch_bert.h"
 #include "unit_test/test_torch_nodes.h"
-#include "unit_test/test_torch_nodes_fp16.h"
+//#include "unit_test/test_torch_nodes_fp16.h"
 // #include "unit_test/test_torch_nodes_int8.h"
 // #include "unit_test/test_torch_nodes_v170.h"
 // #include "unit_test/test_torch_seg.h"
@@ -43,9 +43,9 @@
 
 #ifdef ENABLE_TENSORFLOW
 
-#include "unit_test/test_tf_bert.h"
+//#include "unit_test/test_tf_bert.h"
 #include "unit_test/test_tf_nodes.h"
-#include "unit_test/test_tf_nodes_fp16.h"
+//#include "unit_test/test_tf_nodes_fp16.h"
 // #include "unit_test/test_tf_nodes_int8.h"
 // #include "unit_test/test_tf_vision.h"
 

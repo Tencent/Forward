@@ -159,8 +159,9 @@ std::vector<at::Tensor> TorchEngine::CopyFromBuffers(const std::vector<Tensor>& 
                      .device(use_cuda ? c10::kCUDA : c10::kCPU);
 
   for (size_t i = 0; i < buffers.size(); ++i) {
-    const auto dtype = reinterpret_cast<TrtForwardEngine*>(engine_.get())->GetOutputType(i);
-    options = options.dtype(dtype == DataType::HALF ? c10::kHalf : c10::kFloat);
+    const auto dtype =
+        torch_::ToScalarType(reinterpret_cast<TrtForwardEngine*>(engine_.get())->GetOutputType(i));
+    options = options.dtype(dtype);
 
     const std::vector<int>& dims = buffers[i].dims;
     std::vector<int64_t> shape(dims.begin(), dims.end());
