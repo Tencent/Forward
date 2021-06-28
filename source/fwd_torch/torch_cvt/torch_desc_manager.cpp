@@ -67,9 +67,12 @@
 #include "torch_desc_creators/torch_slice_creator.h"
 #include "torch_desc_creators/torch_softmax_creator.h"
 #include "torch_desc_creators/torch_split_creator.h"
-#include "torch_desc_creators/torch_submodule_creator.h"
 #include "torch_desc_creators/torch_unary_creator.h"
 #include "torch_desc_creators/torch_upsample_bilinear_creator.h"
+
+#ifdef ENABLE_TORCH_PLUGIN
+#include "torch_desc_creators/torch_submodule_creator.h"
+#endif
 
 FWD_TORCH_NAMESPACE_BEGIN
 
@@ -96,7 +99,7 @@ TorchDescManager::TorchDescManager() {
   RegisterCreator<TrtSplitDesc>();
   RegisterCreator<TrtClampDesc>();
   RegisterCreator<TrtConcatenationDesc>();
-  // RegisterCreator<TrtGatherDesc>();
+  RegisterCreator<TrtGatherDesc>();
   RegisterCreator<TrtGeluDesc>();
   RegisterCreator<TrtGridSamplerDesc>();
   RegisterCreator<TrtIndexDesc>();
@@ -117,7 +120,10 @@ TorchDescManager::TorchDescManager() {
   // 这种简单的模式就放在下面
   RegisterCreator<TrtIdentityDesc>();
   RegisterCreator<TrtNoopDesc>();
+
+#ifdef ENABLE_TORCH_PLUGIN
   RegisterCreator<TrtTorchModuleDesc>();
+#endif
 }
 
 ILayerDescCreator* TorchDescManager::FindDescCreator(const JitNode* node,
