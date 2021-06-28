@@ -59,6 +59,15 @@ option(ENABLE_INFER_TESTS "Enable Inference Tests" OFF)
 # Enable unit tests
 option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 
+# Beta Test Function: Enalbe Torch SubModule Plugin, 'OFF' as default
+# This plugin can support more Torch-Op with TorchSubmodule, but not guarantee the performance of those ops.
+# Warning: This plugin makes libtrt_engine.so require Torch-Libraries as dependencies.
+option(ENABLE_TORCH_PLUGIN "Enable Torch Plugin" OFF)
+if (ENABLE_TORCH_PLUGIN)
+  message(WARNING "ENABLE_TORCH_PLUGIN=ON, TORCH_PLUGIN NOT SUPPORT dynamic batch.")
+  set(ENABLE_DYNAMIC_BATCH OFF)
+endif()
+
 # Enable TensorRT
 set(ENABLE_TENSORRT ON)
 
@@ -248,6 +257,10 @@ if(ENABLE_TORCH)
 
   include_directories(${TORCH_INCLUDE_DIRS})
   add_definitions(-DENABLE_TORCH=1)
+
+  if (ENABLE_TORCH_PLUGIN)
+    add_definitions(-DENABLE_TORCH_PLUGIN=1)
+  endif()
 
   if (TORCH_CUDA_LIBRARIES)
     message(STATUS "TORCH_HAS_CUDA, TORCH_CUDA_LIBRARIES = ${TORCH_CUDA_LIBRARIES}")

@@ -419,6 +419,7 @@ TEST(TestTorchNodes, Permute) {
   TestTorchInference(model_path, input_map, "float32");
 }
 
+#ifdef ENABLE_TORCH_PLUGIN
 TEST(TestTorchNodes, PixelShuffle) {
   const auto model_path = std::string(torch_root_dir) + "nodes/pixel_shuffle.pth";
   const auto input = torch::randn({1, 9, 24, 24}, device);
@@ -429,7 +430,7 @@ TEST(TestTorchNodes, PixelShuffle) {
   // TestTorchInference(model_path, {input}, "float32");
   TestTorchInference(model_path, input_map, "float32");
 }
-
+#endif  // ENABLE_TORCH_PLUGIN
 TEST(TestTorchNodes, ReduceModule) {
   const auto input = torch::randn({32, 16, 45, 12}, device);
   std::unordered_map<std::string, c10::IValue> input_map;

@@ -57,7 +57,7 @@ set(PLUGIN_LISTS
     upsampler_plugin
     )
 
-if (ENABLE_TORCH)
+if (ENABLE_TORCH_PLUGIN)
     list(APPEND PLUGIN_LISTS torch_module_plugin)
 endif()
 

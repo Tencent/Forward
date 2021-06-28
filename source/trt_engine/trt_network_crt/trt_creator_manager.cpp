@@ -69,9 +69,9 @@
 #include "trt_engine/trt_network_crt/layer_creators/trt_unary_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_upsample_bilinear_creator.h"
 
-#ifdef ENABLE_TORCH
+#ifdef ENABLE_TORCH_PLUGIN
 #include "trt_engine/trt_network_crt/layer_creators/trt_torch_module_creator.h"
-#endif  //  ENABLE_TORCH
+#endif  //  ENABLE_TORCH_PLUGIN
 
 // register BERT-related plugins
 namespace fwd {
@@ -106,9 +106,9 @@ REGISTER_TENSORRT_PLUGIN(ReflectionPadding2DPluginCreator);
 REGISTER_TENSORRT_PLUGIN(SplitPluginCreator);
 REGISTER_TENSORRT_PLUGIN(UpsampleBilinear2DPluginCreator);
 
-#ifdef ENABLE_TORCH
+#ifdef ENABLE_TORCH_PLUGIN
 REGISTER_TENSORRT_PLUGIN(TorchModulePluginCreator);
-#endif  //  ENABLE_TORCH
+#endif  //  ENABLE_TORCH_PLUGIN
 
 LayerCreatorManager::LayerCreatorManager() {
   // 这里注册时候，按照字母顺序吧，便于查找
@@ -160,9 +160,9 @@ LayerCreatorManager::LayerCreatorManager() {
 
   RegisterCreator<TrtMatMulAddDesc>();
 
-#ifdef ENABLE_TORCH
+#ifdef ENABLE_TORCH_PLUGIN
   RegisterCreator<TrtTorchModuleDesc>();
-#endif  // ENABLE_TORCH
+#endif  // ENABLE_TORCH_PLUGIN
 }
 
 ILayerCreator* LayerCreatorManager::FindCreator(const std::string& layer_name) const {

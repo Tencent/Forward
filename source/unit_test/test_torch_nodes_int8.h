@@ -455,6 +455,7 @@ TEST(TestTorchNodesInt8, Permute) {
                      std::make_shared<TestBatchStream>(InputVolume(input_map)));
 }
 
+#ifdef ENABLE_TORCH_PLUGIN
 TEST(TestTorchNodesInt8, PixelShuffle) {
   const auto model_path = std::string(torch_root_dir) + "nodes/pixel_shuffle.pth";
   const auto input = torch::randn({1, 9, 24, 24}, device).to(c10::kHalf);
@@ -466,6 +467,7 @@ TEST(TestTorchNodesInt8, PixelShuffle) {
   TestTorchInference(model_path, input_map, "int8", 1e-2,
                      std::make_shared<TestBatchStream>(InputVolume(input_map)));
 }
+#endif
 
 TEST(TestTorchNodesInt8, ReduceModule) {
   const auto input = torch::randn({32, 16, 45, 12}, device).to(c10::kHalf);
