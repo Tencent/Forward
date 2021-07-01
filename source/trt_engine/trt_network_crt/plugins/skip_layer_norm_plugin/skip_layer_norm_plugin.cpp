@@ -38,13 +38,15 @@ SkipLayerNormPluginDynamic::SkipLayerNormPluginDynamic(const std::string name,
                                                        const nvinfer1::DataType type, const int ld,
                                                        const nvinfer1::Weights& beta,
                                                        const nvinfer1::Weights& gamma,
-                                                       const nvinfer1::Weights& bias)
+                                                       const nvinfer1::Weights& bias,
+                                                       const bool has_skip)
     : mLayerName(name),
       mGammaDev(nullptr),
       mBetaDev(nullptr),
       mLd(ld),
       mType(type),
-      mBiasDev(nullptr) {
+      mBiasDev(nullptr),
+      mHasSkip(has_skip) {
   assert(mType == nvinfer1::DataType::kFLOAT || mType == nvinfer1::DataType::kHALF ||
          mType == nvinfer1::DataType::kINT8);
   // mCfgType is the dataType for beta, gamma bias weights, always fp16 or fp32
@@ -73,6 +75,7 @@ SkipLayerNormPluginDynamic::SkipLayerNormPluginDynamic(const std::string name, c
   deserialize_value(&data, &length, &mCfgType);
   deserialize_value(&data, &length, &mLd);
   deserialize_value(&data, &length, &mHasBias);
+  deserialize_value(&data, &length, &mHasSkip);
 
   assert(mCfgType == nvinfer1::DataType::kFLOAT || mCfgType == nvinfer1::DataType::kHALF);
   mParamWordsize = getElementSize(mCfgType);
@@ -89,7 +92,7 @@ SkipLayerNormPluginDynamic::SkipLayerNormPluginDynamic(const std::string name, c
 nvinfer1::IPluginV2DynamicExt* SkipLayerNormPluginDynamic::clone() const {
   LOG(INFO) << "SkipLayerNormPluginDynamic clone\n";
 
-  auto p = new SkipLayerNormPluginDynamic(mLayerName, mType, mLd, mBeta, mGamma, mBias);
+  auto p = new SkipLayerNormPluginDynamic(mLayerName, mType, mLd, mBeta, mGamma, mBias, mHasSkip);
   p->initialize();
   p->setPluginNamespace(mNamespace.c_str());
   return p;
@@ -98,16 +101,16 @@ nvinfer1::IPluginV2DynamicExt* SkipLayerNormPluginDynamic::clone() const {
 nvinfer1::DimsExprs SkipLayerNormPluginDynamic::getOutputDimensions(
     int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
     nvinfer1::IExprBuilder& exprBuilder) {
-  assert(nbInputs == 2);
+  assert(nbInputs == 1 + mHasSkip);
   assert(outputIndex == 0);
-  assert(inputs[0].nbDims == inputs[1].nbDims);
+  // assert(inputs[0].nbDims == inputs[1].nbDims);
   return inputs[0];
 }
 
 bool SkipLayerNormPluginDynamic::supportsFormatCombination(int pos,
                                                            const nvinfer1::PluginTensorDesc* inOut,
                                                            int nbInputs, int nbOutputs) {
-  assert(nbInputs == 2);
+  assert(nbInputs == 1 + mHasSkip);
   assert(nbOutputs == 1);
 
   const nvinfer1::PluginTensorDesc& in = inOut[pos];
@@ -143,34 +146,40 @@ void SkipLayerNormPluginDynamic::configurePlugin(const nvinfer1::DynamicPluginTe
 
   // Validate input arguments
   assert(nbOutputs == 1);
-  assert(nbInputs == 2);
+  assert(nbInputs == 1 + mHasSkip);
   if (mType == nvinfer1::DataType::kFLOAT || mType == nvinfer1::DataType::kHALF) {
     assert(mType == inputs[0].desc.type);
-    assert(mType == inputs[1].desc.type);
   } else {
     assert(mType == inputs[0].desc.type || nvinfer1::DataType::kFLOAT == inputs[0].desc.type);
-    assert(mType == inputs[1].desc.type || nvinfer1::DataType::kFLOAT == inputs[1].desc.type);
   }
   const auto& inDims0 = inputs[0].desc.dims;
-  const auto& inDims1 = inputs[1].desc.dims;
-  TRT_UNUSED inDims1;
-  assert(inDims0.nbDims == inDims1.nbDims);
-
-  assert(inDims0.d[0] <= inDims1.d[0]);
-
-  assert(std::equal(inDims0.d + 1, inDims0.d + inDims0.nbDims, inDims1.d + 1));
-
   // mLd = inDims0.d[HDIM];  // hiddensize
-
   assert(inDims0.nbDims == 5 || inDims0.nbDims == 3);
-  // assert(inDims0.d[3] == 1);
-  // assert(inDims0.d[4] == 1);
-
   mCfgType = inputs[0].desc.type == nvinfer1::DataType::kINT8 ? nvinfer1::DataType::kHALF
                                                               : inputs[0].desc.type;
 
   const auto paramType = getParamWordType(mCfgType);
   mParamWordsize = getElementSize(paramType);
+
+  if (mHasSkip) {
+    if (mType == nvinfer1::DataType::kFLOAT || mType == nvinfer1::DataType::kHALF) {
+      assert(mType == inputs[1].desc.type);
+    } else {
+      assert(mType == inputs[1].desc.type || nvinfer1::DataType::kFLOAT == inputs[1].desc.type);
+    }
+    const auto& inDims1 = inputs[1].desc.dims;
+    TRT_UNUSED inDims1;
+    assert(inDims0.nbDims == inDims1.nbDims);
+    assert(inDims0.d[0] <= inDims1.d[0]);
+    assert(std::equal(inDims0.d + 1, inDims0.d + inDims0.nbDims, inDims1.d + 1));
+  } else {
+    LOG(INFO) << "SkipLayerNorm has no Skip, Create Zeros as Skip.";
+    const auto nbBytes = volume(inputs[0].desc.dims) * mParamWordsize;
+    void* cudaMem{nullptr};
+    CUASSERT(cudaMalloc(&cudaMem, nbBytes));
+    CUASSERT(cudaMemset(cudaMem, 0, nbBytes));
+    mZerosDev.reset(cudaMem);
+  }
 
   copyToDevice(mGamma, getWeightsSize(mGamma, paramType), mGammaDev);
   copyToDevice(mBeta, getWeightsSize(mBeta, paramType), mBetaDev);
@@ -198,7 +207,8 @@ int SkipLayerNormPluginDynamic::enqueue(const nvinfer1::PluginTensorDesc* inputD
   // Launch CUDA kernel wrapper and save its return value
   if (iType == nvinfer1::DataType::kFLOAT) {
     const auto input = static_cast<const float*>(inputs[0]);
-    const auto skip = static_cast<const float*>(inputs[1]);
+    const auto skip = mHasSkip ? static_cast<const float*>(inputs[1])
+                               : static_cast<const float*>(mZerosDev.get());
     auto output = static_cast<float*>(outputs[0]);
     const auto bias = static_cast<const float*>(mBiasDev.get());
     const auto beta = static_cast<const float*>(mBetaDev.get());
@@ -212,7 +222,8 @@ int SkipLayerNormPluginDynamic::enqueue(const nvinfer1::PluginTensorDesc* inputD
     }
   } else if (iType == nvinfer1::DataType::kHALF) {
     const auto input = static_cast<const half*>(inputs[0]);
-    const auto skip = static_cast<const half*>(inputs[1]);
+    const auto skip =
+        mHasSkip ? static_cast<const half*>(inputs[1]) : static_cast<const half*>(mZerosDev.get());
     auto output = static_cast<half*>(outputs[0]);
     const auto bias = static_cast<const half*>(mBiasDev.get());
     const auto beta = static_cast<const half*>(mBetaDev.get());
@@ -229,7 +240,8 @@ int SkipLayerNormPluginDynamic::enqueue(const nvinfer1::PluginTensorDesc* inputD
     const float dqScaleSkip = inputDesc[1].scale;
     const float qScale = 1.f / outputDesc[0].scale;
     const auto input = static_cast<const int8_t*>(inputs[0]);
-    const auto skip = static_cast<const int8_t*>(inputs[1]);
+    const auto skip = mHasSkip ? static_cast<const int8_t*>(inputs[1])
+                               : static_cast<const int8_t*>(mZerosDev.get());
     auto output = static_cast<int8_t*>(outputs[0]);
     const auto bias = static_cast<const half*>(mBiasDev.get());
     const auto beta = static_cast<const half*>(mBetaDev.get());
@@ -256,7 +268,7 @@ int SkipLayerNormPluginDynamic::enqueue(const nvinfer1::PluginTensorDesc* inputD
 nvinfer1::DataType SkipLayerNormPluginDynamic::getOutputDataType(
     int index, const nvinfer1::DataType* inputTypes, int nbInputs) const {
   assert(index == 0);
-  assert(nbInputs == 2);
+  assert(nbInputs == 1 + mHasSkip);
   return inputTypes[0];
 }
 
@@ -280,7 +292,7 @@ void SkipLayerNormPluginDynamic::terminate() {
 size_t SkipLayerNormPluginDynamic::getSerializationSize() const {
   const size_t biasSize = mHasBias ? (mLd * mParamWordsize) : 0;
   return 2 * mParamWordsize * mLd + 2 * sizeof(nvinfer1::DataType) + sizeof(mLd) + biasSize +
-         sizeof(mHasBias);
+         sizeof(mHasBias) + sizeof(mHasSkip);
 }
 
 void SkipLayerNormPluginDynamic::serialize(void* buffer) const {
@@ -290,6 +302,7 @@ void SkipLayerNormPluginDynamic::serialize(void* buffer) const {
   serialize_value(&buffer, mCfgType);
   serialize_value(&buffer, mLd);
   serialize_value(&buffer, mHasBias);
+  serialize_value(&buffer, mHasSkip);
 
   char* d = static_cast<char*>(buffer);
   serFromDev(d, static_cast<char*>(mBetaDev.get()), mLd * mParamWordsize);
@@ -305,6 +318,7 @@ void SkipLayerNormPluginDynamic::destroy() {
   mGammaDev.release();
   mBetaDev.release();
   mBiasDev.release();
+  mZerosDev.release();
   delete this;
 }
 
@@ -337,6 +351,7 @@ nvinfer1::IPluginV2* SkipLayerNormPluginDynamicCreator::createPlugin(
     const char* name, const nvinfer1::PluginFieldCollection* fc) {
   LOG(INFO) << "SkipLayerNormPluginDynamicCreator createPlugin\n";
 
+  bool has_skip = false;
   int ld = 0;
   nvinfer1::Weights beta{nvinfer1::DataType::kFLOAT, nullptr, 0};
   nvinfer1::Weights gamma{nvinfer1::DataType::kFLOAT, nullptr, 0};
@@ -375,8 +390,14 @@ nvinfer1::IPluginV2* SkipLayerNormPluginDynamicCreator::createPlugin(
       bias.count = fc->fields[i].length;
       bias.type = fieldTypeToDataType(fc->fields[i].type);
     }
+
+    if (field_name.compare("has_skip") == 0) {
+      LOG(INFO) << "Building has skip...\n";
+      has_skip = *static_cast<const int*>(fc->fields[i].data);
+    }
   }
   LOG(INFO) << "Type " << typeId << std::endl;
+  LOG(INFO) << "HasSkip " << has_skip << std::endl;
 
   if (typeId < 0 || typeId > 3) {
     LOG(ERROR) << "SkipLayerNorm: Invalid type ID: " << typeId << std::endl;
@@ -391,7 +412,7 @@ nvinfer1::IPluginV2* SkipLayerNormPluginDynamicCreator::createPlugin(
   }
 
   return new SkipLayerNormPluginDynamic(name, static_cast<nvinfer1::DataType>(typeId), ld, beta,
-                                        gamma, bias);
+                                        gamma, bias, has_skip);
 }
 
 nvinfer1::IPluginV2* SkipLayerNormPluginDynamicCreator::deserializePlugin(const char* name,

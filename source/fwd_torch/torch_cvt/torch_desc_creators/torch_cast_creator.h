@@ -51,7 +51,22 @@ class TLayerDescCreator<TrtCastDesc> : public ILayerDescCreator {
     const auto inputs = node->inputs();
     T_CHECK_GE(inputs.size(), 2);
 
-    input_values.push_back(inputs[0]);
+    const auto input = inputs[0];
+
+    // if the input is from a prim::GetAttr, which means Constant Weights, then we create a constant
+    // layer for a constant weight.
+    if (input->node()->kind() == c10::prim::GetAttr) {
+      input_values.push_back(nullptr);
+      auto layer_desc = std::make_shared<TrtConstantDesc>();
+      auto ivalue = module.Get(node->output());
+      T_CHECK(ivalue.isTensor());
+      auto tensor = ivalue.toTensor();
+      layer_desc->weights = ToFwdWeights(tensor);
+      layer_desc->dimensions = layer_desc->weights.Dims();
+      return layer_desc;
+    }
+
+    input_values.push_back(input);
 
     auto layer_desc = std::make_shared<TrtCastDesc>();
     const auto type = module.Get(inputs[1]).toScalarType();

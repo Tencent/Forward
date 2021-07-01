@@ -72,7 +72,7 @@ class TLayerDescCreator<TrtTorchModuleDesc> : public ILayerDescCreator {
     // Create SubModule
     TorchSubModule sub_module;
     CHECK(sub_module.AddNode(const_cast<torch::jit::Node*>(node)));
-    sub_module.AddAttributes(module.NamedAttributes());
+    sub_module.CloneAttributesFrom(module.GetModule());
     CHECK(sub_module.CreateModule());
 
     // set number of inputs

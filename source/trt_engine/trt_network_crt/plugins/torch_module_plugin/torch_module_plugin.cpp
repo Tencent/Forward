@@ -230,10 +230,12 @@ void TorchModulePlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc*
   // Create SubModule by cloning nodes with node_ids and id->node map
   sub_module_ = std::make_shared<fwd::torch_::TorchSubModule>();
   for (auto id : node_ids_) {
-    ASSERT(sub_module_->AddNode(id_node_map[id]));
+    const auto node_item = id_node_map.find(id);
+    ASSERT(node_item != id_node_map.end());
+    ASSERT(sub_module_->AddNode(node_item->second));
   }
   // Copy attributes which is needed by weight and bias of nodes
-  sub_module_->AddAttributes(module.NamedAttributes());
+  sub_module_->CloneAttributesFrom(module.GetModule());
   // Create module
   ASSERT(sub_module_->CreateModule());
   ASSERT(sub_module_->Inputs().size() == nbInputs);

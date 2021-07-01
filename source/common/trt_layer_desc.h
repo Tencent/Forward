@@ -430,8 +430,8 @@ struct TrtMatrixMultiplyDesc : TrtLayerDesc {
   TRT_LAYER_DESC(MatrixMultiply)
 
   ConstantInput inputs[2];
-  nvinfer1::MatrixOperation op0;
-  nvinfer1::MatrixOperation op1;
+  nvinfer1::MatrixOperation op[2]{nvinfer1::MatrixOperation::kNONE,
+                                  nvinfer1::MatrixOperation::kNONE};
 };
 
 struct TrtParametricReLUDesc : TrtLayerDesc {

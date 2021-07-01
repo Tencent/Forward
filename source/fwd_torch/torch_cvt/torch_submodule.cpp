@@ -101,6 +101,9 @@ torch::jit::Value* TorchSubModule::GetOrAddInputForValue(torch::jit::Value* old_
                kind == c10::prim::NumToTensor || kind == c10::aten::size ||
                kind == c10::aten::Int || kind == c10::aten::floor || kind == c10::aten::to ||
                kind == c10::aten::mul || kind == c10::aten::div) {
+      if (kind == c10::prim::GetAttr) {
+        if (node->hasAttributeS("name")) attr_names_.push_back(node->s(c10::Symbol::attr("name")));
+      }
       // create ListConstruct constants and attribute params
       auto env = [&](torch::jit::Value* v) { return GetOrAddInputForValue(v); };
       auto new_const = graph_->createClone(node, env);
@@ -145,8 +148,10 @@ bool TorchSubModule::CreateModule() {
   return true;
 }
 
-void TorchSubModule::AddAttributes(const torch::jit::named_attribute_list& attr_map) {
-  for (auto attr : attr_map) named_attrs_[attr.name] = attr.value.deepcopy();
+void TorchSubModule::CloneAttributesFrom(const torch::jit::Module& module) {
+  for (auto& name : attr_names_) {
+    if (module.hasattr(name)) named_attrs_[name] = module.attr(name);
+  }
 }
 
 std::vector<torch::jit::IValue> TorchSubModule::Eval(

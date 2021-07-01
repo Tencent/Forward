@@ -32,8 +32,7 @@
 #include <string>
 #include <vector>
 
-#include "unit_test/test_batch_stream.h"
-#include "unit_test/unit_test.h"
+#include "unit_test/unit_test_torch_helper.h"
 
 class TestTorchBert : public ::testing::Test {
  public:
@@ -58,13 +57,9 @@ class TestTorchBert : public ::testing::Test {
     input_map["input_ids"] = input_ids;
     input_map["attention_mask"] = input_mask;
     input_map["input"] = segment_ids;
-    // input_map["adj"] = adj;
-    // input_map["nmp"] = nmp;
     inputs.emplace_back(input_ids);
     inputs.emplace_back(input_mask);
     inputs.emplace_back(segment_ids);
-    // inputs.emplace_back(adj);
-    // inputs.emplace_back(nmp);
   }
 
   ~TestTorchBert() override = default;

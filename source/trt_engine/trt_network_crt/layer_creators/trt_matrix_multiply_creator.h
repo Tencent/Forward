@@ -65,8 +65,12 @@ class TLayerCreator<TrtMatrixMultiplyDesc> : public ILayerCreator {
       }
     }
 
+    T_CHECK_NOTNULL(input0);
+    T_CHECK_NOTNULL(input1);
+    CHECK_EQ(input0->getDimensions().nbDims, input1->getDimensions().nbDims);
+
     nvinfer1::IMatrixMultiplyLayer* mat_mul =
-        network->addMatrixMultiply(*input0, mat_mul_desc->op0, *input1, mat_mul_desc->op1);
+        network->addMatrixMultiply(*input0, mat_mul_desc->op[0], *input1, mat_mul_desc->op[1]);
     if (mat_mul == nullptr) {
       LOG(ERROR) << "Create Network: Fail to create [matrix multiply] layer";
       return {};

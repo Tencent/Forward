@@ -136,6 +136,8 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
     const TrtNormalizationDesc* const norm_desc =
         dynamic_cast<const TrtNormalizationDesc*>(layer_desc);
 
+    const int has_skip = input_tensors.size() == 2;
+
     // 创建 Plugin
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
         fwd::bert::FWD_SKIP_LAYER_NORM_NAME, fwd::bert::FWD_SKIP_LAYER_NORM_VERSION);
@@ -149,6 +151,7 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
 
     const auto dtype = TrtCommon::GetDataType(norm_desc->use_fp16, norm_desc->use_int8, true);
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
+    field_data.emplace_back("has_skip", &has_skip, nvinfer1::PluginFieldType::kINT32, 1);
 
     // fill data
     const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
@@ -156,13 +159,8 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
     const auto plugin_obj = TrtCommon::InferUniquePtr<nvinfer1::IPluginV2>(
         creator->createPlugin("skip_layer_norm", &plugin_data));
 
-    ITensorVector tensors(input_tensors);
-    if (tensors.size() == 1) {
-      tensors.push_back(
-          network->addConstant(norm_desc->zeros.Dims(), norm_desc->zeros)->getOutput(0));
-    }
     nvinfer1::IPluginV2Layer* skip =
-        network->addPluginV2(tensors.data(), tensors.size(), *plugin_obj);
+        network->addPluginV2(input_tensors.data(), input_tensors.size(), *plugin_obj);
 
     if (skip == nullptr) {
       LOG(ERROR) << "Create Network: Fail to create [skip_layer_norm] layer.";

@@ -50,33 +50,23 @@ class TLayerDescCreator<TrtMatrixMultiplyDesc> : public ILayerDescCreator {
 
     // Input 0: Tensor input0
     // Input 1: Tensor input1
-
-    std::vector<nvinfer1::MatrixOperation> op(2, nvinfer1::MatrixOperation::kNONE);
-
-    const auto input_dims = module.Get(inputs[0]).toTensor().ndimension();
-
-    std::vector<const JitNode*> children(2);
-    children[0] = node->inputs()[0]->node();
-    children[1] = node->inputs()[1]->node();
+    auto layer_desc = std::make_shared<TrtMatrixMultiplyDesc>();
 
     for (int i = 0; i < 2; i++) {
-      if (CheckTransposed(module, input_dims, children[i])) {
-        op[i] = nvinfer1::MatrixOperation::kTRANSPOSE;
-        node_inputs.push_back(children[i]->inputs()[0]);
+      const auto input_dims = module.Get(inputs[i]).toTensor().ndimension();
+      if (inputs[i]->node()->kind() == c10::prim::GetAttr) {
+        auto ivalue = module.Get(inputs[i]);
+        T_CHECK(ivalue.isTensor());
+        layer_desc->inputs[i].inUse = true;
+        layer_desc->inputs[i].data = ToFwdWeights(ivalue.toTensor());
+        layer_desc->inputs[i].dim = layer_desc->inputs[i].data.Dims();
+      } else if (CheckTransposed(module, input_dims, inputs[i]->node())) {
+        layer_desc->op[i] = nvinfer1::MatrixOperation::kTRANSPOSE;
+        node_inputs.push_back(inputs[i]->node()->inputs()[0]);
       } else {
         node_inputs.push_back(inputs[i]);
       }
     }
-
-    // op0 =
-    // static_cast<nvinfer1::MatrixOperation>(module.Get(inputs[2]).toBool());
-    // op1 =
-    // static_cast<nvinfer1::MatrixOperation>(module.Get(inputs[3]).toBool());
-
-    auto layer_desc = std::make_shared<TrtMatrixMultiplyDesc>();
-
-    layer_desc->op0 = op[0];
-    layer_desc->op1 = op[1];
 
     return layer_desc;
   }

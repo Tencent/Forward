@@ -57,10 +57,12 @@ class TLayerDescCreator<TrtSplitDesc> : public ILayerDescCreator {
     auto layer_desc = std::make_shared<TrtSplitDesc>();
 
     const auto& inputs = node->inputs();
-
+    const auto input_dims = DimsOf(module.Get(inputs[0]).toTensor());
     layer_desc->splitSize.clear();
     layer_desc->dim = module.Get(inputs[2]).toInt();
-    const auto input_dims = DimsOf(module.Get(inputs[0]).toTensor());
+    if (layer_desc->dim < 0) {
+      layer_desc->dim = input_dims.nbDims + layer_desc->dim;
+    }
 
     if (node->kind() == c10::aten::split_with_sizes) {
       const auto split_size = module.Get(inputs[1]).toIntList();

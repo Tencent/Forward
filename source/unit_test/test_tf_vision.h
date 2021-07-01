@@ -29,115 +29,116 @@
 #include <string>
 #include <vector>
 
-#include "unit_test/unit_test.h"
+#include "unit_test/unit_test_tf_helper.h"
 
-TEST(TestTfVision, DenseNet201) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/densenet201.pb";
+class TestTfVisions : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    filename = std::string(tf_root_dir) + "../../models/tf_vision_models/";
+    // configuration
+    infer_mode = "float32";
+    threshold = 1e-2;
+  };
+  void TearDown() override{};
+  float threshold{1e-3};
+  std::string filename;
+  std::string infer_mode;
+  std::vector<std::string> output_names;
+  std::unordered_map<std::string, TF_Tensor*> input_map;
+};
+
+TEST_F(TestTfVisions, DenseNet201) {
+  filename = filename + "densenet201.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_4"] = input.get();
-  const std::vector<std::string> output_names{"relu/Relu"};
+  output_names = {"relu/Relu"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, InceptionV3) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/inception_v3.pb";
+TEST_F(TestTfVisions, InceptionV3) {
+  filename = filename + "inception_v3.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
-  const std::vector<std::string> output_names{"mixed10/concat"};
+  output_names = {"mixed10/concat"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, InceptionResNetV2) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/inception_resnet_v2.pb";
+TEST_F(TestTfVisions, InceptionResNetV2) {
+  filename = filename + "inception_resnet_v2.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_7"] = input.get();
-  const std::vector<std::string> output_names{"conv_7b_ac/Relu"};
+  output_names = {"conv_7b_ac/Relu"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, MobileNetV2) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/mobilenet_v2.pb";
+TEST_F(TestTfVisions, MobileNetV2) {
+  filename = filename + "mobilenet_v2.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_5"] = input.get();
-  const std::vector<std::string> output_names{"out_relu/Relu6"};
+  output_names = {"out_relu/Relu6"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, NasNetLarge) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/nasnet_large.pb";
+TEST_F(TestTfVisions, NasNetLarge) {
+  filename = filename + "nasnet_large.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 331, 331, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_5"] = input.get();
-  const std::vector<std::string> output_names{"activation_556/Relu"};
+  output_names = {"activation_556/Relu"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, ResNet152V2) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/resnet152_v2.pb";
+TEST_F(TestTfVisions, ResNet152V2) {
+  filename = filename + "resnet152_v2.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_3"] = input.get();
-  const std::vector<std::string> output_names{"post_relu/Relu"};
+  output_names = {"post_relu/Relu"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, Vgg19) {
-  const std::string filename = std::string(tf_root_dir) + "../../models/tf_vision_models/vgg19.pb";
+TEST_F(TestTfVisions, Vgg19) {
+  filename = filename + "vgg19.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_2"] = input.get();
-  const std::vector<std::string> output_names{"block5_pool/MaxPool"};
+  output_names = {"block5_pool/MaxPool"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
-TEST(TestTfVision, Xception) {
-  const std::string filename =
-      std::string(tf_root_dir) + "../../models/tf_vision_models/xception.pb";
+TEST_F(TestTfVisions, Xception) {
+  filename = filename + "xception.pb";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 224, 224, 3});
 
-  std::unordered_map<std::string, TF_Tensor*> input_map;
   input_map["input_1"] = input.get();
-  const std::vector<std::string> output_names{"block14_sepconv2_act/Relu"};
+  output_names = {"block14_sepconv2_act/Relu"};
 
-  TestTFInference(filename, "float32", input_map, output_names, 1e-2);
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }

@@ -108,9 +108,7 @@ class TorchModule {
 
   const std::string& ModulePath() const { return module_path_; }
 
-  const torch::jit::named_attribute_list NamedAttributes() const {
-    return module_.named_attributes(false);
-  }
+  const torch::jit::Module& GetModule() const { return module_; }
 
  private:
   /**

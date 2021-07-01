@@ -60,7 +60,7 @@ class TorchSubModule {
 
   /// Add attributes including parameters such that the new graph in the new module is able to
   /// prim::GetAttr from attributes.
-  void AddAttributes(const torch::jit::named_attribute_list& attr_map);
+  void CloneAttributesFrom(const torch::jit::Module& module);
 
   void ToCuda() { module_->to(c10::kCUDA); }
 
@@ -85,6 +85,7 @@ class TorchSubModule {
   std::shared_ptr<torch::jit::Graph> graph_;
   std::shared_ptr<torch::jit::Module> module_;
 
+  std::vector<std::string> attr_names_;
   std::vector<torch::jit::Value*> inputs_;
   std::vector<torch::jit::Value*> outputs_;
   std::vector<torch::jit::Node*> nodes_;

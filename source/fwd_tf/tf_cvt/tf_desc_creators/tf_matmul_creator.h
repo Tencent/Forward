@@ -53,38 +53,22 @@ class TLayerDescCreator<TrtMatrixMultiplyDesc> : public ILayerDescCreator {
 
     const auto num_inputs = op.NumInputs();
     T_CHECK_EQ(num_inputs, 2);
-
-    const auto input0 = op.Input(0);
-    const auto input1 = op.Input(1);
-
-    const auto const_tensor_0 = ToFwdWeights(input0.GetConstantTensor());
-    const auto const_tensor_1 = ToFwdWeights(input1.GetConstantTensor());
-
     auto layer_desc = std::make_shared<TrtMatrixMultiplyDesc>();
 
-    Status status;
-
-    if (!const_tensor_0.Empty()) {
-      layer_desc->inputs[0].inUse = true;
-      layer_desc->inputs[0].data = const_tensor_0;
-      layer_desc->inputs[0].dim = DimsOf(input0);
-    } else {
-      op_inputs.push_back(input0);
+    for (int i = 0; i < 2; ++i) {
+      const auto input = op.Input(i);
+      const auto const_tensor = ToFwdWeights(input.GetConstantTensor());
+      if (!const_tensor.Empty()) {
+        layer_desc->inputs[i].inUse = true;
+        layer_desc->inputs[i].data = const_tensor;
+        layer_desc->inputs[i].dim = DimsOf(input);
+      } else {
+        op_inputs.push_back(input);
+      }
     }
 
-    if (!const_tensor_1.Empty()) {
-      layer_desc->inputs[1].inUse = true;
-      layer_desc->inputs[1].data = const_tensor_1;
-      layer_desc->inputs[1].dim = DimsOf(input1);
-    } else {
-      op_inputs.push_back(input1);
-    }
-
-    auto transpose_a = op.GetAttrBool("transpose_a");
-    auto transpose_b = op.GetAttrBool("transpose_b");
-
-    layer_desc->op0 = static_cast<nvinfer1::MatrixOperation>(transpose_a);
-    layer_desc->op1 = static_cast<nvinfer1::MatrixOperation>(transpose_b);
+    layer_desc->op[0] = static_cast<nvinfer1::MatrixOperation>(op.GetAttrBool("transpose_a"));
+    layer_desc->op[1] = static_cast<nvinfer1::MatrixOperation>(op.GetAttrBool("transpose_b"));
 
     return layer_desc;
   }

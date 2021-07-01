@@ -29,650 +29,509 @@
 #include <string>
 #include <vector>
 
-#include "unit_test/unit_test.h"
+#include "unit_test/unit_test_torch_helper.h"
 
-TEST(TestTorchNodes, AdaILN) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/AdaILN.pth";
+class TestTorchNodes : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    model_path = std::string(torch_root_dir) + "nodes/";
+    // configuration
+    infer_mode = "float32";
+    threshold = 1e-3;
+  };
+  void TearDown() override{};
+  std::string model_path;
+  std::string infer_mode;
+  float threshold{1e-3};
+  std::unordered_map<std::string, c10::IValue> input_map;
+};
+
+TEST_F(TestTorchNodes, AdaILN) {
+  model_path = model_path + "AdaILN.pth";
   const auto input = ::torch::randn({1, 7, 231, 343}, device);
   const auto gamma = ::torch::randn({1, 7}, device);
   const auto beta = ::torch::randn({1, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["gamma"] = gamma;
   input_map["beta"] = beta;
-
-  // TestTorchInference(model_path, {input, gamma, beta}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Arithmetic) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/arithmetic.pth";
+TEST_F(TestTorchNodes, Arithmetic) {
+  model_path = model_path + "arithmetic.pth";
   const auto a = ::torch::randn({1, 3, 64, 32}, device);
   const auto b = ::torch::randn({1, 3, 64, 32}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["a"] = a;
   input_map["b"] = b;
-
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Addmm) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/addmm.pth";
+TEST_F(TestTorchNodes, Addmm) {
+  model_path = model_path + "addmm.pth";
   const auto M = ::torch::randn({3, 3}, device);
   const auto mat1 = ::torch::randn({3, 3}, device);
   const auto mat2 = ::torch::randn({3, 3}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["M"] = M;
   input_map["mat1"] = mat1;
   input_map["mat2"] = mat2;
-
-  // TestTorchInference(model_path, {M, mat1, mat2}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Activation) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/activation.pth";
+TEST_F(TestTorchNodes, Activation) {
+  model_path = model_path + "activation.pth";
   const auto input = ::torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, AdaptivePooling2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/adaptive_pooling_2d.pth";
+TEST_F(TestTorchNodes, AdaptivePooling2d) {
+  model_path = model_path + "adaptive_pooling_2d.pth";
   const auto x = torch::randn({1, 64, 10, 9}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, AdaptivePooling3d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/adaptive_pooling_3d.pth";
+TEST_F(TestTorchNodes, AdaptivePooling3d) {
+  model_path = model_path + "adaptive_pooling_3d.pth";
   const auto x = torch::randn({1, 64, 8, 9, 10}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, BatchNorm2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/batch_norm_2d.pth";
+TEST_F(TestTorchNodes, BatchNorm2d) {
+  model_path = model_path + "batch_norm_2d.pth";
   const auto input = torch::randn({3, 3, 14, 32}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Bmm) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/bmm.pth";
+TEST_F(TestTorchNodes, Bmm) {
+  model_path = model_path + "bmm.pth";
   const auto mat1 = ::torch::randn({3, 4, 5}, device);
   const auto mat2 = ::torch::randn({3, 5, 6}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
 
   input_map["x"] = mat1;
   input_map["y"] = mat2;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Clamp) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/clamp.pth";
+TEST_F(TestTorchNodes, Clamp) {
+  model_path = model_path + "clamp.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Cat) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/cat.pth";
+TEST_F(TestTorchNodes, Cat) {
+  model_path = model_path + "cat.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Conv2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/conv2d.pth";
+TEST_F(TestTorchNodes, Conv2d) {
+  model_path = model_path + "conv2d.pth";
   const auto input = torch::randn({2, 3, 32, 64}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, ConstantPad2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/constant_pad_2d.pth";
+TEST_F(TestTorchNodes, ConstantPad2d) {
+  model_path = model_path + "constant_pad_2d.pth";
   const auto input = torch::randn({1, 13, 7, 9}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, ConstantPad3d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/constant_pad_3d.pth";
+TEST_F(TestTorchNodes, ConstantPad3d) {
+  model_path = model_path + "constant_pad_3d.pth";
   const auto input = torch::randn({1, 3, 11, 22, 33}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Deconv2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/deconv2d.pth";
+TEST_F(TestTorchNodes, Deconv2d) {
+  model_path = model_path + "deconv2d.pth";
   const auto input = torch::randn({1, 8, 32, 64}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Expand) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/expand.pth";
+TEST_F(TestTorchNodes, Expand) {
+  model_path = model_path + "expand.pth";
   const auto input = torch::randn({1, 3, 2}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, EmbeddingBagModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/embedding_bag.pth";
+TEST_F(TestTorchNodes, EmbeddingBagModule) {
+  model_path = model_path + "embedding_bag.pth";
   auto input = ::torch::tensor({1, 0, 3, 1, 4}, torch::requires_grad(false).dtype(c10::kLong));
   auto offset = torch::tensor({0, 0, 0, 0, 0}, torch::requires_grad(false).dtype(c10::kLong));
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["offsets"] = offset;
-
-  // TestTorchInference(model_path, std::vector<c10::IValue>{input, offset},
-  // "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, FullyConnected) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/fully_connected.pth";
+TEST_F(TestTorchNodes, FullyConnected) {
+  model_path = model_path + "fully_connected.pth";
   const auto input = ::torch::randn({1, 10}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  TestTorchInference(model_path, {input}, "float32");
-  // TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Floor) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/floor.pth";
+TEST_F(TestTorchNodes, Floor) {
+  model_path = model_path + "floor.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Gelu) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/gelu.pth";
+TEST_F(TestTorchNodes, Gelu) {
+  model_path = model_path + "gelu.pth";
   const auto input = torch::randn({1, 3, 24, 24}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
 
-  TestTorchInference(model_path, input_map, "float32", 1e-2);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, GridSamplerBilinearModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/grid_sampler_bilinear.pth";
+TEST_F(TestTorchNodes, GridSamplerBilinearModule) {
+  model_path = model_path + "grid_sampler_bilinear.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device);
   const auto T = ::torch::randn({1, 5, 10, 2}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["grid"] = T;
-
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, GridSamplerNearestModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/grid_sampler_nearest.pth";
+TEST_F(TestTorchNodes, GridSamplerNearestModule) {
+  model_path = model_path + "grid_sampler_nearest.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device);
   const auto T = ::torch::randn({1, 6, 7, 2}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["grid"] = T;
-
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, IndexModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/index.pth";
+TEST_F(TestTorchNodes, IndexModule) {
+  model_path = model_path + "index.pth";
   auto input = ::torch::randn({3, 10, 10});
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["X"] = input;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, ILN) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/ILN.pth";
+TEST_F(TestTorchNodes, ILN) {
+  model_path = model_path + "ILN.pth";
   const auto input = ::torch::randn({1, 7, 231, 343}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Inplace) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/inplace.pth";
+TEST_F(TestTorchNodes, Inplace) {
+  model_path = model_path + "inplace.pth";
   const auto input = torch::randn({1, 3, 64, 32}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, InstanceNorm2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/instance_norm.pth";
+TEST_F(TestTorchNodes, InstanceNorm2d) {
+  model_path = model_path + "instance_norm.pth";
   const auto input = torch::randn({3, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, InstanceNorm2dTrack) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/instance_norm_track.pth";
+TEST_F(TestTorchNodes, InstanceNorm2dTrack) {
+  model_path = model_path + "instance_norm_track.pth";
   const auto input = torch::randn({4, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, InstanceNorm2dAffine) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/instance_norm_aff.pth";
+TEST_F(TestTorchNodes, InstanceNorm2dAffine) {
+  model_path = model_path + "instance_norm_aff.pth";
   const auto input = torch::randn({5, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, InstanceNorm2dAffineTrack) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/instance_norm_aff_track.pth";
+TEST_F(TestTorchNodes, InstanceNorm2dAffineTrack) {
+  model_path = model_path + "instance_norm_aff_track.pth";
   const auto input = torch::randn({6, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, LayerNorm) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/layer_norm.pth";
+TEST_F(TestTorchNodes, LayerNorm) {
+  model_path = model_path + "layer_norm.pth";
   const auto input = torch::randn({3, 3, 14, 32}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, LayerNormWithWeights) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/layer_norm_with_weights.pth";
+TEST_F(TestTorchNodes, LayerNormWithWeights) {
+  model_path = model_path + "layer_norm_with_weights.pth";
   const auto input = torch::randn({20, 5, 10}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, LrnModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/lrn.pth";
+TEST_F(TestTorchNodes, LrnModule) {
+  model_path = model_path + "lrn.pth";
   const auto input = torch::randn({1, 3, 5, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Norm) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/norm.pth";
+TEST_F(TestTorchNodes, Norm) {
+  model_path = model_path + "norm.pth";
   const auto input = torch::randn({1, 32, 1, 1}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, PRelu) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/prelu.pth";
+TEST_F(TestTorchNodes, PRelu) {
+  model_path = model_path + "prelu.pth";
   const auto input = torch::randn({1, 3, 11, 13}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Pooling2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/pooling_2d.pth";
+TEST_F(TestTorchNodes, Pooling2d) {
+  model_path = model_path + "pooling_2d.pth";
   const auto x = ::torch::randn({1, 23, 54, 96}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Pooling3d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/pooling_3d.pth";
+TEST_F(TestTorchNodes, Pooling3d) {
+  model_path = model_path + "pooling_3d.pth";
   const auto x = torch::randn({1, 14, 23, 54, 96}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = x;
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Permute) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/permute.pth";
+TEST_F(TestTorchNodes, Permute) {
+  model_path = model_path + "permute.pth";
   const auto input = torch::randn({3, 5, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
 #ifdef ENABLE_TORCH_PLUGIN
-TEST(TestTorchNodes, PixelShuffle) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/pixel_shuffle.pth";
+TEST_F(TestTorchNodes, PixelShuffle) {
+  model_path = model_path + "pixel_shuffle.pth";
   const auto input = torch::randn({1, 9, 24, 24}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 #endif  // ENABLE_TORCH_PLUGIN
-TEST(TestTorchNodes, ReduceModule) {
+TEST_F(TestTorchNodes, ReduceModule) {
   const auto input = torch::randn({32, 16, 45, 12}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
 
-  TestTorchInference(std::string(torch_root_dir) + "nodes/reduce.pth", input_map, "float32");
-  TestTorchInference(std::string(torch_root_dir) + "nodes/reduce_0.pth", input_map, "float32");
-  TestTorchInference(std::string(torch_root_dir) + "nodes/reduce_1.pth", input_map, "float32");
-  TestTorchInference(std::string(torch_root_dir) + "nodes/reduce_2.pth", input_map, "float32");
-  TestTorchInference(std::string(torch_root_dir) + "nodes/reduce_3.pth", input_map, "float32");
+  TestTorchInference(model_path + "reduce.pth", input_map, infer_mode, threshold);
+  TestTorchInference(model_path + "reduce_0.pth", input_map, infer_mode, threshold);
+  TestTorchInference(model_path + "reduce_1.pth", input_map, infer_mode, threshold);
+  TestTorchInference(model_path + "reduce_2.pth", input_map, infer_mode, threshold);
+  TestTorchInference(model_path + "reduce_3.pth", input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, ReflectionPad2d) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/reflection_pad_2d.pth";
+TEST_F(TestTorchNodes, ReflectionPad2d) {
+  model_path = model_path + "reflection_pad_2d.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Repeat) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/repeat.pth";
+TEST_F(TestTorchNodes, Repeat) {
+  model_path = model_path + "repeat.pth";
   const auto input = torch::randn({2, 3}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Stack) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/stack.pth";
+TEST_F(TestTorchNodes, Stack) {
+  model_path = model_path + "stack.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Softmax) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/softmax.pth";
+TEST_F(TestTorchNodes, Softmax) {
+  model_path = model_path + "softmax.pth";
   const auto input = torch::randn({1, 3, 7, 7}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Slice) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/slice.pth";
+TEST_F(TestTorchNodes, Slice) {
+  model_path = model_path + "slice.pth";
   const auto input = torch::randn({4, 64, 64, 64}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Split) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/split.pth";
+TEST_F(TestTorchNodes, Split) {
+  model_path = model_path + "split.pth";
   const auto input = torch::randn({1, 4, 10, 9}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["argument_1"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, SplitStack) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/split_stack.pth";
+TEST_F(TestTorchNodes, SplitStack) {
+  model_path = model_path + "split_stack.pth";
   const auto input = torch::randn({1, 8, 2, 3}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["argument_1"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, UpsamplingBilinear2dWithSize) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes/upsampling_bilinear_2d_with_size.pth";
+TEST_F(TestTorchNodes, UpsamplingBilinear2dWithSize) {
+  model_path = model_path + "upsampling_bilinear_2d_with_size.pth";
   const auto input = torch::randn({1, 128, 20, 20}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, UpsamplingNearest2dWithSize) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/upsampling_nearest_2d_with_size.pth";
+TEST_F(TestTorchNodes, UpsamplingNearest2dWithSize) {
+  model_path = model_path + "upsampling_nearest_2d_with_size.pth";
   const auto input = torch::randn({1, 1, 2, 2}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, UpsamplingBilinear2dWithScale) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes/upsampling_bilinear_2d_with_scale.pth";
+TEST_F(TestTorchNodes, UpsamplingBilinear2dWithScale) {
+  model_path = model_path + "upsampling_bilinear_2d_with_scale.pth";
   const auto input = torch::randn({1, 128, 20, 20}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, UpsamplingNearest2dWithScale) {
-  const auto model_path =
-      std::string(torch_root_dir) + "nodes/upsampling_nearest_2d_with_scale.pth";
+TEST_F(TestTorchNodes, UpsamplingNearest2dWithScale) {
+  model_path = model_path + "upsampling_nearest_2d_with_scale.pth";
   const auto input = torch::randn({1, 1, 2, 2}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Unsqueeze) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/unsqueeze.pth";
+TEST_F(TestTorchNodes, Unsqueeze) {
+  model_path = model_path + "unsqueeze.pth";
   const auto input = torch::randn({1, 3}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Var) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/var.pth";
+TEST_F(TestTorchNodes, Var) {
+  model_path = model_path + "var.pth";
   const auto input = torch::randn({3, 13, 41, 39}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, View) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/view_and_reshape.pth";
+TEST_F(TestTorchNodes, View) {
+  model_path = model_path + "view_and_reshape.pth";
   const auto input = torch::randn({5, 4, 3}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["x"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
 #ifdef SUPPORT_RNN
-TEST(TestTorchNodes, BidirectionRNN) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/rnn_tanh_bidirectional.pth";
+TEST_F(TestTorchNodes, BidirectionRNN) {
+  model_path = model_path + "rnn_tanh_bidirectional.pth";
   const auto input = torch::randn({1, 28, 28}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, LstmModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/lstm.pth";
+TEST_F(TestTorchNodes, LstmModule) {
+  model_path = model_path + "lstm.pth";
   const auto input = torch::randn({1, 28, 28}, device);
   // 模型需要在Torch里跑一遍，所以此处batch_size在第二维
   const auto h_0 = ::torch::randn({1, 2, 128}, device);
   const auto c_0 = ::torch::randn({1, 2, 128}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["h_0"] = h_0;
   input_map["c_0"] = c_0;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, Lstm2Module) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/lstm2.pth";
+TEST_F(TestTorchNodes, Lstm2Module) {
+  model_path = model_path + "lstm2.pth";
   const auto input = torch::randn({1, 28, 28}, device);
   // 模型需要在Torch里跑一遍，所以此处batch_size在第二维
   const auto h_0 = ::torch::randn({1, 2, 128}, device);
   const auto c_0 = ::torch::randn({1, 2, 128}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["h_0"] = h_0;
   input_map["c_0"] = c_0;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, GruModule) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/gru.pth";
+TEST_F(TestTorchNodes, GruModule) {
+  model_path = model_path + "gru.pth";
   const auto input = torch::randn({1, 28, 28}, device);
   const auto h_0 = ::torch::randn({1, 2, 128}, device);
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
   input_map["h_0"] = h_0;
-
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, RnnModuleTanHBid) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/rnn_tanh_bidirectional.pth";
+TEST_F(TestTorchNodes, RnnModuleTanHBid) {
+  model_path = model_path + "rnn_tanh_bidirectional.pth";
   const auto input = torch::randn({1, 28, 28}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchNodes, RnnModuleRelu) {
-  const auto model_path = std::string(torch_root_dir) + "nodes/rnn_relu.pth";
+TEST_F(TestTorchNodes, RnnModuleRelu) {
+  model_path = model_path + "rnn_relu.pth";
   const auto input = torch::randn({1, 28, 28}, device);
 
-  std::unordered_map<std::string, c10::IValue> input_map;
   input_map["input"] = input;
-
-  // TestTorchInference(model_path, {input}, "float32");
-  TestTorchInference(model_path, input_map, "float32");
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 #endif  // SUPPORT_RNN

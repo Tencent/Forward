@@ -29,123 +29,92 @@
 #include <string>
 #include <vector>
 
-#include "unit_test/unit_test.h"
+#include "unit_test/unit_test_torch_helper.h"
 
-TEST(TestTorchVision, AlexNet) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/alexnet.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
+class TestTorchVision : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    // configuration
+    model_path = std::string(models_dir) + "torch_vision_models/";
+    infer_mode = "float32";
+    threshold = 1e-3;
+  };
+  void TearDown() override{};
+  std::string model_path;
+  std::string infer_mode;
+  float threshold{1e-3};
+  std::shared_ptr<fwd::IBatchStream> batch_stream{nullptr};
   std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
+};
 
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, AlexNet) {
+  model_path = model_path + "alexnet.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, GoogLeNet) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/googlenet.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, GoogLeNet) {
+  model_path = model_path + "googlenet.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, Inception_v3) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/inception_v3.pth";
-  const auto input = torch::randn({1, 3, 299, 299}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, Inception_v3) {
+  model_path = model_path + "inception_v3.pth";
+  input_map["input"] = torch::randn({1, 3, 299, 299}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, ResNet50) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/resnet50.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, ResNet50) {
+  model_path = model_path + "resnet50.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, WideResNet50_2) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/wide_resnet50_2.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, WideResNet50_2) {
+  model_path = model_path + "wide_resnet50_2.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, DenseNet121) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/densenet121.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, DenseNet121) {
+  model_path = model_path + "densenet121.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, MNASNet0_75) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/mnasnet0_75.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, MNASNet0_75) {
+  model_path = model_path + "mnasnet0_75.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, Mobilenet_v2) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/mobilenet_v2.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, Mobilenet_v2) {
+  model_path = model_path + "mobilenet_v2.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, ShuffleNet_v2_x1_5) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/shufflenet_v2_x1_5.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, ShuffleNet_v2_x1_5) {
+  model_path = model_path + "shufflenet_v2_x1_5.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, SqueezeNet1_1) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/squeezenet1_1.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, SqueezeNet1_1) {
+  model_path = model_path + "squeezenet1_1.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, VGG11_bn) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/vgg11_bn.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, VGG11_bn) {
+  model_path = model_path + "vgg11_bn.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-TEST(TestTorchVision, EfficientNet) {
-  const auto model_path = std::string(models_dir) + "torch_vision_models/effnet.pth";
-  const auto input = torch::randn({1, 3, 224, 224}, device);
-
-  std::unordered_map<std::string, c10::IValue> input_map;
-  input_map["input"] = input;
-  TestTorchInference(model_path, input_map, "float32");
+TEST_F(TestTorchVision, EfficientNet) {
+  model_path = model_path + "effnet.pth";
+  input_map["input"] = torch::randn({1, 3, 224, 224}, device);
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
 }

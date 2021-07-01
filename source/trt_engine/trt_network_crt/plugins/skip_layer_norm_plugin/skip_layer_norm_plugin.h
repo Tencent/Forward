@@ -45,7 +45,7 @@ class SkipLayerNormPluginDynamic : public nvinfer1::IPluginV2DynamicExt {
  public:
   SkipLayerNormPluginDynamic(const std::string name, const nvinfer1::DataType type, const int ld,
                              const nvinfer1::Weights& beta, const nvinfer1::Weights& gamma,
-                             const nvinfer1::Weights& bias);
+                             const nvinfer1::Weights& bias, const bool has_skip);
 
   SkipLayerNormPluginDynamic(const std::string name, const void* data, size_t length);
 
@@ -85,22 +85,24 @@ class SkipLayerNormPluginDynamic : public nvinfer1::IPluginV2DynamicExt {
   const char* getPluginNamespace() const override;
 
  private:
+  bool mHasBias;
+  bool mHasSkip;
+  nvinfer1::DataType mType;
+  nvinfer1::DataType mCfgType;
+  size_t mParamWordsize;
+  size_t mLd;  // leading dim
+
   const std::string mLayerName;
   std::string mNamespace;
 
-  cuda_unique_ptr<void> mGammaDev;
+  fwd::bert::cuda_unique_ptr<void> mZerosDev;
+
+  fwd::bert::cuda_unique_ptr<void> mGammaDev;
   fwd::bert::cuda_unique_ptr<void> mBetaDev;
-  size_t mLd;  // leading dim
   fwd::bert::WeightsWithOwnership mGamma;
   fwd::bert::WeightsWithOwnership mBeta;
-  nvinfer1::DataType mType;
-  nvinfer1::DataType mCfgType;
-
-  bool mHasBias;
   fwd::bert::cuda_unique_ptr<void> mBiasDev;
   fwd::bert::WeightsWithOwnership mBias;
-
-  size_t mParamWordsize;
 
  protected:
   // To prevent compiler warnings.

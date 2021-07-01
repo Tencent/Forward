@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include "unit_test/unit_test.h"
+#include "unit_test/unit_test_torch_helper.h"
 
 TEST(TestTorchDlrm, DLRM) {
   const auto model_path = std::string(torch_root_dir) + "dlrm.pth";

@@ -28,282 +28,321 @@
 
 #include <string>
 
-#include "unit_test/unit_test.h"
+#include "unit_test/unit_test_keras_helper.h"
 
-TEST(TestKerasNodes, Version) { std::cout << "TensorFlow Version: " << TF_Version() << std::endl; }
+class TestKerasNodes : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    pb_path = std::string(tf_root_dir);
+    keras_h5_path = std::string(keras_root_dir);
+    // configuration
+    infer_mode = "float32";
+    threshold = 1e-3;
+  };
+  void TearDown() override{};
+  float threshold{1e-3};
+  std::string pb_path;
+  std::string keras_h5_path;
+  std::string infer_mode;
+  std::vector<std::string> output_names;
+  std::vector<std::pair<std::string, TF_Tensor*>> input_map;
+};
 
-TEST(TestKerasNodes, Softmax) {
-  const std::string pb_path = std::string(tf_root_dir) + "softmax.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "softmax.h5";
+TEST_F(TestKerasNodes, Softmax) {
+  pb_path = pb_path + "softmax.pb";
+  keras_h5_path = keras_h5_path + "softmax.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_11"}, {"softmax/Softmax"},
-                     batch_size);
+  input_map.push_back({"input_11", input.get()});
+  output_names = {"softmax/Softmax"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Activation) {
-  const std::string pb_path = std::string(tf_root_dir) + "activation.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "activation.h5";
+TEST_F(TestKerasNodes, Activation) {
+  pb_path = pb_path + "activation.pb";
+  keras_h5_path = keras_h5_path + "activation.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
-  TestKerasInference(
-      pb_path, keras_h5_path, {input.get()}, {"input"},
-      {"activation/Sigmoid", "activation_1/Relu", "activation_2/Tanh", "activation_3/Elu"},
-      batch_size);
+  input_map.push_back({"input", input.get()});
+  output_names = {"activation/Sigmoid", "activation_1/Relu", "activation_2/Tanh",
+                  "activation_3/Elu"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, BatchNorm) {
-  const std::string pb_path = std::string(tf_root_dir) + "batch_norm.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "batch_norm.h5";
+TEST_F(TestKerasNodes, BatchNorm) {
+  pb_path = pb_path + "batch_norm.pb";
+  keras_h5_path = keras_h5_path + "batch_norm.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"batch_normalization/FusedBatchNormV3"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"batch_normalization/FusedBatchNormV3"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Arithmetic) {
-  const std::string pb_path = std::string(tf_root_dir) + "arithmetic.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "arithmetic.h5";
+TEST_F(TestKerasNodes, Arithmetic) {
+  pb_path = pb_path + "arithmetic.pb";
+  keras_h5_path = keras_h5_path + "arithmetic.h5";
 
   const int batch_size = 1;
   const auto input1 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
   const auto input2 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input1.get(), input2.get()}, {"input1", "input2"},
-                     {"add/add", "subtract/sub", "multiply/mul"}, batch_size);
+  input_map.push_back({"input1", input1.get()});
+  input_map.push_back({"input2", input2.get()});
+  output_names = {"add/add", "subtract/sub", "multiply/mul"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Concatenate) {
-  const std::string pb_path = std::string(tf_root_dir) + "concatenate.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "concatenate.h5";
+TEST_F(TestKerasNodes, Concatenate) {
+  pb_path = pb_path + "concatenate.pb";
+  keras_h5_path = keras_h5_path + "concatenate.h5";
 
   const int batch_size = 1;
   const auto input1 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
   const auto input2 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
   const auto input3 = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 25, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input1.get(), input2.get(), input3.get()},
-                     {"input1", "input2", "input3"},
-                     {"concatenate/concat", "concatenate_1/concat", "concatenate_2/concat"},
-                     batch_size);
+  input_map.push_back({"input1", input1.get()});
+  input_map.push_back({"input2", input2.get()});
+  input_map.push_back({"input3", input3.get()});
+  output_names = {"concatenate/concat", "concatenate_1/concat", "concatenate_2/concat"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Convolution) {
-  const std::string pb_path = std::string(tf_root_dir) + "conv2d.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "conv2d.h5";
+TEST_F(TestKerasNodes, Convolution) {
+  pb_path = pb_path + "conv2d.pb";
+  keras_h5_path = keras_h5_path + "conv2d.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_2"}, {"conv2d/BiasAdd"},
-                     batch_size);
+  input_map.push_back({"input_2", input.get()});
+  output_names = {"conv2d/BiasAdd"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Cropping2D) {
-  const std::string pb_path = std::string(tf_root_dir) + "cropping2d.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "cropping2d.h5";
+TEST_F(TestKerasNodes, Cropping2D) {
+  pb_path = pb_path + "cropping2d.pb";
+  keras_h5_path = keras_h5_path + "cropping2d.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"cropping2d/strided_slice"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"cropping2d/strided_slice"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, DepthwiseConv2d) {
-  const std::string pb_path = std::string(tf_root_dir) + "depthwise_conv2d.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "depthwise_conv2d.h5";
+TEST_F(TestKerasNodes, DepthwiseConv2d) {
+  pb_path = pb_path + "depthwise_conv2d.pb";
+  keras_h5_path = keras_h5_path + "depthwise_conv2d.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 11});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"depthwise_conv2d/BiasAdd"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"depthwise_conv2d/BiasAdd"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, SeparableConv2d) {
-  const std::string pb_path = std::string(tf_root_dir) + "separable_conv2d.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "separable_conv2d.h5";
+TEST_F(TestKerasNodes, SeparableConv2d) {
+  pb_path = pb_path + "separable_conv2d.pb";
+  keras_h5_path = keras_h5_path + "separable_conv2d.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 11});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"separable_conv2d/BiasAdd", "separable_conv2d_1/separable_conv2d"},
-                     batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"separable_conv2d/BiasAdd", "separable_conv2d_1/separable_conv2d"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, MaxPool) {
-  const std::string pb_path = std::string(tf_root_dir) + "max_pooling.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "max_pooling.h5";
+TEST_F(TestKerasNodes, MaxPool) {
+  pb_path = pb_path + "max_pooling.pb";
+  keras_h5_path = keras_h5_path + "max_pooling.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 13, 33, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input"},
-                     {"max_pooling2d/MaxPool", "max_pooling2d_1/MaxPool"}, batch_size);
+  input_map.push_back({"input", input.get()});
+  output_names = {"max_pooling2d/MaxPool", "max_pooling2d_1/MaxPool"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, AvgPool) {
-  const std::string pb_path = std::string(tf_root_dir) + "average_pooling.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "average_pooling.h5";
+TEST_F(TestKerasNodes, AvgPool) {
+  pb_path = pb_path + "average_pooling.pb";
+  keras_h5_path = keras_h5_path + "average_pooling.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 29, 17, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input"},
-                     {"average_pooling2d/AvgPool", "average_pooling2d_1/AvgPool"}, batch_size);
+  input_map.push_back({"input", input.get()});
+  output_names = {"average_pooling2d/AvgPool", "average_pooling2d_1/AvgPool"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, FullyConnected) {
-  const std::string pb_path = std::string(tf_root_dir) + "dense.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "dense.h5";
+TEST_F(TestKerasNodes, FullyConnected) {
+  pb_path = pb_path + "dense.pb";
+  keras_h5_path = keras_h5_path + "dense.h5";
 
-  auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {1, 784});
+  const int batch_size = 1;
+  auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 784});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_4"}, {"dense/BiasAdd"});
+  input_map.push_back({"input_4", input.get()});
+  output_names = {"dense/BiasAdd"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Permute) {
-  const std::string pb_path = std::string(tf_root_dir) + "permute.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "permute.h5";
+TEST_F(TestKerasNodes, Permute) {
+  pb_path = pb_path + "permute.pb";
+  keras_h5_path = keras_h5_path + "permute.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_8"}, {"permute/transpose"},
-                     batch_size);
+  input_map.push_back({"input_8", input.get()});
+  output_names = {"permute/transpose"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Reduce) {
-  const std::string pb_path = std::string(tf_root_dir) + "reduce.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "reduce.h5";
+TEST_F(TestKerasNodes, Reduce) {
+  pb_path = pb_path + "reduce.pb";
+  keras_h5_path = keras_h5_path + "reduce.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 24, 24, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input1"},
-                     {"tf_op_layer_Mean/Mean", "tf_op_layer_Sum/Sum", "tf_op_layer_Max/Max",
-                      "tf_op_layer_Min/Min"},
-                     batch_size, 1e-3);
+  input_map.push_back({"input1", input.get()});
+  output_names = {"tf_op_layer_Mean/Mean", "tf_op_layer_Sum/Sum", "tf_op_layer_Max/Max",
+                  "tf_op_layer_Min/Min"},
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, ZeroPadding) {
-  const std::string pb_path = std::string(tf_root_dir) + "zero_padding_2d.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "zero_padding_2d.h5";
+TEST_F(TestKerasNodes, ZeroPadding) {
+  pb_path = pb_path + "zero_padding_2d.pb";
+  keras_h5_path = keras_h5_path + "zero_padding_2d.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"zero_padding2d/Pad", "zero_padding2d_1/Pad", "zero_padding2d_2/Pad",
-                      "zero_padding2d_3/Pad"},
-                     batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"zero_padding2d/Pad", "zero_padding2d_1/Pad", "zero_padding2d_2/Pad",
+                  "zero_padding2d_3/Pad"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Conv2DActivation) {
-  const std::string pb_path = std::string(tf_root_dir) + "conv2d_activation.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "conv2d_activation.h5";
+TEST_F(TestKerasNodes, Conv2DActivation) {
+  pb_path = pb_path + "conv2d_activation.pb";
+  keras_h5_path = keras_h5_path + "conv2d_activation.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 23, 29, 3});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"}, {"conv2d/Relu"},
-                     batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"conv2d/Relu"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, Embedding) {
-  const std::string pb_path = std::string(tf_root_dir) + "embedding.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "embedding.h5";
+TEST_F(TestKerasNodes, Embedding) {
+  pb_path = pb_path + "embedding.pb";
+  keras_h5_path = keras_h5_path + "embedding.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomIntTensor<int>(TF_INT32, {batch_size, 10}, 1000);
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input1_1"},
-                     {"embedding_4/embedding_lookup/Identity_1"}, batch_size);
+  input_map.push_back({"input1_1", input.get()});
+  output_names = {"embedding_4/embedding_lookup/Identity_1"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
 #ifdef SUPPORT_RNN
-TEST(TestKerasNodes, RNNTanh) {
-  const std::string pb_path = std::string(tf_root_dir) + "rnn_tanh.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "rnn_tanh.h5";
+TEST_F(TestKerasNodes, RNNTanh) {
+  pb_path = pb_path + "rnn_tanh.pb";
+  keras_h5_path = keras_h5_path + "rnn_tanh.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"simple_rnn/strided_slice_3", "simple_rnn_1/transpose_1"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"simple_rnn/strided_slice_3", "simple_rnn_1/transpose_1"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, RNNRelu) {
-  const std::string pb_path = std::string(tf_root_dir) + "rnn_relu.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "rnn_relu.h5";
+TEST_F(TestKerasNodes, RNNRelu) {
+  pb_path = pb_path + "rnn_relu.pb";
+  keras_h5_path = keras_h5_path + "rnn_relu.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"simple_rnn/strided_slice_3", "simple_rnn_1/transpose_1"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"simple_rnn/strided_slice_3", "simple_rnn_1/transpose_1"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, BiRNN) {
-  const std::string pb_path = std::string(tf_root_dir) + "bidirectional_rnn.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "bidirectional_rnn.h5";
+TEST_F(TestKerasNodes, BiRNN) {
+  pb_path = pb_path + "bidirectional_rnn.pb";
+  keras_h5_path = keras_h5_path + "bidirectional_rnn.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"bidirectional/concat", "bidirectional_1/concat"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"bidirectional/concat", "bidirectional_1/concat"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, LSTM) {
-  const std::string pb_path = std::string(tf_root_dir) + "lstm.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "lstm.h5";
+TEST_F(TestKerasNodes, LSTM) {
+  pb_path = pb_path + "lstm.pb";
+  keras_h5_path = keras_h5_path + "lstm.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"lstm/strided_slice_7", "lstm_1/transpose_1"}, batch_size, 1e-3);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"lstm/strided_slice_7", "lstm_1/transpose_1"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, BiLSTM) {
-  const std::string pb_path = std::string(tf_root_dir) + "bidirectional_lstm.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "bidirectional_lstm.h5";
+TEST_F(TestKerasNodes, BiLSTM) {
+  pb_path = pb_path + "bidirectional_lstm.pb";
+  keras_h5_path = keras_h5_path + "bidirectional_lstm.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"bidirectional/concat", "bidirectional_1/concat"}, batch_size);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"bidirectional/concat", "bidirectional_1/concat"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, GRU) {
-  const std::string pb_path = std::string(tf_root_dir) + "gru.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "gru.h5";
+TEST_F(TestKerasNodes, GRU) {
+  pb_path = pb_path + "gru.pb";
+  keras_h5_path = keras_h5_path + "gru.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"gru/strided_slice_15", "gru_1/transpose_1"}, batch_size, 0.1);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"gru/strided_slice_15", "gru_1/transpose_1"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 
-TEST(TestKerasNodes, BiGRU) {
-  const std::string pb_path = std::string(tf_root_dir) + "bidirectional_gru.pb";
-  const std::string keras_h5_path = std::string(keras_root_dir) + "bidirectional_gru.h5";
+TEST_F(TestKerasNodes, BiGRU) {
+  pb_path = pb_path + "bidirectional_gru.pb";
+  keras_h5_path = keras_h5_path + "bidirectional_gru.h5";
 
   const int batch_size = 1;
   const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128, 10});
 
-  TestKerasInference(pb_path, keras_h5_path, {input.get()}, {"input_1"},
-                     {"bidirectional/concat", "bidirectional_1/concat"}, batch_size, 0.1);
+  input_map.push_back({"input_1", input.get()});
+  output_names = {"bidirectional/concat", "bidirectional_1/concat"};
+  TestKerasInference(pb_path, keras_h5_path, input_map, output_names, batch_size, threshold);
 }
 #endif
