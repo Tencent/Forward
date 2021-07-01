@@ -55,10 +55,33 @@ class TLayerCreator<TrtSliceDesc> : public ILayerCreator {
       return {};
     }
 
-    return {slice->getOutput(0)};
+    nvinfer1::ITensor* output = slice->getOutput(0);
+
+    if (slice_desc->squeeze_dim_flag) {
+      output = GetSqueezedOutput(network, slice_desc, output, slice_desc->squeeze_dim_flag);
+      T_CHECK(output);
+    }
+
+    return {output};
   }
 
  private:
+  // Special for PyTorch, when there is a aten::select in Slice-Chain(eg. Slice-Select-Slice),
+  // the dim of select should be squeezed.
+  nvinfer1::ITensor* GetSqueezedOutput(nvinfer1::INetworkDefinition* network,
+                                       const TrtSliceDesc* layer_desc, nvinfer1::ITensor* input,
+                                       char squeeze_dim_flag) {
+    // Batch Dim should not be squeezed
+    CHECK(!(squeeze_dim_flag & 1));
+    auto shuffle = network->addShuffle(*input);
+    T_CHECK(shuffle);
+    auto dims = layer_desc->dummy_out_dims;
+    // Keep Batch Dim
+    dims.d[0] = 0;
+    shuffle->setReshapeDimensions(dims);
+    return shuffle->getOutput(0);
+  }
+
   void SetDynamicInput(nvinfer1::INetworkDefinition* network, const TrtSliceDesc* const slice_desc,
                        nvinfer1::ITensor& input, nvinfer1::ISliceLayer* slice) {
     if (!CreateDynamicParameters(slice_desc)) return;

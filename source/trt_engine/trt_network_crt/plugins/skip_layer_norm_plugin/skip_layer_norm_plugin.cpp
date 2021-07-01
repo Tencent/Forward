@@ -154,7 +154,7 @@ void SkipLayerNormPluginDynamic::configurePlugin(const nvinfer1::DynamicPluginTe
   }
   const auto& inDims0 = inputs[0].desc.dims;
   // mLd = inDims0.d[HDIM];  // hiddensize
-  assert(inDims0.nbDims == 5 || inDims0.nbDims == 3);
+  // assert(inDims0.nbDims == 5 || inDims0.nbDims == 3);
   mCfgType = inputs[0].desc.type == nvinfer1::DataType::kINT8 ? nvinfer1::DataType::kHALF
                                                               : inputs[0].desc.type;
 

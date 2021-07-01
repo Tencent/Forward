@@ -531,12 +531,14 @@ struct TrtShuffleDesc : TrtLayerDesc {
 struct TrtSliceDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Slice)
 
+  bool dynamic_start{false};
+  bool dynamic_size{false};
+  char squeeze_dim_flag{0};
+
+  nvinfer1::Dims dummy_out_dims;
   nvinfer1::Dims start;
   nvinfer1::Dims size;
   nvinfer1::Dims stride;
-
-  bool dynamic_start{false};
-  bool dynamic_size{false};
 
   std::unordered_map<std::string, FwdWeights> weight_map;
 };

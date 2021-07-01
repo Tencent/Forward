@@ -65,6 +65,7 @@ class TLayerDescCreator<TrtSliceDesc> : public ILayerDescCreator {
       layer_desc->stride.d[i] = 1;
       layer_desc->size.d[i] = dummy.size(i);
     }
+    layer_desc->dummy_out_dims = ToDims(ShapeOf(dummy));
 
     const JitNode* prev_node = node;
 
@@ -138,6 +139,7 @@ class TLayerDescCreator<TrtSliceDesc> : public ILayerDescCreator {
       layer_desc->size.d[i] = layer_desc->size.d[i - 1];
     }
 
+    layer_desc->squeeze_dim_flag |= 1 << dim;
     layer_desc->start.d[dim] = index;
     layer_desc->stride.d[dim] = 1;
     layer_desc->size.d[dim] = 1;
