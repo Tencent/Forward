@@ -41,7 +41,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
  public:
   bool Check(const Layer& layer) override {
     const std::string name = layer.Type();
-    return name == "Permute";
+    return name == "Permute" || name == "Flatten";
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const Layer& layer, const H5ModelReader& reader,
@@ -54,7 +54,26 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
       return CreatePermute(layer, input_names);
     }
 
+    if (name == "Flatten") {
+      return CreateFlatten(layer, input_names);
+    }
+
     return nullptr;
+  }
+
+ private:
+  std::shared_ptr<TrtLayerDesc> CreateFlatten(const Layer& layer,
+                                              std::vector<std::string>& input_names) const {
+    input_names = layer.Inputs();
+    std::shared_ptr<TrtLayerDesc> default_return_value = nullptr;
+
+    // config
+    const std::string dtype = layer.GetAttr<std::string>("dtype");
+    T_CHECK_EQ(dtype, "float32");
+
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    layer_desc->reshapeDimensions = nvinfer1::Dims2{0, -1};
+    return layer_desc;
   }
 
   std::shared_ptr<TrtLayerDesc> CreatePermute(const Layer& layer,
