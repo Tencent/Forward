@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "common/common_macros.h"
@@ -48,12 +48,9 @@ enum class InferMode {
 // Parse inference mode from string.
 inline InferMode ParseInferMode(const std::string& value) {
   const std::unordered_map<std::string, InferMode> STR_MODE_MAP = {
-      {"float", InferMode::FLOAT},
-      {"float32", InferMode::FLOAT},
-      {"half", InferMode::HALF},
-      {"float16", InferMode::HALF},
-      {"int8", InferMode::INT8},
-      {"int8_calib", InferMode::INT8_CALIB},
+      {"float", InferMode::FLOAT}, {"float32", InferMode::FLOAT},
+      {"half", InferMode::HALF},   {"float16", InferMode::HALF},
+      {"int8", InferMode::INT8},   {"int8_calib", InferMode::INT8_CALIB},
   };
   const auto mode = STR_MODE_MAP.find(value);
   if (mode == STR_MODE_MAP.end()) {

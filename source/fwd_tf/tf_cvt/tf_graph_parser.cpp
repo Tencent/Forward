@@ -185,8 +185,6 @@ void Parser::ProcessOutputDesc(const Operation& graph_output, TrtOutputDesc* out
 std::shared_ptr<TrtShuffleDesc> Parser::CreateNHWC2NCHWLayerDesc() {
   auto shuffle_desc = std::make_shared<TrtShuffleDesc>();
   shuffle_desc->doFirstTrans = true;
-  shuffle_desc->doReshape = false;
-  shuffle_desc->doSecondTrans = false;
   shuffle_desc->firstTranspose = {0, 3, 1, 2, 0, 0, 0, 0};
   return shuffle_desc;
 }
@@ -194,8 +192,6 @@ std::shared_ptr<TrtShuffleDesc> Parser::CreateNHWC2NCHWLayerDesc() {
 std::shared_ptr<TrtShuffleDesc> Parser::CreateNCHW2NHWCLayerDesc() {
   auto shuffle_desc = std::make_shared<TrtShuffleDesc>();
   shuffle_desc->doFirstTrans = true;
-  shuffle_desc->doReshape = false;
-  shuffle_desc->doSecondTrans = false;
   shuffle_desc->firstTranspose = {0, 2, 3, 1, 0, 0, 0, 0};
   return shuffle_desc;
 }

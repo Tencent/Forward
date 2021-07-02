@@ -344,7 +344,6 @@ TEST_F(TestTorchNodes, Permute) {
   TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
-#ifdef ENABLE_TORCH_PLUGIN
 TEST_F(TestTorchNodes, PixelShuffle) {
   model_path = model_path + "pixel_shuffle.pth";
   const auto input = torch::randn({1, 9, 24, 24}, device);
@@ -352,7 +351,7 @@ TEST_F(TestTorchNodes, PixelShuffle) {
   input_map["input"] = input;
   TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
-#endif  // ENABLE_TORCH_PLUGIN
+
 TEST_F(TestTorchNodes, ReduceModule) {
   const auto input = torch::randn({32, 16, 45, 12}, device);
   input_map["x"] = input;

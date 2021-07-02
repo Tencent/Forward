@@ -522,10 +522,16 @@ struct TrtSelectDesc : TrtLayerDesc {
 struct TrtShuffleDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Shuffle)
 
+  bool doFirstTrans{false};
+  bool doReshape{false};
+  bool doSecondTrans{false};
+
+  // special for DepthToSpace
+  int channel_block_size{0};
+
   nvinfer1::Permutation firstTranspose;
   nvinfer1::Dims reshapeDimensions;
   nvinfer1::Permutation secondTranspose;
-  bool doFirstTrans, doReshape, doSecondTrans;
 };
 
 struct TrtSliceDesc : TrtLayerDesc {

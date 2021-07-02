@@ -45,49 +45,60 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     const auto kind = node->kind();
 
     return kind == c10::aten::flatten || kind == c10::aten::permute ||
-           kind == c10::aten::transpose || kind == c10::aten::view || kind == c10::aten::reshape ||
-           kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_ ||
+           kind == c10::aten::pixel_shuffle || kind == c10::aten::transpose ||
+           kind == c10::aten::view || kind == c10::aten::reshape || kind == c10::aten::unsqueeze ||
+           kind == c10::aten::unsqueeze_ ||
            kind == c10::aten::expand;  // TODO(Ao Li): 暂时在这里处理 expand
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
                                        std::vector<const JitValue*>& input_values) override {
     const auto kind = node->kind();
-    if (kind == c10::aten::flatten) {
-      return CreateFlatten(node, module, input_values);
-    }
 
-    if (kind == c10::aten::permute) {
-      return CreatePermute(node, module, input_values);
-    }
+    if (kind == c10::aten::flatten) return CreateFlatten(node, module, input_values);
+    if (kind == c10::aten::permute) return CreatePermute(node, module, input_values);
+    if (kind == c10::aten::transpose) return CreateTranspose(node, module, input_values);
+    if (kind == c10::aten::expand) return CreateExpand(node, module, input_values);
+    if (kind == c10::aten::pixel_shuffle) return CreatePixelShuffle(node, module, input_values);
 
-    if (kind == c10::aten::transpose) {
-      return CreateTranspose(node, module, input_values);
-    }
-
-    if (kind == c10::aten::view || kind == c10::aten::reshape) {
+    if (kind == c10::aten::view || kind == c10::aten::reshape)
       return CreateView(node, module, input_values);
-    }
 
-    if (kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_) {
+    if (kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_)
       return CreateUnSqueeze(node, module, input_values);
-    }
-
-    if (kind == c10::aten::expand) {
-      return CreateExpand(node, module, input_values);
-    }
 
     return nullptr;
   }
 
  private:
-  /**
-   * \brief 创建适用于 Flatten 的层描述
-   * \param node
-   * \param module
-   * \param input_values
-   * \return
-   */
+  std::shared_ptr<TrtLayerDesc> CreatePixelShuffle(
+      const JitNode* node, const TorchModule& module,
+      std::vector<const JitValue*>& input_values) const {
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+
+    // Input 0: Tensor input
+    const auto inputs = node->inputs();
+    T_CHECK_EQ(inputs.size(), 2);
+
+    input_values.push_back(inputs[0]);
+
+    const int upscale_factor = module.Get(inputs[1]).toInt();
+
+    layer_desc->channel_block_size = upscale_factor;
+
+    auto input_shape = torch_::ShapeOf(module.Get(inputs[0]).toTensor());
+    const int nbdims = input_shape.size();
+    input_shape[0] = 0;                                            // keep batch dim
+    input_shape[nbdims - 3] /= (upscale_factor * upscale_factor);  // C /= upscale_factor^2
+    input_shape[nbdims - 2] *= upscale_factor;                     // H *= upscale_factor
+    input_shape[nbdims - 1] *= upscale_factor;                     // W *= upscale_factor
+
+    layer_desc->doReshape = true;
+    layer_desc->reshapeDimensions = TrtUtils::ToDims(input_shape);
+
+    return layer_desc;
+  }
+
   std::shared_ptr<TrtLayerDesc> CreateFlatten(const JitNode* node, const TorchModule& module,
                                               std::vector<const JitValue*>& input_values) const {
     auto layer_desc = std::make_shared<TrtShuffleDesc>();
@@ -112,13 +123,6 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     return layer_desc;
   }
 
-  /**
-   * \brief 创建适用于 Permute 的层描述
-   * \param node
-   * \param module
-   * \param input_values
-   * \return
-   */
   std::shared_ptr<TrtLayerDesc> CreatePermute(const JitNode* node, const TorchModule& module,
                                               std::vector<const JitValue*>& input_values) const {
     LOG(INFO) << "TrtShuffleDescCreator::CreatePermute";
@@ -140,13 +144,6 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     return layer_desc;
   }
 
-  /**
-   * \brief 创建适用于 Transpose 的层描述
-   * \param node
-   * \param module
-   * \param input_values
-   * \return
-   */
   std::shared_ptr<TrtLayerDesc> CreateTranspose(const JitNode* node, const TorchModule& module,
                                                 std::vector<const JitValue*>& input_values) const {
     LOG(INFO) << "TrtShuffleDescCreator::CreateTranspose";
@@ -178,13 +175,6 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     return layer_desc;
   }
 
-  /**
-   * \brief 创建适用于 View 的层描述
-   * \param node
-   * \param module
-   * \param input_values
-   * \return
-   */
   std::shared_ptr<TrtLayerDesc> CreateView(const JitNode* node, const TorchModule& module,
                                            std::vector<const JitValue*>& input_values) const {
     const auto inputs = node->inputs();
@@ -218,13 +208,6 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     return layer_desc;
   }
 
-  /**
-   * \brief 创建适用于 Unsqueeze 的层描述
-   * \param node
-   * \param module
-   * \param input_values
-   * \return
-   */
   std::shared_ptr<TrtLayerDesc> CreateUnSqueeze(const JitNode* node, const TorchModule& module,
                                                 std::vector<const JitValue*>& input_values) const {
     const auto inputs = node->inputs();
@@ -267,13 +250,6 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     return layer_desc;
   }
 
-  /**
-   * \brief 创建适用于 Expand 的层描述
-   * \param node
-   * \param module
-   * \param input_values
-   * \return
-   */
   std::shared_ptr<TrtLayerDesc> CreateExpand(const JitNode* node, const TorchModule& module,
                                              std::vector<const JitValue*>& input_values) const {
     const auto inputs = node->inputs();

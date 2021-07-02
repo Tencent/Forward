@@ -42,140 +42,195 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
  public:
   bool Check(const Operation& op) override {
     const auto type = op.OpType();
-    return type == "Transpose" || type == "Reshape" || type == "ExpandDims" || type == "Squeeze";
+    return type == "Transpose" || type == "Reshape" || type == "ExpandDims" || type == "Squeeze" ||
+           type == "DepthToSpace";
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const Operation& op, const Graph& graph,
                                        std::vector<Output>& op_inputs) override {
     LOG(INFO) << "TrtShuffleDesc::Create";
-    std::shared_ptr<TrtLayerDesc> default_return_value = nullptr;
-
-    auto layer_desc = std::make_shared<TrtShuffleDesc>();
 
     const auto type = op.OpType();
-    if (type == "Transpose") {
-      T_CHECK_EQ(op.NumInputs(), 2);
+    if (type == "Transpose") return CreateTranspose(op, op_inputs);
+    if (type == "Reshape") return CreateReshape(op, op_inputs);
+    if (type == "ExpandDims") return CreateExpandDims(op, op_inputs);
+    if (type == "Squeeze") return CreateSqueezeDims(op, op_inputs);
+    if (type == "DepthToSpace") return CreateDepthToSpace(op, op_inputs);
 
-      // Input 0, kind = input
-      // Input 1, perm
-      const auto input = op.Input(0);
-      const auto perm = op.Input(1);
+    return {};
+  }
 
-      // 将输入返回
-      op_inputs.push_back(input);
+  std::shared_ptr<fwd::TrtLayerDesc> CreateDepthToSpace(const fwd::tf_::Operation& op,
+                                                        std::vector<fwd::tf_::Output>& op_inputs) {
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    T_CHECK_EQ(op.NumInputs(), 1);
 
-      // [N, H, W, C]
-      auto const_permute = perm.GetConstantTensor();
-      T_CHECK(const_permute.Valid());
-      const std::vector<int> permutes = const_permute.AsIntList();
-      T_CHECK_EQ(permutes.size(), 4);
+    // Input 0, kind = input
+    const auto input = op.Input(0);
+    op_inputs.push_back(input);
+    const auto block_size = op.GetAttrInt("block_size");
+    const auto data_format = op.GetAttrString("data_format");
 
-      layer_desc->doFirstTrans = true;
-      layer_desc->doReshape = false;
-      layer_desc->doSecondTrans = false;
-      layer_desc->firstTranspose =
-          TrtUtils::ToPermutation(TrtUtils::NHWC2NCHWDim(TrtUtils::NHWC2NCHW(permutes)));
-    } else if (type == "Reshape") {
-      T_CHECK_EQ(op.NumInputs(), 2);
+    T_CHECK_EQ(data_format, "NHWC");
 
-      // Input 0, kind = input
-      // Input 1, shape
-      const auto input = op.Input(0);
-      const auto reshape = op.Input(1);
+    std::vector<int64_t> dims_64;
+    dims_64.resize(input.GetTensorNumDims());
+    input.GetTensorShape(dims_64.data(), dims_64.size());
+    std::vector<int> dims(dims_64.begin(), dims_64.end());
+    T_CHECK_EQ(dims.size(), 4);
+    const auto square_block = block_size * block_size;
+    const auto channel_size = dims[3];
+    T_CHECK_EQ(channel_size % square_block, 0);
+    dims[0] = 0;              // keep batch dim
+    dims[1] *= block_size;    // H *= block_size
+    dims[2] *= block_size;    // W *= block_size
+    dims[3] /= square_block;  // C /= block_size^2
 
-      // 将输入返回
-      op_inputs.push_back(input);
-      std::vector<int> dims;
-      if (reshape.OpType() == "Shape") {
-        std::vector<int64_t> dims_64;
-        const auto tensor_to_get_shape = reshape.Input(0);
-        dims_64.resize(tensor_to_get_shape.GetTensorNumDims());
-        tensor_to_get_shape.GetTensorShape(dims_64.data(), dims_64.size());
-        dims.assign(dims_64.begin(), dims_64.end());
-      } else if (reshape.OpType() == "Pack") {
-        // keep batch dim
-        dims.push_back(0);
-        // assign other params in Pack Node
-        for (int i = 1; i < reshape.NumInputs(); ++i) {
-          auto reshape_dim = reshape.Input(i).GetConstantTensor();
-          T_CHECK(reshape_dim.Valid());
-          dims.push_back(reshape_dim.AsInt());
-        }
-      } else {
-        auto reshape_dims = reshape.GetConstantTensor();
-        T_CHECK(reshape_dims.Valid());
-        dims = reshape_dims.AsIntList();
+    layer_desc->channel_block_size = block_size;
+
+    // Because we cannot guarantee that TensorRT will make the storage of NCHW-input continuous (it
+    // may do nothing after the NHWC->NCHW shuffle layer of inputs), the NCHW->NHWC and NHWC->NCHW
+    // are required here to guarantee that inputs are valid.
+    layer_desc->doFirstTrans = true;
+    layer_desc->firstTranspose = {0, 2, 3, 1, 0, 0, 0, 0};
+
+    layer_desc->doReshape = true;
+    layer_desc->reshapeDimensions = TrtUtils::ToDims(dims);
+
+    layer_desc->doSecondTrans = true;
+    layer_desc->secondTranspose = {0, 3, 1, 2, 0, 0, 0, 0};
+    return layer_desc;
+  }
+
+  std::shared_ptr<fwd::TrtLayerDesc> CreateSqueezeDims(const fwd::tf_::Operation& op,
+                                                       std::vector<fwd::tf_::Output>& op_inputs) {
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    T_CHECK_EQ(op.NumInputs(), 1);
+
+    // Input 0, kind = input
+    const auto input = op.Input(0);
+    const auto squeeze_dim = op.GetAttrIntList("squeeze_dims");
+
+    const auto dims = DimsOf(input);
+
+    nvinfer1::Dims real_dims;
+    real_dims.nbDims = 0;
+
+    for (int i = 0; i < dims.nbDims; ++i) {
+      if (std::find(squeeze_dim.begin(), squeeze_dim.end(), i) == squeeze_dim.end()) {
+        real_dims.d[real_dims.nbDims++] = dims.d[i];
       }
-      layer_desc->doReshape = true;
-      layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
-
-      // When inputs are NHWC, we do NHWC->NCHW on those inputs to match TensorRT's data format.
-      // If the number dimensions of Reshape changed, we have to do NCHW->NHWC to keep
-      // data storages correct for following layers.
-      if (input.GetTensorNumDims() == 4 && dims.size() != 4) {
-        layer_desc->doFirstTrans = true;
-        layer_desc->firstTranspose = {0, 2, 3, 1, 0, 0, 0, 0};
-      } else {
-        layer_desc->doFirstTrans = false;
-      }
-      layer_desc->doSecondTrans = false;
-    } else if (type == "ExpandDims") {
-      T_CHECK_EQ(op.NumInputs(), 2);
-
-      // Input 0, kind = input
-      // Input 1, perm
-      const auto input = op.Input(0);
-      const auto dim = op.Input(1);
-
-      auto dims = DimsOf(input);
-      dims.nbDims += 1;
-
-      // int expand_dim = GetConstantInt(graph, dim);
-      auto const_dim = dim.GetConstantTensor();
-      T_CHECK(const_dim.Valid());
-      int expand_dim = const_dim.AsInt();
-      if (expand_dim < 0) {
-        expand_dim += dims.nbDims;
-      }
-      for (int i = dims.nbDims - 1; i >= expand_dim + 1; i--) {
-        dims.d[i] = dims.d[i - 1];
-      }
-      dims.d[expand_dim] = 1;
-
-      layer_desc->doFirstTrans = false;
-      layer_desc->doReshape = true;
-      layer_desc->doSecondTrans = false;
-      layer_desc->reshapeDimensions = dims;
-
-      // 将输入返回
-      op_inputs.push_back(input);
-    } else if (type == "Squeeze") {
-      T_CHECK_EQ(op.NumInputs(), 1);
-
-      // Input 0, kind = input
-      const auto input = op.Input(0);
-      const auto squeeze_dim = op.GetAttrIntList("squeeze_dims");
-
-      const auto dims = DimsOf(input);
-
-      nvinfer1::Dims real_dims;
-      real_dims.nbDims = 0;
-
-      for (int i = 0; i < dims.nbDims; ++i) {
-        if (std::find(squeeze_dim.begin(), squeeze_dim.end(), i) == squeeze_dim.end()) {
-          real_dims.d[real_dims.nbDims++] = dims.d[i];
-        }
-      }
-
-      layer_desc->doFirstTrans = false;
-      layer_desc->doReshape = true;
-      layer_desc->doSecondTrans = false;
-      layer_desc->reshapeDimensions = real_dims;
-
-      // 将输入返回
-      op_inputs.push_back(input);
     }
 
+    layer_desc->doReshape = true;
+    layer_desc->reshapeDimensions = real_dims;
+
+    // 将输入返回
+    op_inputs.push_back(input);
+    return layer_desc;
+  }
+
+  std::shared_ptr<fwd::TrtLayerDesc> CreateExpandDims(const fwd::tf_::Operation& op,
+                                                      std::vector<fwd::tf_::Output>& op_inputs) {
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    T_CHECK_EQ(op.NumInputs(), 2);
+
+    // Input 0, kind = input
+    // Input 1, perm
+    const auto input = op.Input(0);
+    const auto dim = op.Input(1);
+
+    auto dims = DimsOf(input);
+    dims.nbDims += 1;
+
+    // int expand_dim = GetConstantInt(graph, dim);
+    auto const_dim = dim.GetConstantTensor();
+    T_CHECK(const_dim.Valid());
+    int expand_dim = const_dim.AsInt();
+    if (expand_dim < 0) {
+      expand_dim += dims.nbDims;
+    }
+    for (int i = dims.nbDims - 1; i >= expand_dim + 1; i--) {
+      dims.d[i] = dims.d[i - 1];
+    }
+    dims.d[expand_dim] = 1;
+
+    layer_desc->doReshape = true;
+    layer_desc->reshapeDimensions = dims;
+
+    // 将输入返回
+    op_inputs.push_back(input);
+    return layer_desc;
+  }
+
+  std::shared_ptr<fwd::TrtLayerDesc> CreateReshape(const fwd::tf_::Operation& op,
+                                                   std::vector<fwd::tf_::Output>& op_inputs) {
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    T_CHECK_EQ(op.NumInputs(), 2);
+
+    // Input 0, kind = input
+    // Input 1, shape
+    const auto input = op.Input(0);
+    const auto reshape = op.Input(1);
+
+    // 将输入返回
+    op_inputs.push_back(input);
+    std::vector<int> dims;
+    if (reshape.OpType() == "Shape") {
+      std::vector<int64_t> dims_64;
+      const auto tensor_to_get_shape = reshape.Input(0);
+      dims_64.resize(tensor_to_get_shape.GetTensorNumDims());
+      tensor_to_get_shape.GetTensorShape(dims_64.data(), dims_64.size());
+      dims.assign(dims_64.begin(), dims_64.end());
+    } else if (reshape.OpType() == "Pack") {
+      // keep batch dim
+      dims.push_back(0);
+      // assign other params in Pack Node
+      for (int i = 1; i < reshape.NumInputs(); ++i) {
+        auto reshape_dim = reshape.Input(i).GetConstantTensor();
+        T_CHECK(reshape_dim.Valid());
+        dims.push_back(reshape_dim.AsInt());
+      }
+    } else {
+      auto reshape_dims = reshape.GetConstantTensor();
+      T_CHECK(reshape_dims.Valid());
+      dims = reshape_dims.AsIntList();
+    }
+    layer_desc->doReshape = true;
+    layer_desc->reshapeDimensions = TrtUtils::ToDims(TrtUtils::NHWC2NCHW(dims));
+
+    // When inputs are NHWC, we do NHWC->NCHW on those inputs to match TensorRT's data format.
+    // If the number dimensions of Reshape changed, we have to do NCHW->NHWC to keep
+    // data storages correct for following layers.
+    if (input.GetTensorNumDims() == 4 && dims.size() != 4) {
+      layer_desc->doFirstTrans = true;
+      layer_desc->firstTranspose = {0, 2, 3, 1, 0, 0, 0, 0};
+    }
+    return layer_desc;
+  }
+
+  std::shared_ptr<TrtLayerDesc> CreateTranspose(const Operation& op,
+                                                std::vector<Output>& op_inputs) {
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    T_CHECK_EQ(op.NumInputs(), 2);
+
+    // Input 0, kind = input
+    // Input 1, perm
+    const auto input = op.Input(0);
+    const auto perm = op.Input(1);
+
+    // 将输入返回
+    op_inputs.push_back(input);
+
+    // [N, H, W, C]
+    auto const_permute = perm.GetConstantTensor();
+    T_CHECK(const_permute.Valid());
+    const std::vector<int> permutes = const_permute.AsIntList();
+    T_CHECK_EQ(permutes.size(), 4);
+
+    layer_desc->doFirstTrans = true;
+    layer_desc->firstTranspose =
+        TrtUtils::ToPermutation(TrtUtils::NHWC2NCHWDim(TrtUtils::NHWC2NCHW(permutes)));
     return layer_desc;
   }
 };

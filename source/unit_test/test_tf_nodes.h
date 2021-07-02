@@ -153,6 +153,18 @@ TEST_F(TestTfNodes, Convolution2d) {
   TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
+TEST_F(TestTfNodes, DepthToSpace) {
+  filename = filename + "depth_to_space.pb";
+
+  const int batch_size = 1;
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 12, 24, 16});
+
+  input_map["x"] = input.get();
+  output_names = {"DepthToSpace"};
+
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
+}
+
 TEST_F(TestTfNodes, DepthwiseConv2d) {
   filename = filename + "depthwise_conv2d.pb";
 
