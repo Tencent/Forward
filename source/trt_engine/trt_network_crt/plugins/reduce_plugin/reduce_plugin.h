@@ -105,6 +105,16 @@ class ReducePlugin final : public nvinfer1::IPluginV2DynamicExt {
   float power_;
 
   const char* mPluginNamespace = "";
+
+ protected:
+  // To prevent compiler warnings.
+  using nvinfer1::IPluginV2DynamicExt::canBroadcastInputAcrossBatch;
+  using nvinfer1::IPluginV2DynamicExt::configurePlugin;
+  using nvinfer1::IPluginV2DynamicExt::enqueue;
+  using nvinfer1::IPluginV2DynamicExt::getOutputDimensions;
+  using nvinfer1::IPluginV2DynamicExt::getWorkspaceSize;
+  using nvinfer1::IPluginV2DynamicExt::isOutputBroadcastAcrossBatch;
+  using nvinfer1::IPluginV2DynamicExt::supportsFormat;
 };
 
 class ReducePluginCreator : public nvinfer1::plugin::BaseCreator {

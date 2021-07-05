@@ -177,7 +177,10 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/simple-utils)
 set_target_properties(simple-utils PROPERTIES FOLDER third_party)
 
 # Cub-1.8.0
-include_directories(${PROJECT_SOURCE_DIR}/source/third_party/cub-1.8.0)
+if (${CUDA_VERSION_MAJOR} LESS 11)
+  message(STATUS "CUDA_VERSION_MAJOR < 11, Use cub-1.8.0 in the third_party.")
+  include_directories(${PROJECT_SOURCE_DIR}/source/third_party/cub-1.8.0)
+endif()
 
 # json
 add_subdirectory(${PROJECT_SOURCE_DIR}/source/third_party/json)

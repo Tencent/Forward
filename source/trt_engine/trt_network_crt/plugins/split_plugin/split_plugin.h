@@ -113,6 +113,16 @@ class SplitPlugin final : public nvinfer1::IPluginV2DynamicExt {
   bool initialized_;
 
   const char* mPluginNamespace = "";
+
+ protected:
+  // To prevent compiler warnings.
+  using nvinfer1::IPluginV2DynamicExt::canBroadcastInputAcrossBatch;
+  using nvinfer1::IPluginV2DynamicExt::configurePlugin;
+  using nvinfer1::IPluginV2DynamicExt::enqueue;
+  using nvinfer1::IPluginV2DynamicExt::getOutputDimensions;
+  using nvinfer1::IPluginV2DynamicExt::getWorkspaceSize;
+  using nvinfer1::IPluginV2DynamicExt::isOutputBroadcastAcrossBatch;
+  using nvinfer1::IPluginV2DynamicExt::supportsFormat;
 };
 
 class SplitPluginCreator : public nvinfer1::plugin::BaseCreator {

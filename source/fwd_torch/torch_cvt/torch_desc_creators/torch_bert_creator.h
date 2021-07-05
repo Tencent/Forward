@@ -214,15 +214,14 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
   bool AnalyzeAttrNode(const JitNode* node, const TorchModule& module,
                        std::shared_ptr<TrtBertDesc>& layer_desc) const {
     const std::string key_type = node->s(c10::Symbol::attr("name"));
-    if (key_type != "weight" && key_type != "bias") {
-      return false;
-    }
+    if (key_type != "weight" && key_type != "bias") return false;
 
     const auto weight = module.Get(node->output()).toTensor();
     const std::string layer_name = GetWeightFullName(node);
 
     // 与tf的kernel存储方式相反，这里应该不需要转置
     layer_desc->weight_map[layer_name] = ToFwdWeights(weight);
+    return true;
   }
 
   void TrySetDesc(const JitNode* node, const TorchModule& module,
