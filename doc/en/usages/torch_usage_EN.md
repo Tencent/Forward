@@ -28,7 +28,7 @@
 - TensorRT >= 7.0.0.11,  (Recommended version: TensorRT-7.2.1.6)
 - CMake >= 3.12.2
 - GCC >= 5.4.0, ld >= 2.26.1
-- (Pytorch) pytorch == 1.3.1 and pytorch == 1.7.1
+- PyTorch >= 1.7.0
 
  __Note: When using PyTorch that pre-installed by Conda or pip, its CUDA version should be as the same as the version of CUDA toolkit installed in the operating system. Otherwise, Forward-Python library may cause Segmentation fault.__
 
@@ -37,15 +37,14 @@
 1. Install from pip
 
 ``` sh
-pip3 install torch==1.3.1+cu100 torchvision==0.4.2+cu100 -f https://download.pytorch.org/whl/torch_stable.html
+pip3 install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 2. Install from whl
-Download whl from [here](https://download.pytorch.org/whl/torch_stable.html), for example python 3.6 + CUDA 10.0:
+Download whl from [here](https://download.pytorch.org/whl/torch_stable.html), for example python 3.6 + CPU:
 
 ``` sh
-https://download.pytorch.org/whl/cu100/torch-1.3.1%2Bcu100-cp36-cp36m-linux_x86_64.whl
-https://download.pytorch.org/whl/cu100/torchvision-0.4.2%2Bcu100-cp36-cp36m-linux_x86_64.whl
+https://download.pytorch.org/whl/cpu/torch-1.7.1%2Bcpu-cp36-cp36m-linux_x86_64.whl
 ```
 
 ## Export PyTorch JIT models
