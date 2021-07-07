@@ -30,7 +30,7 @@
 - GCC >= 5.4.0, ld >= 2.26.1
 - (Pytorch) pytorch == 1.3.1 and pytorch == 1.7.1
 
- __Note: 使用 Conda 或者 pip 安装的 pytorch 预编译版本, 所使用的 CUDA 必须和系统环境下的 CUDA toolkit 版本一致, 否则在使用 python lib 退出时可能会出现 Segmentation fault. __
+ __Note: 使用 Conda 或者 pip 安装的 pytorch 预编译版本, 所使用的 CUDA 必须和系统环境下的 CUDA toolkit 版本一致, 否则在使用 python lib 退出时可能会出现 Segmentation fault.__
 
 ## Pytorch Installation
 
