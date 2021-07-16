@@ -44,44 +44,67 @@ class TLayerDescCreator<TrtConstantDesc> : public ILayerDescCreator {
   bool Check(const JitNode* node, const TorchModule& module) override {
     const auto kind = node->kind();
     // 在这里补充其他的常量算子
-    return kind == c10::aten::arange || kind == c10::aten::zeros;
+    return kind == c10::aten::arange || kind == c10::aten::zeros || kind == c10::aten::ones ||
+           kind == c10::prim::GetAttr;
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
                                        std::vector<const JitValue*>& input_values) override {
-    LOG(INFO) << "TrtConstantDesc::Create";
-
-    auto layer_desc = std::make_shared<TrtConstantDesc>();
-
-    const auto inputs = node->inputs();
+    input_values.push_back(nullptr);
 
     const auto kind = node->kind();
-    if (node->kind() == c10::aten::arange) {
-      input_values.push_back(nullptr);
-      if (inputs.size() == 5) {
-        const c10::Scalar end = module.Get(inputs[0]).toScalar();
-        const c10::ScalarType dtype = module.Get(inputs[1]).toScalarType();
-        at::Tensor tensor = ::torch::arange(end, dtype);
-        layer_desc->weights = ToFwdWeights(tensor);
-        layer_desc->dimensions = DimsOf(tensor);
-      } else {
-        const c10::Scalar start = module.Get(inputs[0]).toScalar();
-        const c10::Scalar end = module.Get(inputs[1]).toScalar();
-        const c10::Scalar step = module.Get(inputs[2]).toScalar();
-        const c10::ScalarType dtype = module.Get(inputs[3]).toScalarType();
-        at::Tensor tensor = ::torch::arange(start, end, step, dtype);
-        layer_desc->weights = ToFwdWeights(tensor);
-        layer_desc->dimensions = DimsOf(tensor);
-      }
-    } else if (node->kind() == c10::aten::zeros) {
-      input_values.push_back(nullptr);
-      const auto size = module.Get(inputs[0]).toIntVector();
-      const at::Tensor tensor = torch::zeros(size);
-      layer_desc->weights = ToFwdWeights(tensor);
-      layer_desc->dimensions = DimsOf(tensor);
+    at::Tensor tensor;
+    if (kind == c10::aten::arange) {
+      tensor = CreateConstantFromArrange(module, node);
+    } else if (kind == c10::aten::zeros || kind == c10::aten::ones) {
+      tensor = CreateConstantFromZerosOrOnes(module, node);
+    } else if (kind == c10::prim::GetAttr) {
+      tensor = CreateConstantFromGetAttr(module, node);
     }
 
+    auto layer_desc = std::make_shared<TrtConstantDesc>();
+    layer_desc->weights = ToFwdWeights(tensor);
+    layer_desc->dimensions = DimsOf(tensor);
     return layer_desc;
+  }
+
+ private:
+  at::Tensor CreateConstantFromGetAttr(const TorchModule& module, const JitNode* node) {
+    LOG(INFO) << "TrtConstantDesc::CreateGetAttr";
+    const auto output = module.Get(node->output());
+
+    if (output.isTensor()) return output.toTensor();
+    if (output.isScalar()) return output.toScalar() * torch::ones(1);
+
+    LOG(ERROR) << "Unsupported IValue type. Only support : Tensor and Scalar.";
+    return {};
+  }
+
+  at::Tensor CreateConstantFromZerosOrOnes(const TorchModule& module, const JitNode* node) {
+    LOG(INFO) << "TrtConstantDesc::CreateZerosOrOnes";
+    const auto inputs = node->inputs();
+    const auto size = module.Get(inputs[0]).toIntVector();
+
+    if (node->kind() == c10::aten::zeros) return torch::zeros(size);
+
+    return torch::ones(size);
+  }
+
+  at::Tensor CreateConstantFromArrange(const TorchModule& module, const JitNode* node) {
+    LOG(INFO) << "TrtConstantDesc::CreateArrange";
+    const auto inputs = node->inputs();
+
+    if (inputs.size() == 5) {
+      const c10::Scalar end = module.Get(inputs[0]).toScalar();
+      const c10::ScalarType dtype = module.Get(inputs[1]).toScalarType();
+      return torch::arange(end, dtype);
+    }
+
+    const c10::Scalar start = module.Get(inputs[0]).toScalar();
+    const c10::Scalar end = module.Get(inputs[1]).toScalar();
+    const c10::Scalar step = module.Get(inputs[2]).toScalar();
+    const c10::ScalarType dtype = module.Get(inputs[3]).toScalarType();
+    return torch::arange(start, end, step, dtype);
   }
 };
 
