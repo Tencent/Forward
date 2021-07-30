@@ -88,6 +88,11 @@ bool Parser::CreateDescs(const std::vector<c10::IValue>& inputs) {
   if (!ParseValue(output_desc.get(), graph_output)) {
     return false;
   }
+
+#ifdef ENABLE_TORCH_PLUGIN
+  FuseTorchSubmodule(output_desc.get());
+#endif
+
   // torch single output
   network_.outputs.push_back(output_desc);
 
@@ -97,13 +102,13 @@ bool Parser::CreateDescs(const std::vector<c10::IValue>& inputs) {
 }
 
 bool Parser::ParseValue(TrtLayerDesc* parent, const JitValue* value) {
-  // 为了支持多输入的情况，仍然保持用 JitValue 作为 key。
+  // To support multi-input of JitNode, we use JitValue as the key for mapping TrtLayerDescs
   const auto* node = value->node();
   const auto& outputs = node->outputs();
   int value_idx = std::find(outputs.begin(), outputs.end(), value) - outputs.begin();
   CHECK_GE(value_idx, 0);
 
-  // 已经创建好的，直接加入到输入中
+  // If it is created, it is directly added into parent->inputs
   const auto iter = created_desc_map_.find(value);
   if (iter != created_desc_map_.end()) {
     if (iter->second->Name() == TrtInputDesc::NAME()) {
@@ -129,8 +134,8 @@ bool Parser::ParseValue(TrtLayerDesc* parent, const JitValue* value) {
     network_.torch_module_path = module_.ModulePath();
   }
 
-  // 如果输出是 TensorList，则将所有输出添加到 Parent 的输入：目前针对的是 Split
-  // 节点。
+  // If the output is TensorList, we need to add all outputs in the TensorList into parent->inputs.
+  // So far, this method is only designed for aten::split
   if (parent->Name() == TrtIdentityDesc::NAME() &&
       value->type()->kind() == c10::TypeKind::ListType) {
     const auto& output_value = module_.Get(value);
@@ -143,7 +148,7 @@ bool Parser::ParseValue(TrtLayerDesc* parent, const JitValue* value) {
     parent->inputs.push_back({layer_desc, value_idx});
   }
 
-  // 针对多输出的 Node，仅创建添加一份 layer_desc
+  // For multi-output nodes, we only create single TrtLayerDesc for it.
   for (auto output : outputs) {
     created_desc_map_[output] = layer_desc;
   }
@@ -171,7 +176,7 @@ bool Parser::SetNetworkBatchSize() {
 #endif  // USE_DYNAMIC_BATCH
   }
 
-  // 设置网络的 batch_size
+  // set the batch_size of network
   network_.batch_size = batch_size;
   module_.SetMaxBatchSize(network_.batch_size);
 
@@ -235,4 +240,39 @@ bool Parser::SetInputType(std::shared_ptr<TrtInputDesc> input_desc,
   return true;
 }
 
+bool Parser::FuseTorchSubmodule(TrtLayerDesc* current) {
+  // End condition
+  if (current->Name() == TrtInputDesc::NAME()) return false;
+
+  int need_fuse = 1;
+  for (auto& input : current->inputs) need_fuse &= FuseTorchSubmodule(input.layer_desc.get());
+
+  if (current->Name() == TrtTorchModuleDesc::NAME()) {
+    // fuse nodes
+    if (need_fuse) {
+      std::vector<TrtLayerOutput> inputs;
+      std::vector<int> node_ids;
+      std::vector<int> in_types;
+
+      // collect fuse infos
+      for (auto& input : current->inputs) {
+        auto child = reinterpret_cast<TrtTorchModuleDesc*>(input.layer_desc.get());
+        node_ids.insert(node_ids.end(), child->node_ids.begin(), child->node_ids.end());
+        in_types.insert(in_types.end(), child->in_types.begin(), child->in_types.end());
+        inputs.insert(inputs.end(), child->inputs.begin(), child->inputs.end());
+      }
+
+      // update
+      auto* cur_desc = reinterpret_cast<TrtTorchModuleDesc*>(current);
+      cur_desc->inputs.swap(inputs);
+      cur_desc->in_types.swap(in_types);
+      node_ids.insert(node_ids.end(), cur_desc->node_ids.begin(), cur_desc->node_ids.end());
+      cur_desc->node_ids.swap(node_ids);
+    }
+
+    return true;
+  }
+
+  return false;
+}
 FWD_TORCH_NAMESPACE_END

@@ -40,7 +40,7 @@
 #include "fwd_torch/torch_cvt/torch_desc_manager.h"
 #include "fwd_torch/torch_cvt/torch_module.h"
 
-// 解决外部 log 与 torch log 冲突导致日志打不出的问题
+// To solve the conflicts between internal LOG lib and Torch LOG lib
 #ifdef LOG
 #undef LOG
 #endif
@@ -56,112 +56,69 @@ FWD_NAMESPACE_END
 
 FWD_TORCH_NAMESPACE_BEGIN
 
-/**
- * \brief 将 Torch JIT Module 转换为 网络层描述 的转换器
- */
+// Parse Torch JIT Module into NetworkDesc
 class Parser {
  public:
-  /**
-   * \brief 构造器
-   * \param mode TensorRT 网络推理类型
-   */
+  // constructor
   explicit Parser(InferMode mode);
 
-  /**
-   * \brief 将 Torch JIT Module 转换为 网络层描述集合
-   * \param module_path Torch JIT Module
-   * \param inputs 伪输入
-   * \return
-   */
+  // Load Torch JIT Module and parse it into TrtNetwork descriptions with dummy inputs
   bool Parse(const std::string& module_path, const std::vector<torch::jit::IValue>& inputs);
 
-  /**
-   * \brief 将 Torch JIT Module 转换为 网络层描述集合
-   * \param module_path Torch JIT Module
-   * \param input_map 伪输入映射
-   * \return
-   */
+  // Load Torch JIT Module and parse it into TrtNetwork descriptions with dummy input_map
   bool Parse(const std::string& module_path,
              const std::unordered_map<std::string, c10::IValue>& input_map);
 
-  /**
-   * \brief 获取网络层描述
-   * \return
-   */
   const TrtNetworkDesc& GetNetwork() const { return network_; }
 
-  /**
-   * \brief 获取数据类型
-   * \return
-   */
+  // Get InferMode
   InferMode GetMode() const { return mode_; }
 
-  /**
-   * \brief 获取 Graph 中未使用的输入序号集合
-   * \return
-   */
   const std::set<int>& GetUnusedInputs() const { return network_.unused_input_indices; }
 
  private:
-  /**
-   * \brief 根据 dummy_input_map 解析 Torch  module
-   * \param inputs
-   * \return
-   */
+  // Utilize dummy_inputs to eval all outputs of intermediate JitValue, and then create
+  // LayerDescs to these nodes.
   bool CreateDescs(const std::vector<c10::IValue>& inputs);
 
-  /**
-   * \brief 根据 伪输入 创建 输入层描述
-   * \param inputs 伪输入
-   */
+  // Create INPUT LayerDescs with dummy inputs
   bool CreateInputDescs(const std::vector<c10::IValue>& inputs);
 
-  /**
-   * \brief 将 Graph 节点 转换为 网络层描述
-   * \param parent TrtLayerDesc
-   * \param value JitValue
-   * \return
-   */
+  // Recursively parse JitValue into TrtLayerDesc, and regard these new created TrtLayerDesc as the
+  // children(inputs) of parent.
   bool ParseValue(TrtLayerDesc* parent, const JitValue* value);
 
-  /**
-   * \brief 设置输入类型
-   * \param input_desc 输入描述
-   * \param input_type torch  IValue 输入
-   * \return
-   */
+  // Set input type of TrtInputDesc
   bool SetInputType(std::shared_ptr<TrtInputDesc> input_desc,
                     const c10::ScalarType& input_type) const;
 
-  /**
-   * \brief 校验并设置网络的批量大小
-   * \return
-   */
+  // Fuse Torch Submodules, here is a simple example:
+  //
+  //     TrtInputDesc                    TrtInputDesc
+  //          |                               |
+  //   TrtTorchModuleDesc                     |
+  //          |                 ==>  FusedTrtTorchModuleDesc
+  //   TrtTorchModuleDesc                     |
+  //          |                               |
+  //     TrtOutputDesc                   TrtOutputDesc
+  bool FuseTorchSubmodule(TrtLayerDesc* current);
+
+  // Validate and set the batch size of network
   bool SetNetworkBatchSize();
 
-  /**
-   * \brief TensorRT 的推理类型
-   */
+  // Infer mode of the network
   InferMode mode_;
 
-  /**
-   * \brief 已创建过的从 Graph 节点 到 网络层描述 的映射
-   */
+  // Mapping records of the created TrtLayerDesc and its corresponding JitValue
   std::unordered_map<const JitValue*, std::shared_ptr<TrtLayerDesc>> created_desc_map_;
 
-  /**
-   * \brief 网络层描述
-   */
+  // The whole description of the network
   TrtNetworkDesc network_;
 
-  /**
-   * \brief Torch Module 管理器
-   */
+  // a TorchModule instance for loading Torch JIT Module and manipulating the JitValues
   TorchModule module_;
 
-  /**
-   * \brief Torch 描述管理器
-   */
+  // TrtLayerDesc Registry for JitValue
   TorchDescManager desc_manager_;
 };
 
