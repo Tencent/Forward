@@ -2,15 +2,18 @@
 
 ----
 
-- [Models](#models)
-  - [CV](#cv)
-  - [NLP](#nlp)
-  - [Recommender](#recommender)
-- [Operators](#operators)
-  - [PyTorch](#pytorch)
-  - [TensorFlow](#tensorflow)
+- [Models & Operators](#models--operators)
+  - [Models](#models)
+    - [CV](#cv)
+    - [NLP](#nlp)
+    - [Recommender](#recommender)
+  - [Operators](#operators)
+    - [PyTorch](#pytorch)
+    - [TensorFlow](#tensorflow)
 
 ----
+
+> Update on Release v1.2.4
 
 ## Models
 
@@ -49,154 +52,203 @@
 
 | Model Name| PyTorch | TensorFlow | Keras |
 | -- | -- | -- | -- |
-| DeepFM | Yes | Yes |Yes |
-| DLRM| Yes |Yes |Yes |
+| DeepFM | NO | Yes |Yes |
+| DLRM| NO |Yes |Yes |
 
 ## Operators
 
 ### PyTorch
 
-| Op Name | Support |
-| -- | -- |
-| aten::abs | Yes |
-| aten::acos | Yes |
-| aten::acosh | Yes |
-| aten::adaptive_avg_pool2d | Yes |
-| aten::adaptive_avg_pool3d | Yes |
-| aten::adaptive_max_pool2d | Yes |
-| aten::adaptive_max_pool3d | Yes |
-| aten::add | Yes |
-| aten::addmm | Yes |
-| aten::asin | Yes |
-| aten::asinh | Yes |
-| aten::atan | Yes |
-| aten::atanh | Yes |
-| aten::avg_pool2d | Yes |
-| aten::avg_pool3d | Yes |
-| aten::batch_norm | Yes |
-| aten::bmm | Yes |
-| aten::Bool | Yes |
-| aten::cat | Yes |
-| aten::ceil | Yes |
-| aten::chunk | Yes |
-| aten::clamp | Yes |
-| aten::constant_pad_nd | Yes |
-| aten::contiguous | Yes |
-| aten::convolution | Yes |
-| aten::cos | Yes |
-| aten::cosh | Yes |
-| aten::detach | Yes |
-| aten::device | Yes |
-| aten::div | Yes |
-| aten::dropout | Yes |
-| aten::elu | Yes |
-| aten::embedding_bag | Yes |
-| aten::exp | Yes |
-| aten::expand | Yes |
-| aten::expand_as | Yes |
-| aten::feature_dropout | Yes |
-| aten::flatten | Yes |
-| aten::Float | Yes |
-| aten::floor | Yes |
-| aten::floordiv | Yes |
-| aten::grid_sampler | Yes |
-| aten::gru | Yes |
-| aten::hardtanh | Yes |
-| aten::index | Yes |
-| aten::instance_norm | Yes |
-| aten::Int | Yes |
-| aten::layer_norm | Yes |
-| aten::leaky_relu | Yes |
-| aten::linear | Yes |
-| aten::log | Yes |
-| aten::lstm | Yes |
-| aten::max | Yes |
-| aten::max_pool2d | Yes |
-| aten::max_pool3d | Yes |
-| aten::mean | Yes |
-| aten::min | Yes |
-| aten::mul | Yes |
-| aten::neg | Yes |
-| aten::norm | Yes |
-| aten::permute | Yes |
-| aten::pow | Yes |
-| aten::prelu | Yes |
-| aten::reciprocal | Yes |
-| aten::reflection_pad2d | Yes |
-| aten::relu | Yes |
-| aten::reshape | Yes |
-| aten::rnn_relu | Yes |
-| aten::rnn_tanh | Yes |
-| aten::rsub | Yes |
-| aten::select | Yes |
-| aten::selu | Yes |
-| aten::sigmoid | Yes |
-| aten::sin | Yes |
-| aten::sinh | Yes |
-| aten::size | Yes |
-| aten::slice | Yes |
-| aten::softmax | Yes |
-| aten::softplus | Yes |
-| aten::split | Yes |
-| aten::split_with_sizes | Yes |
-| aten::sqrt | Yes |
-| aten::squeeze | Yes |
-| aten::stack | Yes |
-| aten::std | Yes |
-| aten::sub | Yes |
-| aten::sum | Yes |
-| aten::t | Yes |
-| aten::tan | Yes |
-| aten::tanh | Yes |
-| aten::to | Yes |
-| aten::transpose | Yes |
-| aten::unsqueeze | Yes |
-| aten::upsample_bilinear2d | Yes |
-| aten::upsample_nearest2d | Yes |
-| aten::var | Yes |
-| aten::view | Yes |
+> Support 138 torch Operators
+
+| Op Name |
+|--|
+|aten::_convolution|
+|aten::abs|
+|aten::abs_|
+|aten::acos|
+|aten::acos_|
+|aten::acosh|
+|aten::acosh_|
+|aten::adaptive_avg_pool2d|
+|aten::adaptive_avg_pool3d|
+|aten::adaptive_max_pool2d|
+|aten::adaptive_max_pool3d|
+|aten::add|
+|aten::add_|
+|aten::addmm|
+|aten::arange|
+|aten::asin|
+|aten::asin_|
+|aten::asinh|
+|aten::asinh_|
+|aten::atan|
+|aten::atan_|
+|aten::atanh|
+|aten::atanh_|
+|aten::avg_pool2d|
+|aten::avg_pool3d|
+|aten::batch_norm|
+|aten::bmm|
+|aten::cat|
+|aten::ceil|
+|aten::ceil_|
+|aten::chunk|
+|aten::clamp|
+|aten::clamp_|
+|aten::constant_pad_nd|
+|aten::contiguous|
+|aten::cos|
+|aten::cos_|
+|aten::cosh|
+|aten::cosh_|
+|aten::detach|
+|aten::device|
+|aten::div|
+|aten::div_|
+|aten::dropout|
+|aten::dropout_|
+|aten::elu|
+|aten::embedding|
+|aten::embedding_bag|
+|aten::eq|
+|aten::erf|
+|aten::erf_|
+|aten::exp|
+|aten::exp_|
+|aten::expand|
+|aten::expand_as|
+|aten::feature_dropout|
+|aten::flatten|
+|aten::floor|
+|aten::floor_|
+|aten::floordiv|
+|aten::gelu|
+|aten::grid_sampler|
+|aten::gru|
+|aten::gt|
+|aten::hardtanh|
+|aten::hardtanh_|
+|aten::index|
+|aten::instance_norm|
+|aten::layer_norm|
+|aten::leaky_relu|
+|aten::leaky_relu_|
+|aten::linear|
+|aten::log|
+|aten::log_|
+|aten::lrn|
+|aten::lstm|
+|aten::lt|
+|aten::matmul|
+|aten::max|
+|aten::max_pool2d|
+|aten::max_pool3d|
+|aten::mean|
+|aten::min|
+|aten::mul|
+|aten::mul_|
+|aten::neg|
+|aten::neg_|
+|aten::norm|
+|aten::ones|
+|aten::permute|
+|aten::pixel_shuffle|
+|aten::pow|
+|aten::prelu|
+|aten::reciprocal|
+|aten::reciprocal_|
+|aten::reflection_pad2d|
+|aten::relu|
+|aten::relu_|
+|aten::repeat|
+|aten::reshape|
+|aten::rnn_relu|
+|aten::rnn_tanh|
+|aten::rsub|
+|aten::select|
+|aten::selu|
+|aten::sigmoid|
+|aten::sin|
+|aten::sin_|
+|aten::sinh|
+|aten::sinh_|
+|aten::slice|
+|aten::softmax|
+|aten::softplus|
+|aten::split|
+|aten::split_with_sizes|
+|aten::sqrt|
+|aten::sqrt_|
+|aten::squeeze|
+|aten::stack|
+|aten::std|
+|aten::sub|
+|aten::sub_|
+|aten::sum|
+|aten::tan|
+|aten::tan_|
+|aten::tanh|
+|aten::to|
+|aten::transpose|
+|aten::unsqueeze|
+|aten::unsqueeze_|
+|aten::upsample_bilinear2d|
+|aten::upsample_bilinear2d|
+|aten::upsample_nearest2d|
+|aten::var|
+|aten::view|
+|aten::zeros|
+|Adaptive Layer-Instance Normalization|
+|BERT|
 
 ### TensorFlow
 
-| Op Name | Support |
-| -- | -- |
-| Add | Yes |
-| AddV2 | Yes |
-| AvgPool | Yes |
-| Bert | Yes |
-| BiasAdd | Yes |
-| Cast | Yes |
-| clamp | Yes |
-| ConcatV2 | Yes |
-| Conv2D | Yes |
-| DepthwiseConv2dNative | Yes |
-| Elu | Yes |
-| ExpandDims | Yes |
-| FusedBatchNormV3 | Yes |
-| GatherV2 | Yes |
-| Greater | Yes |
-| Identity | Yes |
-| IteratorGetNext | Yes |
-| Less | Yes |
-| MatMul | Yes |
-| Max | Yes |
-| MaxPool | Yes |
-| Mean | Yes |
-| Min | Yes |
-| Mul | Yes |
-| Pad | Yes |
-| Pow | Yes |
-| Range | Yes |
-| RealDiv | Yes |
-| Relu | Yes |
-| Relu6 | Yes |
-| Reshape | Yes |
-| Sigmoid | Yes |
-| Softmax | Yes |
-| Square | Yes |
-| Squeeze | Yes |
-| StridedSlice | Yes |
-| Sub | Yes |
-| Sum | Yes |
-| Tanh | Yes |
-| Transpose | Yes |
+> Support 44 TF Operators
+
+|Op Name|
+|--|
+|Add|
+|AddV2|
+|AvgPool|
+|BERT|
+|Cast|
+|Clamp|
+|ConcatV2|
+|Conv1D|
+|Conv2D|
+|Dense|
+|DepthToSpace|
+|DepthwiseConv2dNative|
+|Elu|
+|EmbeddingBag|
+|ExpandDims|
+|FusedBatchNorm|
+|FusedBatchNormV3|
+|GatherV2|
+|Greater|
+|Identity|
+|Less|
+|MatMul|
+|Max|
+|MaxPool|
+|Mean|
+|Min|
+|Mul|
+|Pad|
+|Pow|
+|Range|
+|RealDiv|
+|Relu|
+|Reshape|
+|Select|
+|Sigmoid|
+|Softmax|
+|Split|
+|Square|
+|Squeeze|
+|StridedSlice|
+|Sub|
+|Sum|
+|Tanh|
+|Transpose|
