@@ -30,16 +30,16 @@
 
 ## What is Forward
 
-Forward is a library for high-performance deep learning inference on NVIDIA GPUs. It provides a well-designed scheme that directly parses Tensorflow/PyTorch/Keras models to the high-performance engine based on [TensorRT](https://developer.nvidia.com/tensorrt). Compared to TensorRT, it is easy-to-use and easy-to-expand. So far, Forward supports not only mainstream deep learning models in CV, NLP, and  Recommend fields, but also some advanced models such as BERT, GAN, FaceSwap, StyleTransfer.
+Forward is a library for high-performance deep learning inference on NVIDIA GPUs. It provides a well-designed scheme that directly parses Tensorflow/PyTorch/Keras/ONNX models to the high-performance engine based on [TensorRT](https://developer.nvidia.com/tensorrt). Compared to TensorRT, it is easy-to-use and easy-to-expand. So far, Forward supports not only mainstream deep learning models in CV, NLP, and  Recommend fields, but also some advanced models such as BERT, GAN, FaceSwap, StyleTransfer.
 
 ## Why choose Forward
 
-- **High-performance optimization**: utilize TensorRT API and customized operators for high-performance deep learning inference.
-- **Wide range support**: support advanced models such as BERT, GAN, FaceSwap, and StyleTransfer besides the mainstream deep learning models in CV, NLP, and Recommend fields.
-- **Multiple modes**: support FLOAT/HALF/INT8 infer modes.
-- **Easy to use**: load Tensorflow(.pb)/PyTorch(.pth)/Keras(.h5) models directly, followed by inferencing with TensorRT.
-- **Easy to expand**: register customized layers according to [add_support_op.md](doc/en/usages/add_support_op_EN.md).
-- Provide C++ and Python interfaces.
+- **High-performance optimization**: utilize TensorRT API and customized operators for high-performance deep learning inference;
+- **Wide range support**: support advanced models such as BERT, GAN, FaceSwap, and StyleTransfer besides the mainstream deep learning models in CV, NLP, and Recommend fields;
+- **Multiple modes**: support FLOAT/HALF/INT8 infer modes;
+- **Easy to use**: load Tensorflow(.pb)/PyTorch(.pth)/Keras(.h5)/ONNX(.onnx) models directly, followed by inferencing with TensorRT;
+- **Easy to expand**: register customized layers according to [add_support_op.md](doc/en/usages/add_support_op_EN.md);
+- **Provide C++ and Python interfaces**.
 
 ## Quick Start
 
@@ -55,7 +55,7 @@ Forward is a library for high-performance deep learning inference on NVIDIA GPUs
 
 ### Build with CMake
 
-Use CMake to generate Makefiles or Visual Studio project (Windows). Upon the usage, Forward is able to be built for different frameworks, such as Fwd-Torch, Fwd-Python-Torch, Fwd-Tf, Fwd-Python-Tf, Fwd-Keras, and Fwd-Python-Keras.
+Use CMake to generate Makefiles or Visual Studio project (Windows). Upon the usage, Forward is able to be built for different frameworks, such as Fwd-Torch, Fwd-Python-Torch, Fwd-Tf, Fwd-Python-Tf, Fwd-Keras, Fwd-Python-Keras, Fwd-Onnx, and Fwd-Python-Onnx.
 
 The example below shows the building workflow under the Linux system,
 
@@ -67,7 +67,7 @@ Step 2: download `Tensorflow 1.15.0` (only needed when using Forward with Tensor
 ```bash
 1 cd Forward/source/third_party/tensorflow/
 2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
-3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz -C lib/
+3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
 ```
 Step 3: create `build` folder
 ```bash
@@ -119,12 +119,13 @@ Refer to [Demo for using Forward-Bert](demo/bert/README.md)
 - [PyTorch usages](doc/en/usages/torch_usage_EN.md)
 - [TensorFlow usages](doc/en/usages/tf_usage_EN.md)
 - [Keras usages](doc/en/usages/keras_usage_EN.md)
+- [ONNX usages](doc/en/usages/onnx_usage_EN.md)
 
 ### Logging
 
 Forward use [easylogging++](https://github.com/amrayn/easyloggingpp) for logging, and use `forward_log.conf` as the log configuration file. 
 
-- If `forward_log.conf` is existed under the workspace directory, Forward will use this file as the configuration file. For more information, please refer to [Using-configuration-file](https://github.com/amrayn/easyloggingpp#using-configuration-file).
+- If `forward_log.conf` is existed under the workspace directory, Forward will use this file as the configuration file. For more information, please refer to [Using-configuration-file](https://github.com/amrayn/easyloggingpp#using-configuration-file);
 - If `forward_log.conf` is not existed under the workspace directory, Forward will use its default settings and save logging information in `logs/myeasylog.log`.
 
 Example for the log configuration file `forward_log.conf`

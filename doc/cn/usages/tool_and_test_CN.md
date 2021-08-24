@@ -26,6 +26,8 @@
 | `test_<platform>_bert.h` | 测试对应平台下 Bert 模型的正确性 |
 | `test_torch_dlrm.h.h` | 测试 PyTorch 平台下 DLRM 推荐模型的正确性 |
 | `test_tf_recommender.h` | 测试 TensorFlow 平台下部分推荐模型的正确性 |
+| `test_onnx_models.h` | 测试 ONNX 平台下常见模型的正确性 |
+| `test_onnx_dynamic.h` | 测试 ONNX 平台下 ResNet50 模型动态批量输入的正确性 |
 
 ## 性能测试
 

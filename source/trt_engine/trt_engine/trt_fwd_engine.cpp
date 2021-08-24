@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include "trt_engine/trt_engine/trt_fwd_engine.h"
 
@@ -153,6 +154,8 @@ bool TrtForwardEngine::Execute(const IOMappingVector& inputs, IOMappingVector& o
 }
 
 bool TrtForwardEngine::Load(const std::string& engine_file) {
+  std::lock_guard<std::mutex> lock_guard(mtx);
+
   UTILS_PROFILE(LoadEngine);
 
   LOG(INFO) << "Loading engine " << engine_file;

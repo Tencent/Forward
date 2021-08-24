@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -49,6 +50,13 @@
   namespace fwd {                 \
   namespace keras_ {
 #define FWD_KERAS_NAMESPACE_END \
+  }                             \
+  }
+
+#define FWD_ONNX_NAMESPACE_BEGIN \
+  namespace fwd {                 \
+  namespace onnx_ {
+#define FWD_ONNX_NAMESPACE_END \
   }                             \
   }
 

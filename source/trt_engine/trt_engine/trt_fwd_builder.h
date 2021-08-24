@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -59,36 +60,10 @@ class TrtForwardBuilder : public IForwardBuilder {
   /**
    * \brief 根据 网络层描述 构建 TRT 推理引擎
    * \param network_desc 网络层描述
-   * \return
+   * \return 推理引擎
    */
   std::shared_ptr<IForwardEngine> Build(const TrtNetworkDesc& network_desc) override;
 
-  /**
-   * \brief 设置最优批量值，引擎将针对此批量大小进行优化
-   * \return size 最优批量值
-   */
-  void SetOptBatchSize(int size) override;
-
-  /**
-   * \brief 设置推理模式
-   * \param mode
-   */
-  void SetInferMode(InferMode mode) override;
-
-  /**
-   * \brief 设置工作空间最大值
-   * \param size
-   */
-  void SetMaxWorkspaceSize(size_t size);
-
-  /**
-   * \brief 设置量化器
-   * \param calibrator INT 量化器
-   * \return
-   */
-  void SetCalibrator(std::shared_ptr<nvinfer1::IInt8Calibrator> calibrator);
-
- protected:
   /**
    * \brief 构建 TRT 引擎
    * \param builder TensorRT 构建器
@@ -99,29 +74,91 @@ class TrtForwardBuilder : public IForwardBuilder {
                                      nvinfer1::INetworkDefinition* network) const;
 
   /**
+   * \brief 设置量化器
+   * \param calibrator INT 量化器
+   */
+  void SetCalibrator(std::shared_ptr<nvinfer1::IInt8Calibrator> calibrator);
+
+  /**
+   * \brief 设置最优批量值，引擎将针对此批量大小进行优化
+   * \return size 最优批量值
+   */
+  void SetOptBatchSize(int size) override;
+
+  /**
+   * \brief 获取最优批量值
+   * \return 最优批量值
+   */
+  int GetOptBatchSize() const;
+
+  /**
+   * \brief 设置最大批量值
+   * \param size 最大批量值
+   */
+  void SetMaxBatchSize(int size);
+
+  /**
+   * \brief 获取最大批量值
+   * \return 最大批量值
+   */
+  int GetMaxBatchSize() const;
+
+  /**
+   * \brief 设置推理模式
+   * \param mode 推理模式
+   */
+  void SetInferMode(InferMode mode) override;
+
+  /**
+   * \brief 设置工作空间内存最大值
+   * \param size 工作空间内存最大值
+   */
+  void SetMaxWorkspaceSize(size_t size);
+
+  /**
+   * \brief 获取工作空间内存最大值
+   * \return 工作空间内存最大值
+   */
+  size_t GetMaxWorkspaceSize() const;
+
+  /**
+   * \brief 设置推理引擎元数据中的输出顺序
+   * \param output_pos 推理引擎输出顺序
+   */
+  void SetOutputPositions(const std::vector<int>& output_pos);
+
+  /**
+   * \brief 获取 TRT 引擎的元数据
+   * \return 推理引擎元数据
+   */
+  EngineMetaData GetEngineMetaData() const;
+
+  /**
+   * \brief 将基本网络信息网络输出到文件
+   * \param network 待输出的网络
+   * \param filename 输出到的文件名
+   * \return 成功，返回 True
+   */
+  static bool DumpNetwork(const nvinfer1::INetworkDefinition* network,
+                          const std::string& filename = "network.txt");
+
+ protected:
+  /**
    * \brief 设置动态 Batch 的配置
-   * \param builder
-   * \param network
-   * \param config
-   * \return
+   * \param builder TensorRT 构建器
+   * \param network TensorRT 网络定义
+   * \param config TensorRT 构建器属性
+   * \return 成功，返回 True
    */
   bool SetDynamicProfile(nvinfer1::IBuilder* builder, nvinfer1::INetworkDefinition* network,
                          nvinfer1::IBuilderConfig* config) const;
 
   /**
    * \brief 设置 TRT 引擎的推理模式
-   * \param builder
-   * \param config
+   * \param builder TensorRT 构建器
+   * \param config TensorRT 构建器属性
    */
   void SetBuilderConfig(nvinfer1::IBuilder* builder, nvinfer1::IBuilderConfig* config) const;
-
-  /**
-   * \brief 将基本网络信息网络输出到文件
-   * \param network 待输出的网络
-   * \param filename 输出到的文件名
-   */
-  static bool DumpNetwork(const nvinfer1::INetworkDefinition* network,
-                          const std::string& filename = "network.txt");
 
   /**
    * \brief 构建推理引擎的最大 GPU 内存空间,最大可用内存空间大小

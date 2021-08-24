@@ -35,4 +35,4 @@ Engine Meta is a configuration file for loading Forward Engine.
     - Example: If tuple inputs of torch::Tensor is `(input_0, input_1, input_2)` but `input_2` is not used in Engine, then this attribute is set as `[2]`.
 - `output_indices` : Output Binding Indices.
     - Example: If Engine has 4 outputs and 1 input, then it should be `[1, 2, 3, 4]`;
-- `torch_module_path` : The path to TorchScript Module 模型路径. When some Torch operators cannot be converted to TensorRT operators, TorchModulePlugin is used to support these Torch operators. In this case, the original TorchScript Module is required such that Engine can load the module to rebuild a SubModule to forward.
+- `torch_module_path` : The path to TorchScript Module. When some Torch operators cannot be converted to TensorRT operators, TorchModulePlugin is used to support these Torch operators. In this case, the original TorchScript Module is required such that Engine can load the module to rebuild a SubModule to forward.

@@ -13,7 +13,7 @@
 ## Infer modes
 
 1. "float32" : default infer mode. If InferMode is not set, then the Forward engine use FLOAT mode to do inference.
-2. "float16" : HALF infer mode
+2. "float16" : HALF infer mode.
 3. "int8" : INT8 infer mode. TensorRT layers support INT8 mode in default, but customized layers require more workload to support INT8 mode.
 4. "int8_calib" : INT8 Calibration mode. If models include customized layers that support INT8 mode (like BERT), users should use this mode to generate at first a calibration cache file as CodeBook. After a valid calibration cache file is built, users can use INT8 mode to build a Forward engine for INT8 inference.
 
@@ -33,3 +33,13 @@
 ## cublasLt related errors
 
 1. Error message like `[TRT] Assertion failed: cublasStatus == CUBLAS_STATUS_SUCCESS \source\rtSafe\cublas\cublasLtWrapper.cpp:279` is almost related to a known cubBLAS LT bug in CUDA 10.2. You can fix it either by upgrading to a newer patch version of 10.2, or using the work-around mentioned here. Since you're using the API you can use  `config->setTacticSources()`  to disable cuBLAS LT. (Refer to [TensorRT Issue 1151](https://github.com/NVIDIA/TensorRT/issues/1151))
+
+## ONNX-TensorRT related errors
+
+1. When OnnxBuilder is parsing the ONNX model, it directly calls the `nvonnxparser::createParser` interface provided in the `NvOnnxParser.h`. Whether the model can be successfully converted to a TRT engine depends on whether the corresponding TensorRt version can provide the corresponding op support. There are some logs related to this problem as below (Refer to [ONNX-TensorRT Issue 401](https://github.com/onnx/onnx-tensorrt/issues/401)):
+    - `[TRT] ModelImporter.cpp:135: No importer registered for op: NonZero. Attempting to import as plugin.`
+
+## pybind11 related errors
+
+1. When Fwd-Python-Onnx is destructing the OnnxEngine, a segmentation fault will be prompted. This problem is caused by the failure of some objects to be initialized successfully when pybind11 calls the C++ API. This problem does not affect the inference results, but it is still recommended to save the results locally in time. There are some logs related to this problem as below:
+    - `0x00007fffe052dba4 in nvinfer1::plugin::InstanceNormalizationPluginCreator::~InstanceNormalizationPluginCreator() () from /usr/lib64/libnvinfer_plugin.so.7`

@@ -12,7 +12,7 @@
 
 ## CMake 构建流程
 
-使用 CMake 进行构建生成 Makefiles 或者 Visual Studio 项目。根据使用目的，Forward 可构建成适用于不同框架的库，如 Fwd-Torch、 Fwd-Python-Torch、 Fwd-Tf、 Fwd-Python-Tf、 Fwd-Keras 和 Fwd-Python-Keras。
+使用 CMake 进行构建生成 Makefiles 或者 Visual Studio 项目。根据使用目的，Forward 可构建成适用于不同框架的库，如 Fwd-Torch、Fwd-Python-Torch、Fwd-Tf、Fwd-Python-Tf、Fwd-Keras、Fwd-Python-Keras、Fwd-Onnx 和 Fwd-Python-Onnx。
 
 以 Linux 平台构建 Fwd-Tf 为例，
 
@@ -24,7 +24,7 @@
 ```bash
 1 cd Forward/source/third_party/tensorflow/
 2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
-3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz -C lib/
+3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
 ```
 步骤三：创建 `build` 文件夹
 ```bash
@@ -67,19 +67,12 @@ cd bin/
         <td>备注</td>
    </tr>
    <tr>
-        <td rowspan="9" nowrap="nowrap">通用</td>
+        <td rowspan="8" nowrap="nowrap">通用</td>
         <td>TensorRT_ROOT</td>
         <td>path_to_TensorRT</td>
         <td>N/A</td>
         <td>指定 TensorRT 安装路径</td>
         <td>必选</td>
-   </tr>
-   <tr>
-        <td nowrap="nowrap">ENABLE_LOGGING</td>
-        <td>N/A</td>
-        <td><code>ON</code></td>
-        <td>开启日志打印功能；<br>可通过修改 <code>forward_log.conf</code> 配置文件关闭该功能</td>
-        <td>N/A</td>
    </tr>
    <tr>
         <td nowrap="nowrap">ENABLE_PROFILING</td>
@@ -128,7 +121,7 @@ cd bin/
         <td><code>ON</code> 或 <code>OFF</code></td>
         <td><code>OFF</code></td>
         <td>是否开启单元测试</td>
-        <td>可选</td>
+        <td>Fwd_Keras 的单元测试依赖于 Fwd_Tf；<br>Fwd_Onnx 的单元测试依赖于 Fwd_Torch</td>
    </tr>
    <tr>
         <td rowspan="3" nowrap="nowrap">PyTorch</td>
@@ -174,5 +167,13 @@ cd bin/
         <td>N/A</td>
         <td>指定 <code>HDF5</code> 库路径；<br>若同时配置 Fwd_Torch 的 <code>CMAKE_PREFIX_PATH</code>，可用分号隔开，如 <code>/path/to/libtorch;/path/to/hdf5</code></td>
         <td>配合 <code>ENABLE_TORCH</code> 或 <code>ENABLE_KERAS</code> 参数</td>
+   </tr>
+   <tr>
+        <td rowspan="1" nowrap="nowrap">ONNX</td>
+        <td>ENABLE_ONNX</td>
+        <td><code>ON</code> 或 <code>OFF</code></td>
+        <td><code>OFF</code></td>
+        <td>是否构建用于解析 ONNX 模型的 Fwd_Onnx 项目</td>
+        <td>可选</td>
    </tr>
 </table>

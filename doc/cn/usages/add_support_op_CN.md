@@ -8,9 +8,9 @@
 
 ### 1. 添加操作层级创建器
 
-在 `source\trt_engine\trt_network_crt\layer_creators` 目录下创建使用层级创建器文件 `trt_cast_creator.h`. 参照以下模板创建层级创建器. 须注意：
+在 `source\trt_engine\trt_network_crt\layer_creators` 目录下创建使用层级创建器文件 `trt_cast_creator.h` 。参照以下模板创建层级创建器。须注意：
 
-- 如果是目前项目暂未支持的操作, 需要添加一个新的操作描述：**新描述添加须要提 Issue**. 在 `source\common\trt_layer_desc.h`中添加描述. 
+- 如果是目前项目暂未支持的操作，需要添加一个新的操作描述：**新描述添加须要提 Issue**。 在 `source\common\trt_layer_desc.h` 中添加描述。
 
 ```c++
 // 项目组自定义的描述
@@ -21,11 +21,11 @@ struct TrtCastDesc : TrtLayerDesc {
 };
 ```
 
-- 尽量使用项目本身支持的描述, 以及 TensorRT 原生层级 `ILayer` 进行支持. 
+- 尽量使用项目本身支持的描述，以及 TensorRT 原生层级 `ILayer` 进行支持。
 - 如果需要使用插件支持
-  - 使用正确的标识名及版本号创建 `nvinfer1::IPluginCreator`
-  - 使用正确的参数名, 参数类型及大小来创建 `nvinfer1::PluginField` 集合. 
-  - 使用 `TrtCommon::InferUniquePtr` 创建 `plugin_obj`. 
+  - 使用正确的标识名及版本号创建 `nvinfer1::IPluginCreator` ；
+  - 使用正确的参数名, 参数类型及大小来创建 `nvinfer1::PluginField` 集合；
+  - 使用 `TrtCommon::InferUniquePtr` 创建 `plugin_obj` 。
 
 ```c++
 #pragma once
@@ -93,10 +93,10 @@ END_NAMESPACE_FWD_TRT
 
 ### 2. 注册层级创建器
 
-在 `source\trt_engine\trt_network_crt\trt_creator_manager.cpp` 中找到层级注册区域, 进行层级注册. 如需要插件, 也须注册插件创造器. 
+在 `source\trt_engine\trt_network_crt\trt_creator_manager.cpp` 中找到层级注册区域，进行层级注册。如需要插件，也须注册插件创造器。
 
-- 添加头文件 `trt_cast_creator.h`
-- 如果该层级需要插件的话, 须注册插件创造器. 
+- 添加头文件 `trt_cast_creator.h` ；
+- 如果该层级需要插件的话, 须注册插件创造器。
 
 ```c++
 ...
@@ -114,10 +114,10 @@ RegisterCreator<TrtCastDesc>();
 
 ### 3. 在对应的模型框架目录下添加操作的解析
 
-此处以 torch 模型操作为例, 在 `source\fwd_torch\torch_cvt\torch_desc_creators` 目录下创建添加 `torch_cast_creator.h`. 
+此处以 torch 模型操作为例，在 `source\fwd_torch\torch_cvt\torch_desc_creators` 目录下创建添加 `torch_cast_creator.h` 。
 
-- 需要把输入节点放进 `input_values`
-- 从 `accessor` 中获取模型中常量参数. 
+- 需要把输入节点放进 `input_values` ；
+- 从 `accessor` 中获取模型中常量参数。
 
 ```c++
 #pragma once
@@ -171,10 +171,10 @@ END_NAMESPACE_FWD_TORCH
 
 ### 4. 注册模型操作解析器
 
-在 `source\fwd_torch\torch_cvt\torch_desc_manager.cpp` 中找到解析器注册区域, 进行解析器注册. 
+在 `source\fwd_torch\torch_cvt\torch_desc_manager.cpp` 中找到解析器注册区域，进行解析器注册。
 
-- 添加头文件 `torch_cast_creator.h`
-- 注册操作解析器
+- 添加头文件 `torch_cast_creator.h` ；
+- 注册操作解析器。
 
 ```c++
 ...
@@ -187,27 +187,27 @@ RegisterCreator<TrtCastDesc>();
 ...
 ```
 
-### 5. 编译项目, 检查编译是否通过. 
+### 5. 编译项目, 检查编译是否通过
 
-### 6. 添加单元测试, 检验插件的正确性. 
+### 6. 添加单元测试, 检验插件的正确性
 
-在 `source\unit_test` 目录下添加一个单元测试文件 `test_cast_plugin.h`. 单元测试可参考 `test_tf_nodes.h` 与 `test_torch_nodes.h`. 
+在 `source\unit_test` 目录下添加一个单元测试文件 `test_cast_plugin.h` 。单元测试可参考 `test_tf_nodes.h` 与 `test_torch_nodes.h` 。
 
 
 ## 添加插件（可选）
 
-### 1. 创建 Plugin 专用目录及相关文件. 
+### 1. 创建 Plugin 专用目录及相关文件
 
-在 `source\trt_engine\trt_network_crt\plugins` 目录下创建一个专用目录 `cast_plugin`, 在 `cast_plugin` 目录下创建如下 4 个文件：
+在 `source\trt_engine\trt_network_crt\plugins` 目录下创建一个专用目录 `cast_plugin`，在 `cast_plugin` 目录下创建如下 4 个文件：
 
-- `CMakeLists.txt`：与其他 plugin 下的 `CMakeLists.txt` 的内容完全一致, 用于收集同目录下的 `*.h`, `*.cpp`, `*.cu` 文件. 
-- `cast_plugin.h`：Plugin 的头文件, 用于声明插件类的相关类及函数. 
-- `cast_plugin.cpp`：Plugin 的 Cpp 代码文件, 用于定义及存放插件中的与设备代码无关的 Cpp 代码. 
-- `cast_plugin.cu`：Plugin 的 Cuda 代码文件, 用于定义及存放插件中的核函数及相关设备（Device）代码. 
+- `CMakeLists.txt`：与其他 plugin 下的 `CMakeLists.txt` 的内容完全一致，用于收集同目录下的 `*.h`，`*.cpp`，`*.cu` 文件。 
+- `cast_plugin.h`：Plugin 的头文件，用于声明插件类的相关类及函数。
+- `cast_plugin.cpp`：Plugin 的 Cpp 代码文件，用于定义及存放插件中的与设备代码无关的 Cpp 代码。
+- `cast_plugin.cu`：Plugin 的 Cuda 代码文件，用于定义及存放插件中的核函数及相关设备（Device）代码。
 
-### 2. 在 CMakeLists 中注册 Plugin 目录, 此时可以用 CMake 创建项目（可选）. 
+### 2. 在 CMakeLists 中注册 Plugin 目录，此时可以用 CMake 创建项目（可选）
 
-在 `source\trt_engine\CMakeLists.txt` 中, 注册刚才创建的插件目录. 
+在 `source\trt_engine\CMakeLists.txt` 中，注册刚才创建的插件目录。
 ```
 set(PLUGIN_LISTS
     ...
@@ -216,9 +216,9 @@ set(PLUGIN_LISTS
     )
 ```
 
-### 3. 在头文件中添加 Plugin 声明. 
+### 3. 在头文件中添加 Plugin 声明
 
-打开 `cast_plugin.h` 进行编辑, 参考如下模板进行自定义插件声明, 需要添加 CopyRight 及 Author. 
+打开 `cast_plugin.h` 进行编辑，参考如下模板进行自定义插件声明，需要添加 CopyRight 及 Author。
 
 ```c++
 #pragma once
@@ -339,18 +339,18 @@ END_NAMESPACE_FWD_TRT
 
 ### 4. 添加插件定义
 
-打开 `cast_plugin.cpp` 进行 Plugin 方法定义重写. 本文件不能包含 `*.cuh` 头文件及设备代码. 关键函数为：
+打开 `cast_plugin.cpp` 进行 Plugin 方法定义重写。本文件不能包含 `*.cuh` 头文件及设备代码。关键函数为：
 
 - 插件类
   - 构造函数
-  - `getOutputDimensions`：用于确定输出维度
-  - `enqueue`：定义插件如何执行计算
-  - `supportFormatCombination`：用于定义插件支持的输入输出的数据结构及数据类型
-  - `serialize`, `deserialzie`及`clone`：插件在构建过程中存在 clone 操作, 须定义好相关数据的序列化与反序列化. 
+  - `getOutputDimensions`：用于确定输出维度；
+  - `enqueue`：定义插件如何执行计算；
+  - `supportFormatCombination`：用于定义插件支持的输入输出的数据结构及数据类型；
+  - `serialize`，`deserialzie` 及 `clone`：插件在构建过程中存在 clone 操作，须定义好相关数据的序列化与反序列化。
 - 插件创造类
-  - 构造函数
-  - `createPlugin`：定义插件如何创造, 如何接收参数. 
-  - `deserializePlugin`：定义插件如何析构. 
+  - 构造函数；
+  - `createPlugin`：定义插件如何创造，如何接收参数；
+  - `deserializePlugin`：定义插件如何析构。
 
 ```c++
 #include "trt_engine/trt_network_crt/plugins/cast_plugin/cast_plugin.h"
@@ -538,10 +538,10 @@ END_NAMESPACE_FWD_TRT
 
 ### 5. 添加插件核函数及相关设备代码
 
-打开 `cast_plugin.cu` 文件, 定义插件中使用的核函数及相关设备代码. 须注意的是：
+打开 `cast_plugin.cu` 文件，定义插件中使用的核函数及相关设备代码。须注意的是：
 
-- 必须有一个不带 `__global__`, `__device__` 的执行调用函数, 该调用函数声明于 `cast_plugin.h` 中. 
-- 若上述的调用函数为模板函数, 则需要在本文件内进行模板实例化声明. 
+- 必须有一个不带 `__global__`，`__device__` 的执行调用函数，该调用函数声明于 `cast_plugin.h` 中。
+- 若上述的调用函数为模板函数，则需要在本文件内进行模板实例化声明。
 
 ```c++
 #include "trt_engine/trt_network_crt/plugins/cast_plugin/cast_plugin.h"

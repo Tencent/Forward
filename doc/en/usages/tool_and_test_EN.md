@@ -27,6 +27,8 @@ For those common models in CV, Bert, and Recommender fields, we also provide cor
 | `test_<platform>_bert.h` | Verify the correctness of Bert-related model conversion under the corresponding platform |
 | `test_torch_dlrm.h.h` | Verify the correctness of DLRM model conversion under PyTorch platform |
 | `test_tf_recommender.h` | Verify the correctness of recommender model conversion under TensorFlow platform |
+| `test_onnx_models.h` | Verify the correctness of general model conversion under ONNX platform |
+| `test_onnx_dynamic.h` | Verify the correctness of dynamic batch usage of ResNet50 model under ONNX platform |
 
 ## Performance Tests
 

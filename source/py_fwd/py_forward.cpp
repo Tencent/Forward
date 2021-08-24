@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -38,6 +39,10 @@
 
 #ifdef ENABLE_KERAS
 #include "py_fwd/py_forward_keras.h"
+#endif
+
+#ifdef ENABLE_ONNX
+#include "py_fwd/py_forward_onnx.h"
 #endif
 
 #include "common/trt_calibrator.h"
@@ -148,4 +153,21 @@ PYBIND11_MODULE(forward, m) {
       .def("save", &fwd::KerasEngine::Save, py::arg("engine_filename"))
       .def("forward", &KerasEngineForward, py::arg("inputs"));
 #endif  // ENABLE_KERAS
+
+#ifdef ENABLE_ONNX
+  py::class_<fwd::OnnxBuilder>(m, "OnnxBuilder")
+      .def(py::init<>())
+      .def("build", &fwd::OnnxBuilder::Build, py::arg("model_path"))
+      .def("set_mode", &fwd::OnnxBuilder::SetInferMode, py::arg("infer_mode"))
+      .def("set_opt_batch_size", &fwd::OnnxBuilder::SetOptBatchSize, py::arg("opt_batch_size"))
+      .def("set_max_workspace_size", &fwd::OnnxBuilder::SetMaxWorkspaceSize,
+           py::arg("max_workspace_size"))
+      .def("set_calibrator", &fwd::OnnxBuilder::SetCalibrator, py::arg("calibrator"));
+
+  py::class_<fwd::OnnxEngine, std::shared_ptr<fwd::OnnxEngine>>(m, "OnnxEngine")
+      .def(py::init<>())
+      .def("load", &fwd::OnnxEngine::Load, py::arg("engine_filename"))
+      .def("save", &fwd::OnnxEngine::Save, py::arg("engine_filename"))
+      .def("forward", &OnnxEngineForward, py::arg("inputs"));
+#endif  // ENABLE_ONNX
 }

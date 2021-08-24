@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include "trt_engine/trt_engine/trt_fwd_builder.h"
 
@@ -38,54 +39,15 @@
 #include <vector>
 
 #include "common/trt_utils.h"
+#include "trt_engine/trt_common/trt_common.h"
 #include "trt_engine/trt_common/trt_logger.h"
 #include "trt_engine/trt_engine/trt_fwd_engine.h"
 #include "trt_engine/trt_network_crt/trt_network_creator.h"
 
 FWD_NAMESPACE_BEGIN
 
-/**
- * \brief 重置最大工作空间大小，使其不超过当前可用显存的 4/5
- * \param size 最大工作空间大小
- * \return
- */
-inline size_t ResetMaxWorkspaceSize(size_t size) {
-  size_t free;
-  size_t total;
-  CUDA_CHECK(cudaMemGetInfo(&free, &total));
-
-  // 限制一下需要的显存大小
-  if (size > free * 4 / 5) {
-    size = free * 4 / 5;
-
-    LOG(WARNING) << "Reset max workspace size to " << size;
-  }
-
-  return size;
-}
-
-/**
- * \brief 根据网络输出的顺序，得到其对应的引擎绑定编号顺序
- *        即，将 binding 顺序调整为 markOutput 的顺序
- * \param engine 引擎
- * \param network 网络
- * \return 引擎绑定编号的输出顺序
- */
-inline std::vector<int> GetOutputOrder(nvinfer1::ICudaEngine* engine,
-                                       nvinfer1::INetworkDefinition* network) {
-  std::vector<int> output_pos;
-  for (int i = 0; i < network->getNbOutputs(); ++i) {
-    const auto output = network->getOutput(i);
-    const int pos = engine->getBindingIndex(output->getName());
-    output_pos.push_back(pos);
-    LOG(INFO) << output->getName() << TrtUtils::ShapeStrOf(output->getDimensions())
-              << " in position " << pos;
-  }
-  return output_pos;
-}
-
 std::shared_ptr<IForwardEngine> TrtForwardBuilder::Build(const TrtNetworkDesc& network_desc) {
-  max_workspace_size_ = ResetMaxWorkspaceSize(max_workspace_size_);
+  max_workspace_size_ = TrtCommon::ResetMaxWorkspaceSize(max_workspace_size_);
 
   TrtCommon::InferUniquePtr<nvinfer1::IBuilder> builder(
       nvinfer1::createInferBuilder(gLogger.getTRTLogger()));
@@ -128,11 +90,11 @@ std::shared_ptr<IForwardEngine> TrtForwardBuilder::Build(const TrtNetworkDesc& n
     return nullptr;
   }
 
-  meta_data_.SetOutputPositions(GetOutputOrder(engine, network.get()));
+  meta_data_.SetOutputPositions(TrtCommon::GetOutputOrder(engine, network.get()));
 
   auto trt_fwd_engine = std::make_shared<TrtForwardEngine>();
 
-  // 默认返回一个已经被初始化的 Engine
+  // By default, an initiated engine will be returned.
   if (!trt_fwd_engine->Clone(engine, meta_data_) || !trt_fwd_engine->InitEngine()) {
     LOG(ERROR) << "Init Engine failed.";
     return nullptr;
@@ -324,8 +286,22 @@ void TrtForwardBuilder::SetCalibrator(std::shared_ptr<nvinfer1::IInt8Calibrator>
 
 void TrtForwardBuilder::SetOptBatchSize(int size) { meta_data_.SetOptBatchSize(size); }
 
+int TrtForwardBuilder::GetOptBatchSize() const { return meta_data_.OptBatchSize(); }
+
+void TrtForwardBuilder::SetMaxBatchSize(int size) { meta_data_.SetMaxBatchSize(size); }
+
+int TrtForwardBuilder::GetMaxBatchSize() const { return meta_data_.MaxBatchSize(); }
+
 void TrtForwardBuilder::SetInferMode(InferMode mode) { meta_data_.SetMode(mode); }
 
 void TrtForwardBuilder::SetMaxWorkspaceSize(size_t size) { max_workspace_size_ = size; }
+
+size_t TrtForwardBuilder::GetMaxWorkspaceSize() const { return max_workspace_size_; }
+
+void TrtForwardBuilder::SetOutputPositions(const std::vector<int>& output_pos) {
+  meta_data_.SetOutputPositions(output_pos);
+}
+
+EngineMetaData TrtForwardBuilder::GetEngineMetaData() const { return meta_data_; }
 
 FWD_NAMESPACE_END

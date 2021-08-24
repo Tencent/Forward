@@ -13,7 +13,7 @@ dummy_input = {"input_ids" : np.ones([batch_size , seq_len], dtype='int32'),
                "input_mask" : np.ones([batch_size , seq_len], dtype='int32'),
                "segment_ids" : np.ones([batch_size , seq_len], dtype='int32')}
 
-builder.set_mode(infer_mode);
+builder.set_mode(infer_mode)
 tf_engine = builder.build(model_path, dummy_input)
 
 need_save = True

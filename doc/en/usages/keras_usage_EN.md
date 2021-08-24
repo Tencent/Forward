@@ -25,16 +25,17 @@
 ```bash
 mkdir build
 cd build
-cmake .. \
--DTensorRT_ROOT=/path/to/TensorRT \  
--DENABLE_LOGGING=OFF \  
+cmake .. \ 
+-DTensorRT_ROOT=/path/to/TensorRT \ 
 -DENABLE_PROFILING=OFF \ 
 -DENABLE_DYNAMIC_BATCH=OFF \ 
 -DBUILD_PYTHON_LIB=ON \ 
 -DPYTHON_EXECUTABLE=/path/to/python3 \ 
--DENABLE_TORCH=OFF \
--DENABLE_TENSORFLOW=OFF \
--DENABLE_KERAS=ON
+-DENABLE_TORCH=OFF \ 
+-DENABLE_TENSORFLOW=OFF \ 
+-DENABLE_KERAS=ON \ 
+-DENABLE_ONNX=OFF
+
 make -j
 ```
 

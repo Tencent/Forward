@@ -16,13 +16,14 @@ fi
 
 cd build
 make clean
-cmake .. -DENABLE_LOGGING=OFF         \
-        -DENABLE_PROFILING=OFF               \
-        -DBUILD_PYTHON_LIB=ON                \
-        -DENABLE_TORCH=ON                    \
-        -DENABLE_TENSORFLOW=ON               \
-        -DENABLE_KERAS=ON                    \
-        -DENABLE_RNN=OFF                     \
-        -DPYTHON_EXECUTABLE=$(which python3) 
+cmake .. -DENABLE_PROFILING=OFF \ 
+         -DBUILD_PYTHON_LIB=OFF \ 
+         -DENABLE_TORCH=OFF \ 
+         -DENABLE_TENSORFLOW=OFF \ 
+         -DENABLE_KERAS=OFF \ 
+         -DENABLE_ONNX=OFF \ 
+         -DENABLE_RNN=OFF \ 
+         -DENABLE_UNIT_TESTS=OFF \ 
+         -DPYTHON_EXECUTABLE=$(which python3)
 
 make -j

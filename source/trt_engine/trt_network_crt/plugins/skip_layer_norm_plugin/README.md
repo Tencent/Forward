@@ -36,7 +36,7 @@ output is a tensor with shape `[S, B, E]` where `B` is the batch size.
 
 ## Parameters
 
-`skipLayerNormPlugin` has plugin creator class `SkipLayerNormPluginDynamicCreator` and plugin class `CustomSkipLayerNormPluginDynamic`.
+`skipLayerNormPlugin` has plugin creator class `SkipLayerNormPluginDynamicCreator`.
 
 The parameters are defined below and consists of the following attributes:
 

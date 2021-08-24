@@ -30,15 +30,15 @@
 
 ## 什么是 Forward
 
-Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了一种解析方案，可直接加载主流框架模型（Tensorflow / PyTorch / Keras）转换成 TensorRT 推理加速引擎，帮助用户节省中间繁杂的模型转换或网络构建步骤。相对于直接使用 TensorRT，Forward 更易用以及更容易扩展支持更多模型和算子。目前，Forward 除了覆盖支持主流的 CV，NLP 及推荐领域的深度学习模型外，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型。
+Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了一种解析方案，可直接加载主流框架模型（Tensorflow / PyTorch / Keras / ONNX）转换成 TensorRT 推理加速引擎，帮助用户节省中间繁杂的模型转换或网络构建步骤。相对于直接使用 TensorRT，Forward 更易用以及更容易扩展支持更多模型和算子。目前，Forward 除了覆盖支持主流的 CV，NLP 及推荐领域的深度学习模型外，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型。
 
 ## 为什么选择 Forward
 
-- **模型性能优化高**：基于 TensorRT API 开发网络层级的支持，保证对于通用网络层级的推理性能优化处于最优级别。
-- **模型支持范围广**：除了通用的 CV，NLP，及推荐类模型，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型。
-- **多种推理模式**：支持 FLOAT / HALF / INT8 推理模式。
-- **接口简单易用**：直接导入已训练好的 Tensorflow(.pb) / PyTorch(.pth) / Keras(.h5) 导出的模型文件，隐式转换为高性能的推理 Engine 进行推理加速。
-- **支持自研扩展**：可根据业务模型[扩展支持自定义网络层级](doc/cn/usages/add_support_op_CN.md)。
+- **模型性能优化高**：基于 TensorRT API 开发网络层级的支持，保证对于通用网络层级的推理性能优化处于最优级别；
+- **模型支持范围广**：除了通用的 CV，NLP，及推荐类模型，还支持一些诸如 BERT，FaceSwap，StyleTransfer 这类高级模型；
+- **多种推理模式**：支持 FLOAT / HALF / INT8 推理模式；
+- **接口简单易用**：直接导入已训练好的 Tensorflow(.pb) / PyTorch(.pth) / Keras(.h5) / ONNX(.onnx) 模型文件，隐式转换为高性能的推理 Engine 进行推理加速；
+- **支持自研扩展**：可根据业务模型[扩展支持自定义网络层级](doc/cn/usages/add_support_op_CN.md)；
 - **支持 C++ 和 Python 接口调用**。
 
 ## 快速上手 Forward
@@ -55,7 +55,7 @@ Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了�
 
 ### 项目构建
 
-使用 CMake 进行构建生成 Makefiles 或者 Visual Studio 项目。根据使用目的，Forward 可构建成适用于不同框架的库，如 Fwd-Torch、 Fwd-Python-Torch、 Fwd-Tf、 Fwd-Python-Tf、 Fwd-Keras 和 Fwd-Python-Keras。
+使用 CMake 进行构建生成 Makefiles 或者 Visual Studio 项目。根据使用目的，Forward 可构建成适用于不同框架的库，如 Fwd-Torch、Fwd-Python-Torch、Fwd-Tf、Fwd-Python-Tf、Fwd-Keras、Fwd-Python-Keras、Fwd-Onnx 和 Fwd-Python-Onnx。
 
 以 Linux 平台构建 Fwd-Tf 为例，
 
@@ -67,7 +67,7 @@ Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了�
 ```bash
 1 cd Forward/source/third_party/tensorflow/
 2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
-3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz -C lib/
+3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
 ```
 步骤三：创建 `build` 文件夹
 ```bash
@@ -119,12 +119,13 @@ Refer to [Demo for using Forward-Bert](demo/bert/README_CN.md)
 - [PyTorch 使用说明](doc/cn/usages/torch_usage_CN.md)
 - [TensorFlow 使用说明](doc/cn/usages/tf_usage_CN.md)
 - [Keras 使用说明](doc/cn/usages/keras_usage_CN.md)
+- [ONNX 使用说明](doc/cn/usages/onnx_usage_CN.md)
 
 ### Logging 日志
 
 Forward 使用 [easylogging++](https://github.com/amrayn/easyloggingpp) 作为日志功能，并使用 `forward_log.conf` 作为日志配置文件。 
 
-- 若工作目录中存在 `forward_log.conf` 文件，Forward 将使用该配置文件，更多内容可参考 [Using-configuration-file](https://github.com/amrayn/easyloggingpp#using-configuration-file) 。
+- 若工作目录中存在 `forward_log.conf` 文件，Forward 将使用该配置文件，更多内容可参考 [Using-configuration-file](https://github.com/amrayn/easyloggingpp#using-configuration-file)；
 - 若工作目录中不存在 `forward_log.conf` 文件，Forward 将使用默认配置，并将日志记录到 `logs/myeasylog.log` 。
 
 `forward_log.conf` 文件配置样例
