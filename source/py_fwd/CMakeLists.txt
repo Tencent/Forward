@@ -23,6 +23,7 @@
 #          Yzx (yzxyzxyzx777@outlook.com)
 #          Ao LI (346950981@qq.com)
 #          Paul LU (lujq96@gmail.com)
+#          Zhaoyi LUO (luozy63@gmail.com)
 
 file(GLOB BINDING_HEADERS *.h)
 
@@ -45,3 +46,7 @@ endif(ENABLE_TENSORFLOW)
 if (ENABLE_KERAS)
     target_link_libraries(forward PUBLIC fwd_keras hdf5_cpp)
 endif(ENABLE_KERAS)
+
+if (ENABLE_ONNX)
+    target_link_libraries(forward PUBLIC fwd_onnx)
+endif(ENABLE_ONNX)

@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include "fwd_torch/torch_engine/torch_engine.h"
 
@@ -105,8 +106,6 @@ std::vector<at::Tensor> TorchEngine::Forward(const torch::jit::IValue& input) co
 }
 
 bool TorchEngine::Load(const std::string& engine_file) const {
-  std::lock_guard<std::mutex> lock_guard(mtx);
-
   if (!engine_->Load(engine_file)) {
     LOG(ERROR) << "Load forward engine failed";
     return false;

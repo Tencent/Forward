@@ -23,6 +23,8 @@
 #          Yzx (yzxyzxyzx777@outlook.com)
 #          Ao LI (346950981@qq.com)
 #          Paul LU (lujq96@gmail.com)
+#          Zhaoyi LUO (luozy63@gmail.com)
+
 cmake_minimum_required(VERSION 3.10.1 FATAL_ERROR)
 
 project(Forward LANGUAGES C CXX CUDA)
@@ -38,6 +40,8 @@ list(APPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/cmake")
 option(ENABLE_TORCH "Enable Torch" OFF)
 # Enable TensorFlow
 option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
+# Enable ONNX
+option(ENABLE_ONNX "Enable ONNX" OFF)
 
 # CUDA
 find_package(CUDA)
@@ -107,4 +111,13 @@ CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_tf)
 set_property(TARGET test_fwd_tf PROPERTY CXX_STANDARD 14)
 endif(ENABLE_TENSORFLOW)
 
-
+if (ENABLE_ONNX)
+CUDA_ADD_EXECUTABLE(test_fwd_onnx test_fwd_onnx.cpp)
+find_library(FWD_ONNX fwd_onnx HINTS ${PROJECT_SOURCE_DIR}/libs)
+target_link_libraries(test_fwd_onnx
+        ${FWD_ONNX}
+        ${TensorRT_LIBRARIES}
+        )
+CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_onnx)
+set_property(TARGET test_fwd_onnx PROPERTY CXX_STANDARD 14)
+endif(ENABLE_ONNX)

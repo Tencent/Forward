@@ -23,6 +23,7 @@
 #          Yzx (yzxyzxyzx777@outlook.com)
 #          Ao LI (346950981@qq.com)
 #          Paul LU (lujq96@gmail.com)
+#          Zhaoyi LUO (luozy63@gmail.com)
 
 file(GLOB TEST_HEADER_FILES *.h *.hpp)
 
@@ -44,3 +45,7 @@ endif(ENABLE_TORCH)
 if (ENABLE_KERAS)
     target_link_libraries(unit_test fwd_keras tensorflow)
 endif(ENABLE_KERAS)
+
+if (ENABLE_ONNX)
+    target_link_libraries(unit_test fwd_onnx ${TORCH_LIBRARIES})
+endif(ENABLE_ONNX)

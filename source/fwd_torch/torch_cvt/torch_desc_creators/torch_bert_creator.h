@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -57,6 +58,8 @@ class TLayerDescCreator<TrtBertDesc> : public ILayerDescCreator {
                                        std::vector<const JitValue*>& input_values) override {
     LOG(INFO) << "TorchBertDesc::Create";
     auto layer_desc = std::make_shared<TrtBertDesc>();
+
+    layer_desc->max_batch_size = module.GetMaxBatchSize();
 
     // Work Mode
     layer_desc->use_fp16 =

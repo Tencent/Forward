@@ -23,10 +23,12 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
 #include <NvInfer.h>
+#include <cuda_runtime_api.h>
 #include <easylogging++.h>
 
 #include <functional>
@@ -37,6 +39,7 @@
 #include <vector>
 
 #include "common/fwd_common.h"
+#include "common/trt_utils.h"
 
 #undef max
 #undef min
@@ -119,7 +122,7 @@ inline bool CheckAndCopyFile(const std::string& dest_path, const std::string& sr
 }
 //////////////////////////////////////////
 //                                      //
-//            Set TRT Network           //
+//             TRT Network              //
 //                                      //
 //////////////////////////////////////////
 
@@ -135,6 +138,46 @@ static void SetOutputName(nvinfer1::ILayer* layer, const std::string& prefix,
 
 static bool SetOutputRange(nvinfer1::ILayer* layer, float max_val, int out_idx = 0) {
   return layer->getOutput(out_idx)->setDynamicRange(-max_val, max_val);
+}
+
+/**
+ * \brief 重置最大工作空间大小，使其不超过当前可用显存的 4/5
+ * \param size 最大工作空间大小
+ * \return
+ */
+inline size_t ResetMaxWorkspaceSize(size_t size) {
+  size_t free;
+  size_t total;
+  CUDA_CHECK(cudaMemGetInfo(&free, &total));
+
+  // 限制一下需要的显存大小
+  if (size > free * 4 / 5) {
+    size = free * 4 / 5;
+
+    LOG(WARNING) << "Reset max workspace size to " << size;
+  }
+
+  return size;
+}
+
+/**
+ * \brief 根据网络输出的顺序，得到其对应的引擎绑定编号顺序
+ *        即，将 binding 顺序调整为 markOutput 的顺序
+ * \param engine 引擎
+ * \param network 网络
+ * \return 引擎绑定编号的输出顺序
+ */
+inline std::vector<int> GetOutputOrder(nvinfer1::ICudaEngine* engine,
+                                       nvinfer1::INetworkDefinition* network) {
+  std::vector<int> output_pos;
+  for (int i = 0; i < network->getNbOutputs(); ++i) {
+    const auto output = network->getOutput(i);
+    const int pos = engine->getBindingIndex(output->getName());
+    output_pos.push_back(pos);
+    LOG(INFO) << output->getName() << TrtUtils::ShapeStrOf(output->getDimensions())
+              << " in position " << pos;
+  }
+  return output_pos;
 }
 
 //////////////////////////////////////////

@@ -44,6 +44,8 @@ option(ENABLE_TORCH "Enable Torch" OFF)
 option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 # Enable Keras
 option(ENABLE_KERAS "Enable Keras" OFF)
+# Enable Onnx
+option(ENABLE_ONNX "Enable Onnx" OFF)
 
 # Enable profiling
 option(ENABLE_PROFILING "Enable profiling" OFF)
@@ -91,7 +93,7 @@ if (BUILD_PYTHON_LIB AND ENABLE_TORCH)
   endif()
   # _GLIBCXX_USE_CXX11_ABI=0 only for pytorch
   add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-  message(WARNING "_GLIBCXX_USE_CXX11_ABIT=0 is set for PyTorch libraries. Check dependencies for this flag.")
+  message(WARNING "_GLIBCXX_USE_CXX11_ABI=0 is set for PyTorch libraries. Check dependencies for this flag.")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -317,7 +319,7 @@ if(ENABLE_TENSORFLOW)
   endif()
 endif()
 
-# Keras dependencies
+# Keras
 if(ENABLE_KERAS)
   if(ENABLE_UNIT_TESTS AND NOT ENABLE_TENSORFLOW)
     message(FATAL_ERROR "Unit test Keras must ENABLE_TENSORFLOW")
@@ -338,6 +340,21 @@ if(ENABLE_KERAS)
   add_definitions(-DENABLE_KERAS=1)
 endif(ENABLE_KERAS)
 
+# Onnx
+if(ENABLE_ONNX)
+  if(BUILD_PYTHON_LIB)
+    if(NOT PYTHON_EXECUTABLE)
+      message(STATUS "Do not detected PYTHON_EXECUTABLE, set it to python3")
+      set(PYTHON_EXECUTABLE python3)
+    endif()
+  endif()
+  
+  if(ENABLE_UNIT_TESTS AND NOT ENABLE_TORCH)
+    message(FATAL_ERROR "Unit test ONNX must ENABLE_TORCH")
+  endif()
+
+  add_definitions(-DENABLE_ONNX=1)
+endif(ENABLE_ONNX)
 
 # trt_engine
 if(ENABLE_TENSORRT)
@@ -354,10 +371,15 @@ if (ENABLE_TENSORFLOW)
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_tf)
 endif(ENABLE_TENSORFLOW)
 
-#fwd_keras
+# fwd_keras
 if (ENABLE_KERAS)
   add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_keras)
 endif(ENABLE_KERAS)
+
+# fwd_onnx
+if (ENABLE_ONNX)
+  add_subdirectory(${PROJECT_SOURCE_DIR}/source/fwd_onnx)
+endif(ENABLE_ONNX)
 
 # build python lib
 if(BUILD_PYTHON_LIB)

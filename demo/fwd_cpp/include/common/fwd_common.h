@@ -1,13 +1,15 @@
 // Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License. You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License. You may obtain a copy of
+// the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software distributed under the License
-// is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-// or implied. See the License for the specific language governing permissions and limitations under
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
 // the License.
 //
 // ╔════════════════════════════════════════════════════════════════════════════════════════╗
@@ -26,8 +28,8 @@
 
 #pragma once
 
+#include <map>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "common/common_macros.h"
@@ -47,16 +49,36 @@ enum class InferMode {
 
 // Parse inference mode from string.
 inline InferMode ParseInferMode(const std::string& value) {
-  const std::unordered_map<std::string, InferMode> STR_MODE_MAP = {
-      {"float", InferMode::FLOAT}, {"float32", InferMode::FLOAT},
-      {"half", InferMode::HALF},   {"float16", InferMode::HALF},
-      {"int8", InferMode::INT8},   {"int8_calib", InferMode::INT8_CALIB},
-  };
-  const auto mode = STR_MODE_MAP.find(value);
-  if (mode == STR_MODE_MAP.end()) {
-    return InferMode::INVALID;
+  if (value == "float" || value == "float32") {
+    return InferMode::FLOAT;
   }
-  return mode->second;
+  if (value == "half" || value == "float16") {
+    return InferMode::HALF;
+  }
+  if (value == "int8") {
+    return InferMode::INT8;
+  }
+  if (value == "int8_calib") {
+    return InferMode::INT8_CALIB;
+  }
+
+  return InferMode::INVALID;
+}
+
+// Convert inference mode to string.
+inline std::string ToString(InferMode mode) {
+  switch (mode) {
+    case InferMode::FLOAT:
+      return "float";
+    case InferMode::HALF:
+      return "half";
+    case InferMode::INT8:
+      return "int8";
+    case InferMode::INT8_CALIB:
+      return "int8_calib";
+    default:
+      return "invalid";
+  }
 }
 
 // Enumerations of data type in Forward
@@ -64,12 +86,25 @@ enum class DataType {
   FLOAT,
   HALF,
   INT8,
-  INT16,
   INT32,
-  INT64,
-  DOUBLE,
   INVALID,
 };
+
+// return the string of DataType.
+inline std::string ToString(DataType type) {
+  switch (type) {
+    case DataType::FLOAT:
+      return "FLOAT";
+    case DataType::HALF:
+      return "HALF";
+    case DataType::INT8:
+      return "INT8";
+    case DataType::INT32:
+      return "INT32";
+    default:
+      return "INVALID";
+  }
+}
 
 // enumerations of device types
 enum class DeviceType {
@@ -77,8 +112,9 @@ enum class DeviceType {
   CUDA,
 };
 
-// Tensor in Forward stores the data pointer, dimension, DataType and DeviceType of a data tensor.
-// This struct will NOT be responsible to manage the memory of the data pointer.
+// Tensor in Forward stores the data pointer, dimension, DataType and DeviceType
+// of a data tensor. This struct will NOT be responsible to manage the memory of
+// the data pointer.
 struct Tensor {
   void* data{nullptr};
   std::vector<int> dims;

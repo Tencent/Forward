@@ -2,7 +2,7 @@
 
 1. 参考 [CMake-Build](../../doc/cn/usages/cmake_build_CN.md)，构建 Forward-Python 库。
 
-2. 拷贝 `build/bin` 目录下的 `forward.cpython.xxx*.so`(Linux) or `forward.xxx*.pyd`(Windows) 到 Python 的工作目录下。则目录组织结构如下:
+2. 拷贝 `build/bin` 目录下的 `forward.cpython.xxx*.so` (Linux) or `forward.xxx*.pyd` (Windows) 到 Python 的工作目录下。则目录组织结构如下:
 
 ```bash
 ---- workspace
@@ -11,9 +11,13 @@
    |
    -- test_forward_tf.py
    |
+   -- test_forward_onnx.py
+   |
    -- softmax.pb
    |
    -- softmax.pt
+   |
+   -- softmax.onnx
    |
    -- forward.cpython.xxx*.so
 ```

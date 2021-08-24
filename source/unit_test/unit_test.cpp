@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include <gtest/gtest.h>
 
@@ -38,7 +39,7 @@
 
 #include "unit_test/test_tf_nodes.h"
 // #include "unit_test/test_tf_vision.h"
-//#include "unit_test/test_tf_bert.h"
+// #include "unit_test/test_tf_bert.h"
 
 #endif  // ENABLE_TENSORFLOW
 
@@ -48,6 +49,14 @@
 // #include "unit_test/test_keras_vision.h"
 
 #endif  // ENABLE_KERAS
+
+#ifdef ENABLE_ONNX
+
+// #include "unit_test/test_onnx_models.h"
+// #include "unit_test/test_onnx_dynamic.h"
+// #include "unit_test/test_onnx_bert.h"
+
+#endif  // ENABLE_ONNX
 
 GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);

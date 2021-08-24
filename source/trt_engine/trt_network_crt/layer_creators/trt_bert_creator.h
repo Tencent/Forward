@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -215,6 +216,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
 
     const auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, use_int8, bert_desc->calib_mode);
     const int has_skip = 1;
+    const int batch_size = bert_desc->max_batch_size;
 
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
         fwd::bert::FWD_SKIP_LAYER_NORM_NAME, fwd::bert::FWD_SKIP_LAYER_NORM_VERSION);
@@ -225,6 +227,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     field_data.emplace_back("ld", &bert_desc->hidden_size, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("has_skip", &has_skip, nvinfer1::PluginFieldType::kINT32, 1);
+    field_data.emplace_back("batch_size", &batch_size, nvinfer1::PluginFieldType::kINT32, 1);
 
     const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
                                                       field_data.data()};

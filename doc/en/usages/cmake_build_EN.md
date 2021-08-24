@@ -12,7 +12,7 @@
 
 ## Build with CMake
 
-Use CMake to generate Makefiles or Visual Studio project (Windows). Upon the usage, Forward is able to be built for different frameworks, such as Fwd-Torch, Fwd-Python-Torch, Fwd-Tf, Fwd-Python-Tf, Fwd-Keras, and Fwd-Python-Keras.
+Use CMake to generate Makefiles or Visual Studio project (Windows). Upon the usage, Forward is able to be built for different frameworks, such as Fwd-Torch, Fwd-Python-Torch, Fwd-Tf, Fwd-Python-Tf, Fwd-Keras, Fwd-Python-Keras, Fwd-Onnx, and Fwd-Python-Onnx.
 
 The example below shows the building workflow under the Linux system,
 
@@ -24,7 +24,7 @@ Step 2: download `Tensorflow 1.15.0` (only needed when using Forward with Tensor
 ```bash
 1 cd Forward/source/third_party/tensorflow/
 2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
-3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz -C lib/
+3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
 ```
 Step 3: create `build` folder
 ```bash
@@ -67,19 +67,12 @@ cd bin/
         <td>Remark</td>
    </tr>
    <tr>
-        <td rowspan="9" nowrap="nowrap">General</td>
+        <td rowspan="8" nowrap="nowrap">General</td>
         <td nowrap="nowrap">TensorRT_ROOT</td>
         <td>path_to_TensorRT</td>
         <td>N/A</td>
         <td>Specify TensorRT installation path</td>
         <td>Required</td>
-   </tr>
-   <tr>
-        <td nowrap="nowrap">ENABLE_LOGGING</td>
-        <td>N/A</td>
-        <td><code>ON</code></td>
-        <td>Enable log printing;<br>Could be closed by modifying <code>forward_log.conf</code></td>
-        <td>N/A</td>
    </tr>
    <tr>
         <td nowrap="nowrap">ENABLE_PROFILING</td>
@@ -128,7 +121,7 @@ cd bin/
         <td><code>ON</code> or <code>OFF</code></td>
         <td><code>OFF</code></td>
         <td>Enable unit tests</td>
-        <td>Optional</td>
+        <td>Fwd_Keras unit test depends on Fwd_Tf；<br>Fwd_Onnx unit test depends on Fwd_Torch</td>
    </tr>
    <tr>
         <td rowspan="3" nowrap="nowrap">PyTorch</td>
@@ -174,5 +167,13 @@ cd bin/
         <td>N/A</td>
         <td>Specify <code>HDF5</code> library path;<br>If Fwd_Torch is built at the same time, <code>CMAKE_PREFIX_PATH</code> can be separated by semicolons, for example, <code>/path/to/libtorch;/path/to/hdf5</code></td>
         <td>Use with <code>ENABLE_TORCH</code> or <code>ENABLE_KERAS</code></td>
+   </tr>
+   <tr>
+        <td rowspan="1" nowrap="nowrap">ONNX</td>
+        <td>ENABLE_ONNX</td>
+        <td><code>ON</code> or <code>OFF</code></td>
+        <td><code>OFF</code></td>
+        <td>Build Fwd_Onnx to parse ONNX models</td>
+        <td>Optional</td>
    </tr>
 </table>

@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -142,6 +143,7 @@ struct TrtBertDesc : TrtLayerDesc {
   int n_layers{0};
   int num_heads{0};
   int hidden_size{0};
+  int max_batch_size{0};
   std::unordered_map<std::string, FwdWeights> weight_map;
   // standard bert model use gelu as default, but some models prefer to use relu.
   bool use_relu{false};

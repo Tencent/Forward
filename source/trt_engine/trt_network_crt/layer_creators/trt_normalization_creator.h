@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -137,6 +138,7 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
         dynamic_cast<const TrtNormalizationDesc*>(layer_desc);
 
     const int has_skip = input_tensors.size() == 2;
+    const int batch_size = norm_desc->max_batch_size;
 
     // 创建 Plugin
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
@@ -152,6 +154,7 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
     const auto dtype = TrtCommon::GetDataType(norm_desc->use_fp16, norm_desc->use_int8, true);
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("has_skip", &has_skip, nvinfer1::PluginFieldType::kINT32, 1);
+    field_data.emplace_back("batch_size", &batch_size, nvinfer1::PluginFieldType::kINT32, 1);
 
     // fill data
     const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
