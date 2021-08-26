@@ -82,5 +82,6 @@ int main() {
     }
   }
 
+  std::cout << std::endl << "Test Forward-Tf finished." << std::endl;
   return 0;
 }
