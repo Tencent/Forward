@@ -27,15 +27,9 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Zhaoyi LUO (luozy63@gmail.com)
 
-#include "common/fwd_common.h"
 #include "common/trt_common.h"
 #include "cuda_helper.h"
 #include "onnx_engine.h"
-
-#include <cstring>
-#include <iostream>
-#include <numeric>
-#include <vector>
 
 /// Test Forward-Onnx.
 /// This usage depends on headers below:
@@ -50,7 +44,7 @@ int main() {
 
   ////////////  Set Model Path  ////////////
   // Update Step 1: Update the path to pb model
-  std::string model_path = "../../../models/onnx_models/resnet50.onnx";
+  std::string model_path = "../data/softmax.onnx";
   const std::string infer_mode = "float32";  // float32 / float16 / int8_calib / int8
   onnx_builder.SetInferMode(infer_mode);
 
@@ -96,11 +90,10 @@ int main() {
   //////////////  Print Outputs  //////////////
   for (const auto &h_output : h_outputs) {
     for (const auto &out : h_output) {
-      std::cout << out << " ";
+      std::cout << out << ", ";
     }
-    std::cout << std::endl;
   }
 
-  std::cout << "Test Forward-ONNX finished." << std::endl;
+  std::cout << std::endl << "Test Forward-ONNX finished." << std::endl;
   return 0;
 }

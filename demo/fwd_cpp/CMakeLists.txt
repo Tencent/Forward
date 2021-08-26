@@ -43,20 +43,23 @@ option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 # Enable ONNX
 option(ENABLE_ONNX "Enable ONNX" OFF)
 
+# easylogging
+add_definitions(-DELPP_THREAD_SAFE=1)
+include_directories(${PROJECT_SOURCE_DIR}/../../source/third_party/easyloggingpp)
+
 # CUDA
 find_package(CUDA)
 
 # TensorRT
 find_package(TensorRT)
-
 if(NOT TensorRT_FOUND) # use sources
   message(
     FATAL_ERROR
       "Can NOT find TensorRT, you may set TensorRT root via TensorRT_ROOT.
             like -DTensorRT_ROOT=D:/Libs/TensorRT-6.0.1.5/")
 endif()
-
 include_directories(${TensorRT_INCLUDE_DIRS})
+
 # include headers
 include_directories(${PROJECT_SOURCE_DIR}/include)
 find_library(FWD_ENGINE trt_engine HINTS ${PROJECT_SOURCE_DIR}/libs)
@@ -117,6 +120,7 @@ find_library(FWD_ONNX fwd_onnx HINTS ${PROJECT_SOURCE_DIR}/libs)
 target_link_libraries(test_fwd_onnx
         ${FWD_ONNX}
         ${TensorRT_LIBRARIES}
+        ${FWD_ENGINE}
         )
 CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_onnx)
 set_property(TARGET test_fwd_onnx PROPERTY CXX_STANDARD 14)
