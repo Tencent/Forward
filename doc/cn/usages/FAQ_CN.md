@@ -30,8 +30,3 @@
 
 1. OnnxBuilder 在解析 ONNX 模型时，直接调用了 `NvOnnxParser.h` 中提供的 `nvonnxparser::createParser` 接口。模型是否能成功转换为 TRT 引擎取决于对应的 TensorRt 版本能否提供相应的 op 支持。(参考 [ONNX-TensorRT Issue 401](https://github.com/onnx/onnx-tensorrt/issues/401))
     - 常见错误日志：`[TRT] ModelImporter.cpp:135: No importer registered for op: NonZero. Attempting to import as plugin.`
-
-## pybind11 相关的错误
-
-1. Fwd-Python-Onnx 在析构 OnnxEngine 时，会产生 Segmentation fault，这个问题是由于 pybind11 在调用 C++ API 时存在某些对象未能成功初始化导致的。这个问题不影响推理的结果，但仍建议及时将结果保存到本地。
-    - 常见错误日志：`0x00007fffe052dba4 in nvinfer1::plugin::InstanceNormalizationPluginCreator::~InstanceNormalizationPluginCreator() () from /usr/lib64/libnvinfer_plugin.so.7`

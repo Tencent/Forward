@@ -44,8 +44,8 @@ option(ENABLE_TORCH "Enable Torch" OFF)
 option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 # Enable Keras
 option(ENABLE_KERAS "Enable Keras" OFF)
-# Enable Onnx
-option(ENABLE_ONNX "Enable Onnx" OFF)
+# Enable ONNX
+option(ENABLE_ONNX "Enable ONNX" OFF)
 
 # Enable profiling
 option(ENABLE_PROFILING "Enable profiling" OFF)
@@ -88,12 +88,22 @@ endif(MSVC)
 
 # Special setting for PyTorch
 if (BUILD_PYTHON_LIB AND ENABLE_TORCH)
-  if (MSVC) 
+  if (MSVC)
     message(FATAL_ERROR "BUILD_PYTHON_LIB=ON is NOT SUPPORTED for Torch on WINDOWS platform.")
   endif()
-  # _GLIBCXX_USE_CXX11_ABI=0 only for pytorch
+  # _GLIBCXX_USE_CXX11_ABI=0 used only for PyTorch or ONNX
   add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
   message(WARNING "_GLIBCXX_USE_CXX11_ABI=0 is set for PyTorch libraries. Check dependencies for this flag.")
+endif()
+
+# Special setting for ONNX
+if (BUILD_PYTHON_LIB AND ENABLE_ONNX)
+  if (MSVC)
+    message(FATAL_ERROR "BUILD_PYTHON_LIB=ON is NOT SUPPORTED for ONNX on WINDOWS platform.")
+  endif()
+  # _GLIBCXX_USE_CXX11_ABI=0 used only for PyTorch or ONNX
+  add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+  message(WARNING "_GLIBCXX_USE_CXX11_ABI=0 is set for ONNX libraries. Check dependencies for this flag.")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -340,7 +350,7 @@ if(ENABLE_KERAS)
   add_definitions(-DENABLE_KERAS=1)
 endif(ENABLE_KERAS)
 
-# Onnx
+# ONNX
 if(ENABLE_ONNX)
   if(BUILD_PYTHON_LIB)
     if(NOT PYTHON_EXECUTABLE)

@@ -38,8 +38,3 @@
 
 1. When OnnxBuilder is parsing the ONNX model, it directly calls the `nvonnxparser::createParser` interface provided in the `NvOnnxParser.h`. Whether the model can be successfully converted to a TRT engine depends on whether the corresponding TensorRt version can provide the corresponding op support. There are some logs related to this problem as below (Refer to [ONNX-TensorRT Issue 401](https://github.com/onnx/onnx-tensorrt/issues/401)):
     - `[TRT] ModelImporter.cpp:135: No importer registered for op: NonZero. Attempting to import as plugin.`
-
-## pybind11 related errors
-
-1. When Fwd-Python-Onnx is destructing the OnnxEngine, a segmentation fault will be prompted. This problem is caused by the failure of some objects to be initialized successfully when pybind11 calls the C++ API. This problem does not affect the inference results, but it is still recommended to save the results locally in time. There are some logs related to this problem as below:
-    - `0x00007fffe052dba4 in nvinfer1::plugin::InstanceNormalizationPluginCreator::~InstanceNormalizationPluginCreator() () from /usr/lib64/libnvinfer_plugin.so.7`
