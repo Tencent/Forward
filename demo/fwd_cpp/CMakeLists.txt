@@ -120,7 +120,6 @@ find_library(FWD_ONNX fwd_onnx HINTS ${PROJECT_SOURCE_DIR}/libs)
 target_link_libraries(test_fwd_onnx
         ${FWD_ONNX}
         ${TensorRT_LIBRARIES}
-        ${FWD_ENGINE}
         )
 CUDA_ADD_CUBLAS_TO_TARGET(test_fwd_onnx)
 set_property(TARGET test_fwd_onnx PROPERTY CXX_STANDARD 14)

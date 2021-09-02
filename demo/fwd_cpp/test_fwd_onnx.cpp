@@ -27,14 +27,18 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Zhaoyi LUO (luozy63@gmail.com)
 
-#include "common/trt_common.h"
+#include "common/fwd_common.h"
 #include "cuda_helper.h"
 #include "onnx_engine.h"
 
+#include <cstring>
+#include <numeric>
+
 /// Test Forward-Onnx.
 /// This usage depends on headers below:
-///   1. onnx_engine.h : Interface for TfEngine and TfBuilder
-///   2. common/common_macros.h : common macros for Forward
+///   1. common/fwd_common.h : common data structures for Forward
+///   2. cuda_helper.h : cuda helper functions
+///   3. onnx_engine.h : Interface for OnnxEngine and OnnxBuilder
 
 /// User should update :
 ///   1. model_path
