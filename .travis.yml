@@ -27,8 +27,11 @@ jobs:
     - TENSORRT=7.0.0
     - UBUNTU_VERSION=ubuntu1804
     - TORCH=1.7.0
+    - TENSORFLOW=1.15.0
     - ENABLE_TORCH=ON
+    - ENABLE_TENSORFLOW=OFF
     - ENABLE_KERAS=OFF
+    - ENABLE_ONNX=OFF
   - name: "CUDA 10.2 + TRT 7.2 + Torch 1.8"
     env:
     - CUDA=10.2.89-1
@@ -38,8 +41,25 @@ jobs:
     - TENSORRT=7.2.3
     - UBUNTU_VERSION=ubuntu1804
     - TORCH=1.8.0
+    - TENSORFLOW=1.15.0
     - ENABLE_TORCH=ON
+    - ENABLE_TENSORFLOW=OFF
     - ENABLE_KERAS=OFF
+    - ENABLE_ONNX=OFF
+  - name: "CUDA 10.2 + TRT 7.2 + TensorFlow 1.15"
+    env:
+    - CUDA=10.2.89-1
+    - CUDA_SHORT=10.2
+    - CUDNN_MAJOR=8
+    - CUDNN=8.0.4.*
+    - TENSORRT=7.2.3
+    - UBUNTU_VERSION=ubuntu1804
+    - TORCH=1.8.0
+    - TENSORFLOW=1.15.0
+    - ENABLE_TORCH=OFF
+    - ENABLE_TENSORFLOW=ON
+    - ENABLE_KERAS=OFF
+    - ENABLE_ONNX=OFF
   - name: "CUDA 10.2 + TRT 7.2 + Keras"
     env:
     - CUDA=10.2.89-1
@@ -49,8 +69,25 @@ jobs:
     - TENSORRT=7.2.3
     - UBUNTU_VERSION=ubuntu1804
     - TORCH=1.8.0
+    - TENSORFLOW=1.15.0
     - ENABLE_TORCH=OFF
+    - ENABLE_TENSORFLOW=OFF
     - ENABLE_KERAS=ON
+    - ENABLE_ONNX=OFF
+  - name: "CUDA 10.2 + TRT 7.2 + ONNX"
+    env:
+    - CUDA=10.2.89-1
+    - CUDA_SHORT=10.2
+    - CUDNN_MAJOR=8
+    - CUDNN=8.0.4.*
+    - TENSORRT=7.2.3
+    - UBUNTU_VERSION=ubuntu1804
+    - TORCH=1.8.0
+    - TENSORFLOW=1.15.0
+    - ENABLE_TORCH=OFF
+    - ENABLE_TENSORFLOW=OFF
+    - ENABLE_KERAS=OFF
+    - ENABLE_ONNX=ON
 
 before_install:
   - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
@@ -76,13 +113,13 @@ install:
   - pip3 install torch==${TORCH}+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
 before_script:
-  - wget https://github.com/Neargye/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz -O tensorflow.tar.gz
+  - wget https://github.com/Neargye/tensorflow/releases/download/v${TENSORFLOW}/libtensorflow-cpu-linux-x86_64-${TENSORFLOW}.tar.gz -O tensorflow.tar.gz
   - mkdir tensorflow_lib
   - tar -xzvf tensorflow.tar.gz --directory tensorflow_lib 
   - cp -rv tensorflow_lib/lib/ source/third_party/tensorflow/ 
   - rm -rvf tensorflow_lib tensorflow.tar.gz
   - mkdir build
   - cd build
-  - cmake .. -DENABLE_LOGGING=OFF -DENABLE_PROFILING=OFF -DBUILD_PYTHON_LIB=ON -DENABLE_TORCH=${ENABLE_TORCH} -DENABLE_TENSORFLOW=ON -DENABLE_KERAS=${ENABLE_KERAS} -DENABLE_RNN=ON -DPYTHON_EXECUTABLE=$(which python3)
+  - cmake .. -DENABLE_TORCH=${ENABLE_TORCH} -DENABLE_TENSORFLOW=${ENABLE_TENSORFLOW} -DENABLE_KERAS=${ENABLE_KERAS} -DENABLE_ONNX=${ENABLE_ONNX} -DENABLE_PROFILING=ON -DENABLE_DYNAMIC_BATCH=ON -DENABLE_RNN=ON -DBUILD_PYTHON_LIB=ON -DPYTHON_EXECUTABLE=$(which python3)
 
 script: make -j
