@@ -43,10 +43,6 @@ option(ENABLE_TENSORFLOW "Enable TensorFlow" OFF)
 # Enable ONNX
 option(ENABLE_ONNX "Enable ONNX" OFF)
 
-# easylogging
-add_definitions(-DELPP_THREAD_SAFE=1)
-include_directories(${PROJECT_SOURCE_DIR}/../../source/third_party/easyloggingpp)
-
 # CUDA
 find_package(CUDA)
 

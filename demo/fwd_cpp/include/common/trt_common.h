@@ -29,8 +29,8 @@
 
 #include <NvInfer.h>
 #include <cuda_runtime_api.h>
-#include <easylogging++.h>
 
+#include <fstream>
 #include <functional>
 #include <memory>
 #include <numeric>
@@ -39,7 +39,6 @@
 #include <vector>
 
 #include "common/fwd_common.h"
-#include "common/trt_utils.h"
 
 #undef max
 #undef min
@@ -93,7 +92,6 @@ inline bool CheckAndCopyFile(const std::string& dest_path, const std::string& sr
     // check if desc_file is existed
     std::ifstream file(dest_path);
     if (file.is_open()) {
-      LOG(INFO) << dest_path << " has already been existed.";
       file.close();
       return true;
     }
@@ -102,13 +100,11 @@ inline bool CheckAndCopyFile(const std::string& dest_path, const std::string& sr
 
   std::ifstream src_file(src_path, std::ios::binary);
   if (!src_file.is_open()) {
-    LOG(ERROR) << "Open src file " << src_path << "failed! ";
     return false;
   }
 
   std::ofstream desc_file(dest_path, std::ios::binary);
   if (!desc_file.is_open()) {
-    LOG(ERROR) << "Open dest file " << dest_path << "failed! ";
     return false;
   }
 
@@ -153,8 +149,6 @@ inline size_t ResetMaxWorkspaceSize(size_t size) {
   // 限制一下需要的显存大小
   if (size > free * 4 / 5) {
     size = free * 4 / 5;
-
-    LOG(WARNING) << "Reset max workspace size to " << size;
   }
 
   return size;
@@ -174,8 +168,6 @@ inline std::vector<int> GetOutputOrder(nvinfer1::ICudaEngine* engine,
     const auto output = network->getOutput(i);
     const int pos = engine->getBindingIndex(output->getName());
     output_pos.push_back(pos);
-    LOG(INFO) << output->getName() << TrtUtils::ShapeStrOf(output->getDimensions())
-              << " in position " << pos;
   }
   return output_pos;
 }
