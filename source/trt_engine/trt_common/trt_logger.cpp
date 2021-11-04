@@ -48,7 +48,7 @@ Logger::Logger(nvinfer1::ILogger::Severity level) : level_(level) {
 nvinfer1::ILogger& Logger::getTRTLogger() { return *this; }
 
 // trt logger
-void Logger::log(Severity severity, const char* msg) {
+void Logger::log(Severity severity, const char* msg) noexcept {
   if (severity > level_) {
     return;
   }

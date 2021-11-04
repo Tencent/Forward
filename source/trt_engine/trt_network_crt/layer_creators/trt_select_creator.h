@@ -41,7 +41,6 @@ class TLayerCreator<TrtSelectDesc> : public ILayerCreator {
   ITensorVector CreateLayer(nvinfer1::INetworkDefinition* network, const TrtLayerDesc* layer_desc,
                             const ITensorVector& input_tensors) override {
     LOG(INFO) << "TrtSelectDesc::CreateLayer";
-#if NV_TENSORRT_MAJOR >= 7
     const auto select_desc = dynamic_cast<const TrtSelectDesc*>(layer_desc);
     T_CHECK(select_desc);
 
@@ -76,10 +75,6 @@ class TLayerCreator<TrtSelectDesc> : public ILayerCreator {
     }
 
     return {select->getOutput(0)};
-#else   // NV_TENSORRT_MAJOR < 7
-    LOG(ERROR) << "Select Layer requires TENSORRT_VERSION >= 7.";
-    return {};
-#endif  // NV_TENSORRT_MAJOR >= 7
   }
 };
 

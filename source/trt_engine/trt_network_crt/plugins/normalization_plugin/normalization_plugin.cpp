@@ -95,19 +95,18 @@ NormalizationPlugin::NormalizationPlugin(void const* serialData, size_t serialLe
 NormalizationPlugin::~NormalizationPlugin() { terminate(); }
 
 // NormalizationPlugin returns one output.
-int NormalizationPlugin::getNbOutputs() const { return 1; }
+int NormalizationPlugin::getNbOutputs() const noexcept { return 1; }
 
-nvinfer1::DimsExprs NormalizationPlugin::getOutputDimensions(int outputIndex,
-                                                             const nvinfer1::DimsExprs* inputs,
-                                                             int nbInputs,
-                                                             nvinfer1::IExprBuilder& exprBuilder) {
+nvinfer1::DimsExprs NormalizationPlugin::getOutputDimensions(
+    int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
+    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   const nvinfer1::DimsExprs output(inputs[0]);
   return output;
 }
 
-int NormalizationPlugin::initialize() { return 0; }
+int NormalizationPlugin::initialize() noexcept { return 0; }
 
-void NormalizationPlugin::terminate() {
+void NormalizationPlugin::terminate() noexcept {
   if (!_initialized) {
     return;
   }
@@ -123,14 +122,14 @@ void NormalizationPlugin::terminate() {
 
 size_t NormalizationPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                              const nvinfer1::PluginTensorDesc* outputs,
-                                             int nbOutputs) const {
+                                             int nbOutputs) const noexcept {
   return 0;
 }
 
 int NormalizationPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                  const nvinfer1::PluginTensorDesc* outputDesc,
                                  const void* const* inputs, void* const* outputs, void* workspace,
-                                 cudaStream_t stream) {
+                                 cudaStream_t stream) noexcept {
   assert(_initialized);
 
   nvinfer1::Dims input_dims = inputDesc[0].dims;
@@ -193,13 +192,13 @@ int NormalizationPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t NormalizationPlugin::getSerializationSize() const {
+size_t NormalizationPlugin::getSerializationSize() const noexcept {
   return (serialized_size(_type) + serialized_size(_epsilon) + serialized_size(_nchan) +
           serialized_size(_h_scale) + serialized_size(_h_bias) + serialized_size(_h_mean) +
           serialized_size(_h_var) + serialized_size(_data_type) + serialized_size(max_batch_size_));
 }
 
-void NormalizationPlugin::serialize(void* buffer) const {
+void NormalizationPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, _type);
   serialize_value(&buffer, _epsilon);
   serialize_value(&buffer, _nchan);
@@ -213,7 +212,7 @@ void NormalizationPlugin::serialize(void* buffer) const {
 
 bool NormalizationPlugin::supportsFormatCombination(int pos,
                                                     const nvinfer1::PluginTensorDesc* inOut,
-                                                    int nbInputs, int nbOutputs) {
+                                                    int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 #ifdef ENABLE_NORMALIZATION_FLOAT16
   return ((inOut[pos].type == nvinfer1::DataType::kFLOAT ||
@@ -225,34 +224,38 @@ bool NormalizationPlugin::supportsFormatCombination(int pos,
 #endif
 }
 
-const char* NormalizationPlugin::getPluginType() const { return NORMALIZATION_PLUGIN_NAME; }
+const char* NormalizationPlugin::getPluginType() const noexcept {
+  return NORMALIZATION_PLUGIN_NAME;
+}
 
-const char* NormalizationPlugin::getPluginVersion() const { return NORMALIZATION_PLUGIN_VERSION; }
+const char* NormalizationPlugin::getPluginVersion() const noexcept {
+  return NORMALIZATION_PLUGIN_VERSION;
+}
 
-void NormalizationPlugin::destroy() { delete this; }
+void NormalizationPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* NormalizationPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* NormalizationPlugin::clone() const noexcept {
   return new NormalizationPlugin{_type,   _epsilon, _h_scale,   _h_bias,
                                  _h_mean, _h_var,   _data_type, max_batch_size_};
 }
 
 // Set plugin namespace
-void NormalizationPlugin::setPluginNamespace(const char* pluginNamespace) {
+void NormalizationPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* NormalizationPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* NormalizationPlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType NormalizationPlugin::getOutputDataType(int index,
                                                           const nvinfer1::DataType* inputTypes,
-                                                          int nbInputs) const {
+                                                          int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
 
 void NormalizationPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
                                           const nvinfer1::DynamicPluginTensorDesc* out,
-                                          int nbOutputs) {
+                                          int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   _input_dims.push_back(in[i].desc.dims);
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
@@ -322,16 +325,20 @@ NormalizationPluginCreator::NormalizationPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* NormalizationPluginCreator::getPluginName() const { return NORMALIZATION_PLUGIN_NAME; }
+const char* NormalizationPluginCreator::getPluginName() const noexcept {
+  return NORMALIZATION_PLUGIN_NAME;
+}
 
-const char* NormalizationPluginCreator::getPluginVersion() const {
+const char* NormalizationPluginCreator::getPluginVersion() const noexcept {
   return NORMALIZATION_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* NormalizationPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* NormalizationPluginCreator::getFieldNames() noexcept {
+  return &mFC;
+}
 
 nvinfer1::IPluginV2DynamicExt* NormalizationPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   std::vector<float> scaleValues;
   std::vector<float> biasValues;
   std::vector<float> meanValues;
@@ -388,9 +395,8 @@ nvinfer1::IPluginV2DynamicExt* NormalizationPluginCreator::createPlugin(
   return obj;
 }
 
-nvinfer1::IPluginV2DynamicExt* NormalizationPluginCreator::deserializePlugin(const char* name,
-                                                                             const void* serialData,
-                                                                             size_t serialLength) {
+nvinfer1::IPluginV2DynamicExt* NormalizationPluginCreator::deserializePlugin(
+    const char* name, const void* serialData, size_t serialLength) noexcept {
   NormalizationPlugin* obj = new NormalizationPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

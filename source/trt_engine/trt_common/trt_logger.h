@@ -50,7 +50,7 @@ class Logger : public nvinfer1::ILogger {
 
   nvinfer1::ILogger& getTRTLogger();
 
-  void log(Severity severity, const char* msg) override;
+  void log(Severity severity, const char* msg) noexcept override;
 
  private:
   Severity level_;

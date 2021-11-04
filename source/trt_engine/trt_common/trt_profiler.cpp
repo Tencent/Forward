@@ -49,7 +49,7 @@ SimpleProfiler::SimpleProfiler(const char* name, const std::vector<SimpleProfile
   }
 }
 
-void SimpleProfiler::reportLayerTime(const char* layerName, float ms) {
+void SimpleProfiler::reportLayerTime(const char* layerName, float ms) noexcept {
   mProfile[layerName].count++;
   mProfile[layerName].time += ms;
   if (std::find(mLayerNames.begin(), mLayerNames.end(), layerName) == mLayerNames.end()) {

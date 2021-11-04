@@ -63,7 +63,7 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
     for (int i = 0; i < 2; i++) {
       auto iv = inputs[i ^ isRSub];
       if (iv->node()->kind() == c10::prim::GetAttr || iv->node()->kind() == c10::prim::Constant ||
-          iv->node()->kind() == c10::aten::size) {
+          iv->node()->kind() == c10::aten::size || iv->node()->kind() == c10::prim::NumToTensor) {
         if (!CreateConstantInput(module, iv, layer_desc->inputs[i])) return {};
       } else {
         input_values.push_back(iv);
@@ -100,10 +100,35 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
       LOG(ERROR) << "Create Desc Failed.";
       return false;
     }
+
+#if USE_DYNAMIC_BATCH
+    CheckAtenSizeOp(iv, module);
+#endif
+
+    tensor = tensor.toType(c10::ScalarType::Float);
+
     c_input.inUse = true;
     c_input.data = ToFwdWeights(tensor);
     c_input.dim = DimsOf(tensor);
     return true;
+  }
+
+  void CheckAtenSizeOp(const torch::jit::Value* iv, const fwd::torch_::TorchModule& module) const {
+    const JitNode* aten_size_op = nullptr;
+
+    if (iv->node()->kind() == c10::prim::NumToTensor)
+      aten_size_op = iv->node()->input()->node();
+    else if (iv->node()->kind() == c10::aten::size)
+      aten_size_op = iv->node();
+
+    if (aten_size_op != nullptr) {
+      // aten::size(input, dim)
+      int64_t dim = module.Get(aten_size_op->inputs()[1]).toInt();
+      if (dim == 0) {
+        LOG(ERROR) << " In DYNAMIC_BATCH mode, the aten::size's dim should not be zero. ";
+        exit(-1);
+      }
+    }
   }
 
   const std::unordered_map<c10::Symbol, nvinfer1::ElementWiseOperation> NK2EWP_MAPPING = {

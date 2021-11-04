@@ -41,6 +41,29 @@ template <>
 class TLayerDescCreator<TrtSelectDesc> : public ILayerDescCreator {
  public:
   bool Check(const Operation& op) override {
+    if (op.OpType() == "Select") return true;
+
+    return CheckPattern(op);
+  }
+
+  std::shared_ptr<TrtLayerDesc> Create(const Operation& op, const Graph& graph,
+                                       std::vector<Output>& op_inputs) override {
+    LOG(INFO) << "TrtSelectDesc::Create";
+
+    if (op.OpType() == "Select") {
+      T_CHECK(op.NumInputs() == 3);
+
+      op_inputs.push_back(op.Input(0));  // condition
+      op_inputs.push_back(op.Input(1));  // true
+      op_inputs.push_back(op.Input(2));  // else
+      return std::make_shared<TrtSelectDesc>();
+    }
+
+    return CreateFromPattern(op, graph, op_inputs);
+  }
+
+ private:
+  bool CheckPattern(const fwd::tf_::Operation& op) {
     std::string type = op.OpType();
 
     if (type != "Cast" && type != "Mul") return false;
@@ -67,10 +90,9 @@ class TLayerDescCreator<TrtSelectDesc> : public ILayerDescCreator {
     return false;
   }
 
-  std::shared_ptr<TrtLayerDesc> Create(const Operation& op, const Graph& graph,
-                                       std::vector<Output>& op_inputs) override {
-    LOG(INFO) << "TrtSelectDesc::Create";
-
+  std::shared_ptr<fwd::TrtLayerDesc> CreateFromPattern(const fwd::tf_::Operation& op,
+                                                       const fwd::tf_::Graph& graph,
+                                                       std::vector<fwd::tf_::Output>& op_inputs) {
     std::string type = op.OpType();
 
     const TF_DataType dtype = op.InputType(0);
@@ -113,7 +135,6 @@ class TLayerDescCreator<TrtSelectDesc> : public ILayerDescCreator {
     return layer_desc;
   }
 
- private:
   std::shared_ptr<TrtLayerDesc> CreateOneZeroSelect(const Operation& op, const Graph& graph,
                                                     std::vector<Output>& op_inputs) {
     std::string type = op.OpType();

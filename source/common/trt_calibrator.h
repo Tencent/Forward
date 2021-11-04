@@ -82,11 +82,11 @@ class TrtInt8Calibrator : public nvinfer1::IInt8LegacyCalibrator {
       for (auto& buffer : m_buffers) CUDA_CHECK(cudaFree(buffer));
   }
 
-  virtual int getBatchSize() const { return mBatchSize; }
+  virtual int getBatchSize() const noexcept { return mBatchSize; }
 
   // return true if next batch stream is fed to the corresponding binding inputs of the engine.
   // the batch_size of the batch data should equal to mBatchSize.
-  virtual bool getBatch(void* bindings[], const char* names[], int nbBindings) {
+  virtual bool getBatch(void* bindings[], const char* names[], int nbBindings) noexcept {
     if (!mStream->next()) {
       return false;
     }
@@ -100,7 +100,7 @@ class TrtInt8Calibrator : public nvinfer1::IInt8LegacyCalibrator {
   }
 
   // loading cache file of calibration
-  virtual const void* readCalibrationCache(size_t& length) {
+  virtual const void* readCalibrationCache(size_t& length) noexcept {
     std::ifstream fi(mCalibrationTableName, std::ios::binary);
     if (!fi) {
       length = 0;
@@ -116,7 +116,7 @@ class TrtInt8Calibrator : public nvinfer1::IInt8LegacyCalibrator {
   }
 
   // save calibration in a cache file
-  virtual void writeCalibrationCache(const void* cache, size_t length) {
+  virtual void writeCalibrationCache(const void* cache, size_t length) noexcept {
     std::ofstream fo(mCalibrationTableName, std::ios::binary);
     fo.write((const char*)cache, length);
     fo.close();
@@ -155,16 +155,16 @@ class TrtInt8Calibrator : public nvinfer1::IInt8LegacyCalibrator {
     }
   }
 
-  nvinfer1::CalibrationAlgoType getAlgorithm() { return mAlgo; }
+  nvinfer1::CalibrationAlgoType getAlgorithm() noexcept { return mAlgo; }
 
   // Legacy Use Only
-  double getQuantile() const { return mQuantile; }
+  double getQuantile() const noexcept { return mQuantile; }
 
-  double getRegressionCutoff() const { return 1.0; }
+  double getRegressionCutoff() const noexcept { return 1.0; }
 
-  const void* readHistogramCache(std::size_t& length) { return nullptr; }
+  const void* readHistogramCache(std::size_t& length) noexcept { return nullptr; }
 
-  void writeHistogramCache(const void* ptr, std::size_t length) { return; }
+  void writeHistogramCache(const void* ptr, std::size_t length) noexcept { return; }
 
  protected:
   std::shared_ptr<IBatchStream> mStream;

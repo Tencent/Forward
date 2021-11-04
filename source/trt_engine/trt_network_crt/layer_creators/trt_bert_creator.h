@@ -30,13 +30,12 @@
 #include <string>
 #include <vector>
 
+#include <NvInferPlugin.h>
+
 #include "common/trt_utils.h"
 #include "trt_engine/trt_common/trt_common.h"
 #include "trt_engine/trt_network_crt/layer_creators/i_trt_layer_creator.h"
-#include "trt_engine/trt_network_crt/plugins/emb_layer_norm_plugin/emb_layer_norm_plugin.h"
 #include "trt_engine/trt_network_crt/plugins/gelu_plugin/gelu_plugin.h"
-#include "trt_engine/trt_network_crt/plugins/qkv_to_context_plugin/qkv_to_context_plugin.h"
-#include "trt_engine/trt_network_crt/plugins/skip_layer_norm_plugin/skip_layer_norm_plugin.h"
 
 FWD_TRT_NAMESPACE_BEGIN
 
@@ -125,24 +124,25 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     const auto mha_type =
         TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, bert_desc->calib_mode);
 
-    nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        fwd::bert::FWD_EMB_LAYER_NORM_NAME, fwd::bert::FWD_EMB_LAYER_NORM_VERSION);
+    nvinfer1::IPluginCreator* creator =
+        getPluginRegistry()->getPluginCreator("CustomEmbLayerNormPluginDynamic", "1");
     std::vector<nvinfer1::PluginField> field_data;
-    field_data.emplace_back(NAME_MAP.at("EMB_BETA").c_str(), beta.Data(),
+    field_data.emplace_back(PLUGIN_NAME_MAP.at("EMB_BETA").c_str(), beta.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, beta.Count());
-    field_data.emplace_back(NAME_MAP.at("EMB_GAMMA").c_str(), gamma.Data(),
+    field_data.emplace_back(PLUGIN_NAME_MAP.at("EMB_GAMMA").c_str(), gamma.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, gamma.Count());
-    field_data.emplace_back(NAME_MAP.at("EMB_WORD").c_str(), word_emb.Data(),
+    field_data.emplace_back(PLUGIN_NAME_MAP.at("EMB_WORD").c_str(), word_emb.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, word_emb.Count());
-    field_data.emplace_back(NAME_MAP.at("EMB_TOK").c_str(), tok_emb.Data(),
+    field_data.emplace_back(PLUGIN_NAME_MAP.at("EMB_TOK").c_str(), tok_emb.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, tok_emb.Count());
-    field_data.emplace_back(NAME_MAP.at("EMB_POS").c_str(), pos_emb.Data(),
+    field_data.emplace_back(PLUGIN_NAME_MAP.at("EMB_POS").c_str(), pos_emb.Data(),
                             nvinfer1::PluginFieldType::kFLOAT32, pos_emb.Count());
-    field_data.emplace_back("use_fp16", &use_fp16, nvinfer1::PluginFieldType::kINT32, 1);
+    field_data.emplace_back("output_fp16", &use_fp16, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("mha_type_id", &mha_type, nvinfer1::PluginFieldType::kINT32, 1);
 
     const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
                                                       field_data.data()};
+
     const auto plugin_obj = TrtCommon::InferUniquePtr<nvinfer1::IPluginV2>(
         creator->createPlugin("embeddings", &plugin_data));
 
@@ -210,24 +210,20 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     // "bias");
 
     // requiring that sm >= 72
-    bool use_int8 = bert_desc->use_int8 && fwd::bert::getSMVersion() >= kSM_72;
+    bool use_int8 = bert_desc->use_int8 && fwd::trt_::getSMVersion() >= kSM_72;
     // requiring that hidden_size is 768 or 1024
     if (bert_desc->hidden_size != 768 && bert_desc->hidden_size != 1024) use_int8 = false;
 
     const auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, use_int8, bert_desc->calib_mode);
-    const int has_skip = 1;
-    const int batch_size = bert_desc->max_batch_size;
 
-    nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        fwd::bert::FWD_SKIP_LAYER_NORM_NAME, fwd::bert::FWD_SKIP_LAYER_NORM_VERSION);
+    nvinfer1::IPluginCreator* creator =
+        getPluginRegistry()->getPluginCreator("CustomSkipLayerNormPluginDynamic", "1");
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("beta", beta.Data(), nvinfer1::PluginFieldType::kFLOAT32, beta.Count());
     field_data.emplace_back("gamma", gamma.Data(), nvinfer1::PluginFieldType::kFLOAT32,
                             gamma.Count());
     field_data.emplace_back("ld", &bert_desc->hidden_size, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
-    field_data.emplace_back("has_skip", &has_skip, nvinfer1::PluginFieldType::kINT32, 1);
-    field_data.emplace_back("batch_size", &batch_size, nvinfer1::PluginFieldType::kINT32, 1);
 
     const nvinfer1::PluginFieldCollection plugin_data{static_cast<int>(field_data.size()),
                                                       field_data.data()};
@@ -280,8 +276,8 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     // that it results in large errors!
     auto dtype = TrtCommon::GetDataType(bert_desc->use_fp16, bert_desc->use_int8, true);
 
-    nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        fwd::bert::FWD_QKV_TO_CONTEXT_PLUGIN_NAME, fwd::bert::FWD_QKV_TO_CONTEXT_PLUGIN_VERSION);
+    nvinfer1::IPluginCreator* creator =
+        getPluginRegistry()->getPluginCreator("CustomQKVToContextPluginDynamic", "1");
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("type_id", &dtype, nvinfer1::PluginFieldType::kINT32, 1);
     field_data.emplace_back("hidden_size", &hidden_size, nvinfer1::PluginFieldType::kINT32, 1);
@@ -374,7 +370,7 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
         mid_act = relu_layer->getOutput(0);
       } else {
         mid_act =
-            fwd::bert::CreateGeluLayer(network, mid_out, bert_desc->use_fp16, bert_desc->use_int8);
+            fwd::trt_::CreateGeluLayer(network, mid_out, bert_desc->use_fp16, bert_desc->use_int8);
       }
 
       T_CHECK(mid_act);
@@ -515,6 +511,14 @@ class TLayerCreator<TrtBertDesc> : public ILayerCreator {
     // reshape->setSecondTranspose(perm);
     return reshape;
   }
+
+  const std::unordered_map<std::string, std::string> PLUGIN_NAME_MAP{
+      {"EMB_BETA", "bert_embeddings_layernorm_beta"},
+      {"EMB_GAMMA", "bert_embeddings_layernorm_gamma"},
+      {"EMB_WORD", "bert_embeddings_word_embeddings"},
+      {"EMB_TOK", "bert_embeddings_token_type_embeddings"},
+      {"EMB_POS", "bert_embeddings_position_embeddings"},
+  };
 
   const std::unordered_map<std::string, std::string> NAME_MAP{
       {"EMB_BETA", "embedding_layernorm_beta"},

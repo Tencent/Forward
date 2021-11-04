@@ -48,11 +48,11 @@ ReflectionPadding2DPlugin::ReflectionPadding2DPlugin(void const* serialData, siz
 ReflectionPadding2DPlugin::~ReflectionPadding2DPlugin() { terminate(); }
 
 // ReflectionPadding2DPlugin returns one output.
-int ReflectionPadding2DPlugin::getNbOutputs() const { return 1; }
+int ReflectionPadding2DPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs ReflectionPadding2DPlugin::getOutputDimensions(
     int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
-    nvinfer1::IExprBuilder& exprBuilder) {
+    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   nvinfer1::DimsExprs output(inputs[0]);
   output.d[2] = exprBuilder.constant(inputs[0].d[2]->getConstantValue() + padding_size_[2] +
                                      padding_size_[3]);
@@ -62,21 +62,21 @@ nvinfer1::DimsExprs ReflectionPadding2DPlugin::getOutputDimensions(
   return output;
 }
 
-int ReflectionPadding2DPlugin::initialize() { return 0; }
+int ReflectionPadding2DPlugin::initialize() noexcept { return 0; }
 
-void ReflectionPadding2DPlugin::terminate() {}
+void ReflectionPadding2DPlugin::terminate() noexcept {}
 
 size_t ReflectionPadding2DPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs,
                                                    int nbInputs,
                                                    const nvinfer1::PluginTensorDesc* outputs,
-                                                   int nbOutputs) const {
+                                                   int nbOutputs) const noexcept {
   return 0;
 }
 
 int ReflectionPadding2DPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                        const nvinfer1::PluginTensorDesc* outputDesc,
                                        const void* const* inputs, void* const* outputs,
-                                       void* workspace, cudaStream_t stream) {
+                                       void* workspace, cudaStream_t stream) noexcept {
   const nvinfer1::Dims input_dims = inputDesc[0].dims;
 
 #ifdef ENABLE_REFLECTION_PADDING_2D_FLOAT16
@@ -103,18 +103,18 @@ int ReflectionPadding2DPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDe
   return 0;
 }
 
-size_t ReflectionPadding2DPlugin::getSerializationSize() const {
+size_t ReflectionPadding2DPlugin::getSerializationSize() const noexcept {
   return (serialized_size(padding_size_) + serialized_size(data_type_));
 }
 
-void ReflectionPadding2DPlugin::serialize(void* buffer) const {
+void ReflectionPadding2DPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, padding_size_);
   serialize_value(&buffer, data_type_);
 }
 
 bool ReflectionPadding2DPlugin::supportsFormatCombination(int pos,
                                                           const nvinfer1::PluginTensorDesc* inOut,
-                                                          int nbInputs, int nbOutputs) {
+                                                          int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 
 #ifdef ENABLE_REFLECTION_PADDING_2D_FLOAT16
@@ -127,31 +127,31 @@ bool ReflectionPadding2DPlugin::supportsFormatCombination(int pos,
 #endif
 }
 
-const char* ReflectionPadding2DPlugin::getPluginType() const {
+const char* ReflectionPadding2DPlugin::getPluginType() const noexcept {
   return REFLECTION_PADDING_2D_PLUGIN_NAME;
 }
 
-const char* ReflectionPadding2DPlugin::getPluginVersion() const {
+const char* ReflectionPadding2DPlugin::getPluginVersion() const noexcept {
   return REFLECTION_PADDING_2D_PLUGIN_VERSION;
 }
 
-void ReflectionPadding2DPlugin::destroy() { delete this; }
+void ReflectionPadding2DPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* ReflectionPadding2DPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* ReflectionPadding2DPlugin::clone() const noexcept {
   return new ReflectionPadding2DPlugin(padding_size_, data_type_);
 }
 
 // Set plugin namespace
-void ReflectionPadding2DPlugin::setPluginNamespace(const char* pluginNamespace) {
+void ReflectionPadding2DPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* ReflectionPadding2DPlugin::getPluginNamespace() const {
+const char* ReflectionPadding2DPlugin::getPluginNamespace() const noexcept {
   return mPluginNamespace.c_str();
 }
 
 nvinfer1::DataType ReflectionPadding2DPlugin::getOutputDataType(
-    int index, const nvinfer1::DataType* inputTypes, int nbInputs) const {
+    int index, const nvinfer1::DataType* inputTypes, int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
@@ -159,7 +159,7 @@ nvinfer1::DataType ReflectionPadding2DPlugin::getOutputDataType(
 void ReflectionPadding2DPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in,
                                                 int nbInputs,
                                                 const nvinfer1::DynamicPluginTensorDesc* out,
-                                                int nbOutputs) {
+                                                int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -179,20 +179,20 @@ ReflectionPadding2DPluginCreator::ReflectionPadding2DPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* ReflectionPadding2DPluginCreator::getPluginName() const {
+const char* ReflectionPadding2DPluginCreator::getPluginName() const noexcept {
   return REFLECTION_PADDING_2D_PLUGIN_NAME;
 }
 
-const char* ReflectionPadding2DPluginCreator::getPluginVersion() const {
+const char* ReflectionPadding2DPluginCreator::getPluginVersion() const noexcept {
   return REFLECTION_PADDING_2D_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* ReflectionPadding2DPluginCreator::getFieldNames() {
+const nvinfer1::PluginFieldCollection* ReflectionPadding2DPluginCreator::getFieldNames() noexcept {
   return &mFC;
 }
 
 nvinfer1::IPluginV2DynamicExt* ReflectionPadding2DPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   std::vector<int> padding_size;
   int data_type = 0;
   const nvinfer1::PluginField* fields = fc->fields;
@@ -218,7 +218,7 @@ nvinfer1::IPluginV2DynamicExt* ReflectionPadding2DPluginCreator::createPlugin(
 }
 
 nvinfer1::IPluginV2DynamicExt* ReflectionPadding2DPluginCreator::deserializePlugin(
-    const char* name, const void* serialData, size_t serialLength) {
+    const char* name, const void* serialData, size_t serialLength) noexcept {
   ReflectionPadding2DPlugin* obj = new ReflectionPadding2DPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

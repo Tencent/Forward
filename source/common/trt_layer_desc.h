@@ -512,7 +512,7 @@ struct TrtScaleDesc : TrtLayerDesc {
   FwdWeights power;
 
   // 这个参数是addScaleNd独有的
-  // int channelAxis;
+  int channel_axis{1};
 };
 
 struct TrtSelectDesc : TrtLayerDesc {

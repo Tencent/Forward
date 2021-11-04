@@ -260,6 +260,9 @@ class TorchNormalizationCreator : public ILayerDescCreator {
     layer_desc->scale = ToFwdWeights(scale_tensor);
     layer_desc->mode = nvinfer1::ScaleMode::kCHANNEL;
 
+    // TODO(percyyuan): here we assume that the channel_axis is always 1
+    layer_desc->channel_axis = 1;
+
     return layer_desc;
   }
 };

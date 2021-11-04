@@ -50,12 +50,11 @@ GridSamplerPlugin::GridSamplerPlugin(void const* serialData, size_t serialLength
 
 GridSamplerPlugin::~GridSamplerPlugin() { terminate(); }
 
-int GridSamplerPlugin::getNbOutputs() const { return 1; }
+int GridSamplerPlugin::getNbOutputs() const noexcept { return 1; }
 
-nvinfer1::DimsExprs GridSamplerPlugin::getOutputDimensions(int outputIndex,
-                                                           const nvinfer1::DimsExprs* inputs,
-                                                           int nbInputs,
-                                                           nvinfer1::IExprBuilder& exprBuilder) {
+nvinfer1::DimsExprs GridSamplerPlugin::getOutputDimensions(
+    int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
+    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   // [N, C, H, W], [N, H', W', 2] -> [N, C, H', W']
   ASSERT(nbInputs == 2);
   assert(inputs[0].nbDims == 4 || inputs[0].nbDims == 5);
@@ -73,20 +72,20 @@ nvinfer1::DimsExprs GridSamplerPlugin::getOutputDimensions(int outputIndex,
   return output;
 }
 
-int GridSamplerPlugin::initialize() { return 0; }
+int GridSamplerPlugin::initialize() noexcept { return 0; }
 
-void GridSamplerPlugin::terminate() {}
+void GridSamplerPlugin::terminate() noexcept {}
 
 size_t GridSamplerPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                            const nvinfer1::PluginTensorDesc* outputs,
-                                           int nbOutputs) const {
+                                           int nbOutputs) const noexcept {
   return 0;
 }
 
 int GridSamplerPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                const nvinfer1::PluginTensorDesc* outputDesc,
                                const void* const* inputs, void* const* outputs, void* workspace,
-                               cudaStream_t stream) {
+                               cudaStream_t stream) noexcept {
 #ifdef ENABLE_GRID_SAMPLER_FLOAT16
   nvinfer1::DataType type = data_type_;
 #else
@@ -139,12 +138,12 @@ int GridSamplerPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t GridSamplerPlugin::getSerializationSize() const {
+size_t GridSamplerPlugin::getSerializationSize() const noexcept {
   return serialized_size(interpolation_mode_) + serialized_size(padding_mode_) +
          serialized_size(align_corners_) + serialized_size(data_type_);
 }
 
-void GridSamplerPlugin::serialize(void* buffer) const {
+void GridSamplerPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, interpolation_mode_);
   serialize_value(&buffer, padding_mode_);
   serialize_value(&buffer, align_corners_);
@@ -152,7 +151,7 @@ void GridSamplerPlugin::serialize(void* buffer) const {
 }
 
 bool GridSamplerPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                                  int nbInputs, int nbOutputs) {
+                                                  int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 2 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 
 #ifdef ENABLE_GRID_SAMPLER_FLOAT16
@@ -165,32 +164,34 @@ bool GridSamplerPlugin::supportsFormatCombination(int pos, const nvinfer1::Plugi
 #endif
 }
 
-const char* GridSamplerPlugin::getPluginType() const { return GRID_SAMPLER_PLUGIN_NAME; }
+const char* GridSamplerPlugin::getPluginType() const noexcept { return GRID_SAMPLER_PLUGIN_NAME; }
 
-const char* GridSamplerPlugin::getPluginVersion() const { return GRID_SAMPLER_PLUGIN_VERSION; }
+const char* GridSamplerPlugin::getPluginVersion() const noexcept {
+  return GRID_SAMPLER_PLUGIN_VERSION;
+}
 
-void GridSamplerPlugin::destroy() { delete this; }
+void GridSamplerPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* GridSamplerPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* GridSamplerPlugin::clone() const noexcept {
   return new GridSamplerPlugin{interpolation_mode_, padding_mode_, align_corners_, data_type_};
 }
 
-void GridSamplerPlugin::setPluginNamespace(const char* pluginNamespace) {
+void GridSamplerPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* GridSamplerPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* GridSamplerPlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType GridSamplerPlugin::getOutputDataType(int index,
                                                         const nvinfer1::DataType* inputTypes,
-                                                        int nbInputs) const {
+                                                        int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
 
 void GridSamplerPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
                                         const nvinfer1::DynamicPluginTensorDesc* out,
-                                        int nbOutputs) {
+                                        int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -213,16 +214,20 @@ GridSamplerPluginCreator::GridSamplerPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* GridSamplerPluginCreator::getPluginName() const { return GRID_SAMPLER_PLUGIN_NAME; }
+const char* GridSamplerPluginCreator::getPluginName() const noexcept {
+  return GRID_SAMPLER_PLUGIN_NAME;
+}
 
-const char* GridSamplerPluginCreator::getPluginVersion() const {
+const char* GridSamplerPluginCreator::getPluginVersion() const noexcept {
   return GRID_SAMPLER_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* GridSamplerPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* GridSamplerPluginCreator::getFieldNames() noexcept {
+  return &mFC;
+}
 
 nvinfer1::IPluginV2DynamicExt* GridSamplerPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int interpolation_mode{}, padding_mode{}, align_corners{};
   const nvinfer1::PluginField* fields = fc->fields;
   int data_type = 0;
@@ -252,9 +257,8 @@ nvinfer1::IPluginV2DynamicExt* GridSamplerPluginCreator::createPlugin(
   return obj;
 }
 
-nvinfer1::IPluginV2DynamicExt* GridSamplerPluginCreator::deserializePlugin(const char* name,
-                                                                           const void* serialData,
-                                                                           size_t serialLength) {
+nvinfer1::IPluginV2DynamicExt* GridSamplerPluginCreator::deserializePlugin(
+    const char* name, const void* serialData, size_t serialLength) noexcept {
   auto* obj = new GridSamplerPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

@@ -47,7 +47,7 @@ class TLayerCreator<TrtGeluDesc> : public ILayerCreator {
     T_CHECK(gelu_desc);
 
     const auto input = input_tensors[0];
-    return {fwd::bert::CreateGeluLayer(network, input, gelu_desc->use_fp16, gelu_desc->use_int8)};
+    return {fwd::trt_::CreateGeluLayer(network, input, gelu_desc->use_fp16, gelu_desc->use_int8)};
   }
 };
 

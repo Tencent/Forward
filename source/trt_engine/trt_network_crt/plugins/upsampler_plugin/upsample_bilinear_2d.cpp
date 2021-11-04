@@ -57,11 +57,11 @@ UpsampleBilinear2DPlugin::UpsampleBilinear2DPlugin(void const* serialData, size_
 
 UpsampleBilinear2DPlugin::~UpsampleBilinear2DPlugin() { terminate(); }
 
-int UpsampleBilinear2DPlugin::getNbOutputs() const { return 1; }
+int UpsampleBilinear2DPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs UpsampleBilinear2DPlugin::getOutputDimensions(
     int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
-    nvinfer1::IExprBuilder& exprBuilder) {
+    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   ASSERT(nbInputs == 1);
   ASSERT(inputs[0].nbDims == 4);
 
@@ -72,7 +72,7 @@ nvinfer1::DimsExprs UpsampleBilinear2DPlugin::getOutputDimensions(
   return output;
 }
 
-int UpsampleBilinear2DPlugin::initialize() {
+int UpsampleBilinear2DPlugin::initialize() noexcept {
   if (initialized_) {
     return 0;
   }
@@ -81,7 +81,7 @@ int UpsampleBilinear2DPlugin::initialize() {
   return 0;
 }
 
-void UpsampleBilinear2DPlugin::terminate() {
+void UpsampleBilinear2DPlugin::terminate() noexcept {
   if (!initialized_) {
     return;
   }
@@ -92,14 +92,14 @@ void UpsampleBilinear2DPlugin::terminate() {
 size_t UpsampleBilinear2DPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs,
                                                   int nbInputs,
                                                   const nvinfer1::PluginTensorDesc* outputs,
-                                                  int nbOutputs) const {
+                                                  int nbOutputs) const noexcept {
   return 0;
 }
 
 int UpsampleBilinear2DPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                       const nvinfer1::PluginTensorDesc* outputDesc,
                                       const void* const* inputs, void* const* outputs,
-                                      void* workspace, cudaStream_t stream) {
+                                      void* workspace, cudaStream_t stream) noexcept {
   ASSERT(inputDesc[0].dims.nbDims == 4);
 #ifdef ENABLE_UPSAMPLE_BILINEAR_2D_FLOAT16
   switch (data_type_) {
@@ -132,12 +132,12 @@ int UpsampleBilinear2DPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDes
   return 0;
 }
 
-size_t UpsampleBilinear2DPlugin::getSerializationSize() const {
+size_t UpsampleBilinear2DPlugin::getSerializationSize() const noexcept {
   return serialized_size(output_h_) + serialized_size(output_w_) + serialized_size(align_corners_) +
          serialized_size(scale_h_) + serialized_size(scale_w_) + serialized_size(data_type_);
 }
 
-void UpsampleBilinear2DPlugin::serialize(void* buffer) const {
+void UpsampleBilinear2DPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, output_h_);
   serialize_value(&buffer, output_w_);
   serialize_value(&buffer, align_corners_);
@@ -148,7 +148,7 @@ void UpsampleBilinear2DPlugin::serialize(void* buffer) const {
 
 bool UpsampleBilinear2DPlugin::supportsFormatCombination(int pos,
                                                          const nvinfer1::PluginTensorDesc* inOut,
-                                                         int nbInputs, int nbOutputs) {
+                                                         int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 
 #ifdef ENABLE_UPSAMPLE_BILINEAR_2D_FLOAT16
@@ -161,30 +161,32 @@ bool UpsampleBilinear2DPlugin::supportsFormatCombination(int pos,
 #endif
 }
 
-const char* UpsampleBilinear2DPlugin::getPluginType() const {
+const char* UpsampleBilinear2DPlugin::getPluginType() const noexcept {
   return UPSAMPLE_BILINEAR_2D_PLUGIN_NAME;
 }
 
-const char* UpsampleBilinear2DPlugin::getPluginVersion() const {
+const char* UpsampleBilinear2DPlugin::getPluginVersion() const noexcept {
   return UPSAMPLE_BILINEAR_PLUGIN_VERSION;
 }
 
-void UpsampleBilinear2DPlugin::destroy() { delete this; }
+void UpsampleBilinear2DPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* UpsampleBilinear2DPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* UpsampleBilinear2DPlugin::clone() const noexcept {
   return new UpsampleBilinear2DPlugin{output_h_, output_w_, align_corners_,
                                       scale_h_,  scale_w_,  data_type_};
 }
 
-void UpsampleBilinear2DPlugin::setPluginNamespace(const char* pluginNamespace) {
+void UpsampleBilinear2DPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* UpsampleBilinear2DPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* UpsampleBilinear2DPlugin::getPluginNamespace() const noexcept {
+  return mPluginNamespace;
+}
 
 nvinfer1::DataType UpsampleBilinear2DPlugin::getOutputDataType(int index,
                                                                const nvinfer1::DataType* inputTypes,
-                                                               int nbInputs) const {
+                                                               int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
@@ -192,7 +194,7 @@ nvinfer1::DataType UpsampleBilinear2DPlugin::getOutputDataType(int index,
 void UpsampleBilinear2DPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in,
                                                int nbInputs,
                                                const nvinfer1::DynamicPluginTensorDesc* out,
-                                               int nbOutputs) {
+                                               int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -219,20 +221,20 @@ UpsampleBilinear2DPluginCreator::UpsampleBilinear2DPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* UpsampleBilinear2DPluginCreator::getPluginName() const {
+const char* UpsampleBilinear2DPluginCreator::getPluginName() const noexcept {
   return UPSAMPLE_BILINEAR_2D_PLUGIN_NAME;
 }
 
-const char* UpsampleBilinear2DPluginCreator::getPluginVersion() const {
+const char* UpsampleBilinear2DPluginCreator::getPluginVersion() const noexcept {
   return UPSAMPLE_BILINEAR_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* UpsampleBilinear2DPluginCreator::getFieldNames() {
+const nvinfer1::PluginFieldCollection* UpsampleBilinear2DPluginCreator::getFieldNames() noexcept {
   return &mFC;
 }
 
 nvinfer1::IPluginV2DynamicExt* UpsampleBilinear2DPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int output_h{}, output_w{}, align_corners{};
   float scale_h{1.0f}, scale_w{1.0f};
   const nvinfer1::PluginField* fields = fc->fields;
@@ -270,7 +272,7 @@ nvinfer1::IPluginV2DynamicExt* UpsampleBilinear2DPluginCreator::createPlugin(
 }
 
 nvinfer1::IPluginV2DynamicExt* UpsampleBilinear2DPluginCreator::deserializePlugin(
-    const char* name, const void* serialData, size_t serialLength) {
+    const char* name, const void* serialData, size_t serialLength) noexcept {
   auto* obj = new UpsampleBilinear2DPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

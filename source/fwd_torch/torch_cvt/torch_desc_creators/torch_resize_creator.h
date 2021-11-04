@@ -42,7 +42,9 @@ class TLayerDescCreator<TrtResizeDesc> : public ILayerDescCreator {
  public:
   bool Check(const JitNode* node, const TorchModule& module) override {
     return node->kind() == c10::aten::upsample_bilinear2d ||
-           node->kind() == c10::aten::upsample_nearest2d;
+           node->kind() == c10::aten::upsample_nearest2d ||
+           node->kind() == c10::aten::upsample_trilinear3d ||
+           node->kind() == c10::aten::upsample_nearest3d;
   }
 
   std::shared_ptr<TrtLayerDesc> Create(const JitNode* node, const TorchModule& module,
@@ -59,48 +61,72 @@ class TLayerDescCreator<TrtResizeDesc> : public ILayerDescCreator {
     input_values.push_back(inputs[0]);
 
     const at::Tensor dummy = module.Get(inputs[0]).toTensor();
-    T_CHECK_EQ(dummy.ndimension(), 4);  // TODO(Ao Li): 暂时只支持 upsample 2d
+    T_CHECK(dummy.ndimension() == 4 || dummy.ndimension() == 5);  // TODO(Ao Li): 暂时只支持 upsample 2d
 
     auto layer_desc = std::make_shared<TrtResizeDesc>();
     layer_desc->outputDimensions.nbDims = dummy.ndimension();
-    layer_desc->outputDimensions.d[0] = dummy.size(0);
-    layer_desc->outputDimensions.d[1] = dummy.size(1);
+    for (int i = 0; i < dummy.ndimension(); ++i) {
+      layer_desc->outputDimensions.d[i] = dummy.size(i);
+    }
 
     // torch1.7.0 模型中出现第二个参数为None时，后面的 scale 参数会生效
     if (module.Get(inputs[1]).isNone()) {
-      c10::List<double> scales;
-      if (node->kind() == c10::aten::upsample_bilinear2d) {
-        layer_desc->resizeMode = nvinfer1::ResizeMode::kLINEAR;
-        layer_desc->alignCorners = module.Get(inputs[2]).toBool();
-        scales = module.Get(inputs[3]).toDoubleList();
-      } else {
-        layer_desc->resizeMode = nvinfer1::ResizeMode::kNEAREST;
-        scales = module.Get(inputs[2]).toDoubleList();
-      }
-      T_CHECK_EQ(scales.size(), 2);
-      // 不使用 scales 是因为在 bilinear2d 结果会有问题
-      layer_desc->outputDimensions.d[2] = dummy.size(2) * scales[0];
-      layer_desc->outputDimensions.d[3] = dummy.size(3) * scales[1];
+      if (!CreateWithScales(node, module, layer_desc.get())) return {};
     } else {
-      const auto output_size = module.Get(inputs[1]).toIntVector();
-      layer_desc->outputDimensions.d[2] = output_size[0];
-      layer_desc->outputDimensions.d[3] = output_size[1];
-
-      if (node->kind() == c10::aten::upsample_bilinear2d) {
-        layer_desc->resizeMode = nvinfer1::ResizeMode::kLINEAR;
-        layer_desc->alignCorners = module.Get(inputs[2]).toBool();
-        if (inputs.size() == 5) {  // 认为这里不会出现有 scale 的情况
-          T_CHECK(module.Get(inputs[3]).isNone() && module.Get(inputs[4]).isNone());
-        }
-      } else {
-        layer_desc->resizeMode = nvinfer1::ResizeMode::kNEAREST;
-        if (inputs.size() == 4) {
-          T_CHECK(module.Get(inputs[2]).isNone() && module.Get(inputs[3]).isNone());
-        }
-      }
+      if (!CreateWithoutScales(node, module, layer_desc.get())) return {};
     }
 
     return layer_desc;
+  }
+
+ private:
+  bool CreateWithScales(const JitNode* node, const TorchModule& module, TrtResizeDesc* layer_desc) {
+    const auto inputs = node->inputs();
+    const at::Tensor dummy = module.Get(inputs[0]).toTensor();
+
+    c10::List<double> scales;
+    if (node->kind() == c10::aten::upsample_bilinear2d ||
+        node->kind() == c10::aten::upsample_trilinear3d) {
+      layer_desc->resizeMode = nvinfer1::ResizeMode::kLINEAR;
+      layer_desc->alignCorners = module.Get(inputs[2]).toBool();
+      scales = module.Get(inputs[3]).toDoubleList();
+    } else {
+      layer_desc->resizeMode = nvinfer1::ResizeMode::kNEAREST;
+      scales = module.Get(inputs[2]).toDoubleList();
+    }
+
+    T_CHECK(scales.size() == 2 || scales.size() == 3);
+
+    // 不使用 scales 是因为在 bilinear2d 结果会有问题
+    for (int i = 0; i < scales.size(); ++i) {
+      layer_desc->outputDimensions.d[2 + i] = dummy.size(2) * scales[i];
+    }
+
+    return true;
+  }
+
+  bool CreateWithoutScales(const JitNode* node, const TorchModule& module,
+                           TrtResizeDesc* layer_desc) {
+    const auto inputs = node->inputs();
+    const auto output_size = module.Get(inputs[1]).toIntVector();
+    layer_desc->outputDimensions.d[2] = output_size[0];
+    layer_desc->outputDimensions.d[3] = output_size[1];
+
+    if (node->kind() == c10::aten::upsample_bilinear2d ||
+        node->kind() == c10::aten::upsample_trilinear3d) {
+      layer_desc->resizeMode = nvinfer1::ResizeMode::kLINEAR;
+      layer_desc->alignCorners = module.Get(inputs[2]).toBool();
+      if (inputs.size() == 5) {  // 认为这里不会出现有 scale 的情况
+        T_CHECK(module.Get(inputs[3]).isNone() && module.Get(inputs[4]).isNone());
+      }
+    } else {
+      layer_desc->resizeMode = nvinfer1::ResizeMode::kNEAREST;
+      if (inputs.size() == 4) {
+        T_CHECK(module.Get(inputs[2]).isNone() && module.Get(inputs[3]).isNone());
+      }
+    }
+
+    return true;
   }
 };
 

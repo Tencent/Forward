@@ -46,11 +46,11 @@ AdaptivePoolingPlugin::AdaptivePoolingPlugin(void const *serialData, size_t seri
 
 AdaptivePoolingPlugin::~AdaptivePoolingPlugin() { terminate(); }
 
-int AdaptivePoolingPlugin::getNbOutputs() const { return 1; }
+int AdaptivePoolingPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs AdaptivePoolingPlugin::getOutputDimensions(
     int outputIndex, const nvinfer1::DimsExprs *inputs, int nbInputs,
-    nvinfer1::IExprBuilder &exprBuilder) {
+    nvinfer1::IExprBuilder &exprBuilder) noexcept {
   // TODO(Ao Li): Add 1D supported
   ASSERT(inputs[0].nbDims == 4 && output_size_.size() == 2 ||
          inputs[0].nbDims == 5 && output_size_.size() == 3);
@@ -69,7 +69,7 @@ nvinfer1::DimsExprs AdaptivePoolingPlugin::getOutputDimensions(
 
 bool AdaptivePoolingPlugin::supportsFormatCombination(int pos,
                                                       const nvinfer1::PluginTensorDesc *inOut,
-                                                      int nbInputs, int nbOutputs) {
+                                                      int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 #ifdef ENABLE_ADAPTIVE_POOLING_FLOAT16
   return ((inOut[pos].type == nvinfer1::DataType::kFLOAT ||
@@ -84,23 +84,23 @@ bool AdaptivePoolingPlugin::supportsFormatCombination(int pos,
 void AdaptivePoolingPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc *in,
                                             int nbInputs,
                                             const nvinfer1::DynamicPluginTensorDesc *out,
-                                            int nbOutputs) {}
+                                            int nbOutputs) noexcept {}
 
 size_t AdaptivePoolingPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc *inputs,
                                                int nbInputs,
                                                const nvinfer1::PluginTensorDesc *outputs,
-                                               int nbOutputs) const {
+                                               int nbOutputs) const noexcept {
   return 0;
 }
 
-int AdaptivePoolingPlugin::initialize() { return 0; }
+int AdaptivePoolingPlugin::initialize() noexcept { return 0; }
 
-void AdaptivePoolingPlugin::terminate() {}
+void AdaptivePoolingPlugin::terminate() noexcept {}
 
 int AdaptivePoolingPlugin::enqueue(const nvinfer1::PluginTensorDesc *inputDesc,
                                    const nvinfer1::PluginTensorDesc *outputDesc,
                                    const void *const *inputs, void *const *outputs, void *workspace,
-                                   cudaStream_t stream) {
+                                   cudaStream_t stream) noexcept {
   if (output_size_.size() == 2) {  // 2d
 #ifdef ENABLE_ADAPTIVE_POOLING_FLOAT16
     switch (data_type_) {
@@ -160,37 +160,37 @@ int AdaptivePoolingPlugin::enqueue(const nvinfer1::PluginTensorDesc *inputDesc,
   return 0;
 }  // namespace trt
 
-size_t AdaptivePoolingPlugin::getSerializationSize() const {
+size_t AdaptivePoolingPlugin::getSerializationSize() const noexcept {
   return serialized_size(output_size_) + serialized_size(type_) + serialized_size(data_type_);
 }
 
-void AdaptivePoolingPlugin::serialize(void *buffer) const {
+void AdaptivePoolingPlugin::serialize(void *buffer) const noexcept {
   serialize_value(&buffer, output_size_);
   serialize_value(&buffer, type_);
   serialize_value(&buffer, data_type_);
 }
 
-const char *AdaptivePoolingPlugin::getPluginType() const { return ADAPTIVE_POOLING_PLUGIN_NAME; }
+const char *AdaptivePoolingPlugin::getPluginType() const noexcept { return ADAPTIVE_POOLING_PLUGIN_NAME; }
 
-const char *AdaptivePoolingPlugin::getPluginVersion() const {
+const char *AdaptivePoolingPlugin::getPluginVersion() const noexcept {
   return ADAPTIVE_POOLING_PLUGIN_VERSION;
 }
 
-void AdaptivePoolingPlugin::destroy() { delete this; }
+void AdaptivePoolingPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt *AdaptivePoolingPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt *AdaptivePoolingPlugin::clone() const noexcept {
   return new AdaptivePoolingPlugin(output_size_, type_, data_type_);
 }
 
-void AdaptivePoolingPlugin::setPluginNamespace(const char *pluginNamespace) {
+void AdaptivePoolingPlugin::setPluginNamespace(const char *pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char *AdaptivePoolingPlugin::getPluginNamespace() const { return mPluginNamespace.c_str(); }
+const char *AdaptivePoolingPlugin::getPluginNamespace() const noexcept { return mPluginNamespace.c_str(); }
 
 nvinfer1::DataType AdaptivePoolingPlugin::getOutputDataType(int index,
                                                             const nvinfer1::DataType *inputTypes,
-                                                            int nbInputs) const {
+                                                            int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
@@ -207,20 +207,20 @@ AdaptivePoolingPluginCreator::AdaptivePoolingPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char *AdaptivePoolingPluginCreator::getPluginName() const {
+const char *AdaptivePoolingPluginCreator::getPluginName() const noexcept {
   return ADAPTIVE_POOLING_PLUGIN_NAME;
 }
 
-const char *AdaptivePoolingPluginCreator::getPluginVersion() const {
+const char *AdaptivePoolingPluginCreator::getPluginVersion() const noexcept {
   return ADAPTIVE_POOLING_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection *AdaptivePoolingPluginCreator::getFieldNames() {
+const nvinfer1::PluginFieldCollection *AdaptivePoolingPluginCreator::getFieldNames() noexcept {
   return &mFC;
 }
 
 nvinfer1::IPluginV2DynamicExt *AdaptivePoolingPluginCreator::createPlugin(
-    const char *name, const nvinfer1::PluginFieldCollection *fc) {
+    const char *name, const nvinfer1::PluginFieldCollection *fc) noexcept {
   std::vector<int> output_size{};
   int type = 0;
   int data_type = 0;
@@ -250,7 +250,7 @@ nvinfer1::IPluginV2DynamicExt *AdaptivePoolingPluginCreator::createPlugin(
 }
 
 nvinfer1::IPluginV2DynamicExt *AdaptivePoolingPluginCreator::deserializePlugin(
-    const char *name, const void *serialData, size_t serialLength) {
+    const char *name, const void *serialData, size_t serialLength) noexcept {
   auto *obj = new AdaptivePoolingPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

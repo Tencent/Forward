@@ -211,12 +211,9 @@ bool OnnxBuilder::ParseModelFromFile(const std::string& model_path,
     return false;
   }
 
-  parser->parseFromFile(model_path.c_str(), static_cast<int>(nvinfer1::ILogger::Severity::kINFO));
-
-  if (parser->getNbErrors() > 0) {
-    for (int i = 0; i < parser->getNbErrors(); ++i) {
-      LOG(ERROR) << parser->getError(i)->desc();
-    }
+  if (!parser->parseFromFile(model_path.c_str(),
+                             static_cast<int>(nvinfer1::ILogger::Severity::kINFO))) {
+    LOG(ERROR) << "Parse from file failed.";
     return false;
   }
 
