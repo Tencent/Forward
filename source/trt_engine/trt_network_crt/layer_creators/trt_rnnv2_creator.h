@@ -47,16 +47,16 @@ class TLayerCreator<TrtRNNv2Desc> : public ILayerCreator {
     const auto rnn_desc = dynamic_cast<const TrtRNNv2Desc*>(layer_desc);
     T_CHECK(rnn_desc);
 
-    auto& input = *input_tensors[0];
+    auto* input = input_tensors[0];
 
-    auto input_dim = input.getDimensions();
+    auto input_dim = input->getDimensions();
 
     // 如果!batchFirst需要对输入转置
     if (!rnn_desc->batchFirst) {
-      auto transpose_input = network->addShuffle(input);
+      auto transpose_input = network->addShuffle(*input);
       transpose_input->setFirstTranspose({1, 0, 2});
-      input = *transpose_input->getOutput(0);
-      input_dim = input.getDimensions();
+      input = transpose_input->getOutput(0);
+      input_dim = input->getDimensions();
     }
 
     auto batch_size = input_dim.d[0];
@@ -64,7 +64,7 @@ class TLayerCreator<TrtRNNv2Desc> : public ILayerCreator {
     const auto input_size = input_dim.d[2];
     const auto hidden_size = rnn_desc->hiddenSize;
     nvinfer1::IRNNv2Layer* rnn =
-        network->addRNNv2(input, rnn_desc->layerCount, hidden_size, seq_len, rnn_desc->operation);
+        network->addRNNv2(*input, rnn_desc->layerCount, hidden_size, seq_len, rnn_desc->operation);
 
     if (rnn == nullptr) {
       LOG(ERROR) << "Create Network: Fail to create [rnnv2] layer.";

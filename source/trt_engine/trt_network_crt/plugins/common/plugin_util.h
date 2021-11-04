@@ -26,36 +26,137 @@
 
 #pragma once
 
+#include <NvInfer.h>
+#include <NvInferRuntimeCommon.h>
+#include <cublas_v2.h>
+
+#include <cub/cub.cuh>
+#include <numeric>
 #include <vector>
 
-#include "trt_engine/trt_network_crt/layer_creators/i_trt_layer_creator.h"
+#include "trt_engine/trt_network_crt/plugins/common/half_ext.cuh"
+
+#define TRT_UNUSED (void)
+
+using kv_float = cub::KeyValuePair<float, float>;
+using kv_half = cub::KeyValuePair<half, half>;
+using kv_half2 = cub::KeyValuePair<half2, half2>;
+
+__device__ inline kv_float operator+(const kv_float& a, const kv_float& b) {
+  return kv_float(a.key + b.key, a.value + b.value);
+}
+
+__device__ inline kv_half operator+(const kv_half& a, const kv_half& b) {
+  const half2 a2 = __halves2half2(a.key, a.value);
+  const half2 b2 = __halves2half2(b.key, b.value);
+  const half2 res = __hadd2(a2, b2);
+  return kv_half(res.x, res.y);
+}
+
+__device__ inline kv_half2 operator+(const kv_half2& a, const kv_half2& b) {
+  return kv_half2(__hadd2(a.key, b.key), __hadd2(a.value, b.value));
+}
+
+template <typename T>
+using kvp = cub::KeyValuePair<T, T>;
 
 FWD_TRT_NAMESPACE_BEGIN
 
-/**
- * \brief TRT 缩放层创建器
- */
+#define DESER(d, m) m = readFromBuffer<decltype(m)>(d)
+
+#define HDI inline __host__ __device__
+
+// Helper function for serializing plugin
+template <typename T>
+inline void writeToBuffer(char*& buffer, const T& val) {
+  *reinterpret_cast<T*>(buffer) = val;
+  buffer += sizeof(T);
+}
+
+// Helper function for deserializing plugin
+template <typename T>
+inline T readFromBuffer(const char*& buffer) {
+  T val = *reinterpret_cast<const T*>(buffer);
+  buffer += sizeof(T);
+  return val;
+}
+
+template <typename T>
+__device__ inline T rsqrt(const T& x);
+
 template <>
-class TLayerCreator<TrtScaleDesc> : public ILayerCreator {
- public:
-  ITensorVector CreateLayer(nvinfer1::INetworkDefinition* network, const TrtLayerDesc* layer_desc,
-                            const ITensorVector& input_tensors) override {
-    LOG(INFO) << "TrtScaleDesc::CreateLayer";
-    const auto scale_desc = dynamic_cast<const TrtScaleDesc*>(layer_desc);
-    T_CHECK(scale_desc);
+__device__ inline float rsqrt(const float& x) {
+  return rsqrtf(x);
+}
 
-    auto& input = *input_tensors[0];
-    nvinfer1::IScaleLayer* scale =
-        network->addScaleNd(input, scale_desc->mode, scale_desc->shift, scale_desc->scale,
-                            scale_desc->power, scale_desc->channel_axis);
+template <>
+__device__ inline half rsqrt(const half& x) {
+  return hrsqrt(x);
+}
 
-    if (scale == nullptr) {
-      LOG(ERROR) << "Create Network: Fail to create [shuffle] layer.";
-      return {};
-    }
+template <typename T>
+__device__ inline T tanh(const T& x);
 
-    return {scale->getOutput(0)};
-  }
+template <>
+__device__ inline float tanh(const float& x) {
+  return tanhf(x);
+}
+
+template <>
+__device__ inline half tanh(const half& x) {
+  const float tmp = tanhf(__half2float(x));
+  return __float2half(tmp);
+}
+
+template <>
+__device__ inline half2 tanh(const half2& x) {
+  // at the moment, there is no half2 tanh builtin
+  float2 tmp = (__half22float2(x));
+  tmp.x = tanhf(tmp.x);
+  tmp.y = tanhf(tmp.y);
+  return __float22half2_rn(tmp);
+}
+
+template <typename T>
+__device__ inline T exp(const T x);
+
+template <>
+__device__ inline float exp(const float x) {
+  return expf(x);
+}
+
+template <>
+__device__ inline half exp(const half x) {
+  return hexp(x);
+}
+
+template <int VPT>
+struct BytesToType;
+
+template <>
+struct BytesToType<2> {
+  using type = uint16_t;
 };
+template <>
+struct BytesToType<4> {
+  using type = uint32_t;
+};
+template <>
+struct BytesToType<8> {
+  using type = uint64_t;
+};
+template <>
+struct BytesToType<16> {
+  using type = float4;
+};
+
+template <int Bytes>
+__device__ inline void copy(const void* local, void* data) {
+  using T = typename BytesToType<Bytes>::type;
+
+  const T* in = static_cast<const T*>(local);
+  T* out = static_cast<T*>(data);
+  *out = *in;
+}
 
 FWD_TRT_NAMESPACE_END

@@ -59,7 +59,7 @@ class SimpleProfiler : public nvinfer1::IProfiler {
    * \param layerName
    * \param ms
    */
-  void reportLayerTime(const char* layerName, float ms) override;
+  void reportLayerTime(const char* layerName, float ms) noexcept override;
 
   /**
    * \brief 报告打印到 ostream

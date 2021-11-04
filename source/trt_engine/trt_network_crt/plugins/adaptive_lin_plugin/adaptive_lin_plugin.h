@@ -53,49 +53,49 @@ class AdaptiveLINPlugin final : public nvinfer1::IPluginV2DynamicExt {
 
   AdaptiveLINPlugin() = delete;
 
-  ~AdaptiveLINPlugin() override;
+  ~AdaptiveLINPlugin() noexcept override;
 
-  int getNbOutputs() const override;
+  int getNbOutputs() const noexcept override;
 
   nvinfer1::DimsExprs getOutputDimensions(int outputIndex, const nvinfer1::DimsExprs* inputs,
                                           int nbInputs,
-                                          nvinfer1::IExprBuilder& exprBuilder) override;
+                                          nvinfer1::IExprBuilder& exprBuilder) noexcept override;
 
   bool supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut, int nbInputs,
-                                 int nbOutputs) override;
+                                 int nbOutputs) noexcept override;
 
   void configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
-                       const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) override;
+                       const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) noexcept override;
 
   size_t getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
-                          const nvinfer1::PluginTensorDesc* outputs, int nbOutputs) const override;
+                          const nvinfer1::PluginTensorDesc* outputs, int nbOutputs) const noexcept override;
 
-  int initialize() override;
+  int initialize() noexcept override;
 
-  void terminate() override;
+  void terminate() noexcept override;
 
   int enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
               const nvinfer1::PluginTensorDesc* outputDesc, const void* const* inputs,
-              void* const* outputs, void* workspace, cudaStream_t stream) override;
+              void* const* outputs, void* workspace, cudaStream_t stream) noexcept override;
 
-  size_t getSerializationSize() const override;
+  size_t getSerializationSize() const noexcept override;
 
-  void serialize(void* buffer) const override;
+  void serialize(void* buffer) const noexcept override;
 
-  const char* getPluginType() const override;
+  const char* getPluginType() const noexcept override;
 
-  const char* getPluginVersion() const override;
+  const char* getPluginVersion() const noexcept override;
 
-  void destroy() override;
+  void destroy() noexcept override;
 
-  nvinfer1::IPluginV2DynamicExt* clone() const override;
+  nvinfer1::IPluginV2DynamicExt* clone() const noexcept override;
 
-  void setPluginNamespace(const char* pluginNamespace) override;
+  void setPluginNamespace(const char* pluginNamespace) noexcept override;
 
-  const char* getPluginNamespace() const override;
+  const char* getPluginNamespace() const noexcept override;
 
   nvinfer1::DataType getOutputDataType(int index, const nvinfer1::DataType* inputTypes,
-                                       int nbInputs) const override;
+                                       int nbInputs) const noexcept override;
 
  private:
   nvinfer1::Dims input_dim_;
@@ -117,16 +117,6 @@ class AdaptiveLINPlugin final : public nvinfer1::IPluginV2DynamicExt {
   bool initialized_;
 
   const char* mPluginNamespace = "";
-
- protected:
-  // To prevent compiler warnings.
-  using nvinfer1::IPluginV2DynamicExt::canBroadcastInputAcrossBatch;
-  using nvinfer1::IPluginV2DynamicExt::configurePlugin;
-  using nvinfer1::IPluginV2DynamicExt::enqueue;
-  using nvinfer1::IPluginV2DynamicExt::getOutputDimensions;
-  using nvinfer1::IPluginV2DynamicExt::getWorkspaceSize;
-  using nvinfer1::IPluginV2DynamicExt::isOutputBroadcastAcrossBatch;
-  using nvinfer1::IPluginV2DynamicExt::supportsFormat;
 };
 
 class AdaptiveLINPluginCreator : public nvinfer1::plugin::BaseCreator {
@@ -135,17 +125,17 @@ class AdaptiveLINPluginCreator : public nvinfer1::plugin::BaseCreator {
 
   ~AdaptiveLINPluginCreator() override = default;
 
-  const char* getPluginName() const override;
+  const char* getPluginName() const noexcept override;
 
-  const char* getPluginVersion() const override;
+  const char* getPluginVersion() const noexcept override;
 
-  const nvinfer1::PluginFieldCollection* getFieldNames() override;
+  const nvinfer1::PluginFieldCollection* getFieldNames() noexcept override;
 
   nvinfer1::IPluginV2DynamicExt* createPlugin(const char* name,
-                                              const nvinfer1::PluginFieldCollection* fc) override;
+                                              const nvinfer1::PluginFieldCollection* fc) noexcept override;
 
   nvinfer1::IPluginV2DynamicExt* deserializePlugin(const char* name, const void* serialData,
-                                                   size_t serialLength) override;
+                                                   size_t serialLength) noexcept override;
 
  private:
   nvinfer1::PluginFieldCollection mFC;

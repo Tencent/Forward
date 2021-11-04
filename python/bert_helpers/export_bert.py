@@ -25,7 +25,6 @@
 #          Ao LI (346950981@qq.com)
 #          Paul LU (lujq96@gmail.com)
 import os
-import argparse
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.python.framework.graph_util import convert_variables_to_constants
@@ -74,24 +73,22 @@ def freeze_session(session,
     # export bert model
 
 
-def Convert2BertPb(args):
-
-    output_op_names = args.output_ops.split(',')
-
-    pathname = os.path.join(args.dir, "bert_model.ckpt")  # 模型地址
+def main():
+    bert_dir = "tiny_bert"
+    pathname = os.path.join(bert_dir, "bert_model.ckpt")  # 模型地址
     bert_config = modeling.BertConfig.from_json_file(
-        os.path.join(args.dir, "bert_config.json"))  # 配置文件地址
+        os.path.join(bert_dir, "bert_config.json"))  # 配置文件地址
 
     configsession = tf.ConfigProto()
     configsession.gpu_options.allow_growth = True
     sess = tf.Session(config=configsession)
-    input_ids = tf.placeholder(shape=[None, args.seq_len],
+    input_ids = tf.placeholder(shape=[None, 64],
                                dtype=tf.int32,
                                name="input_ids")
-    input_mask = tf.placeholder(shape=[None, args.seq_len],
+    input_mask = tf.placeholder(shape=[None, 64],
                                 dtype=tf.int32,
                                 name="input_mask")
-    segment_ids = tf.placeholder(shape=[None, args.seq_len],
+    segment_ids = tf.placeholder(shape=[None, 64],
                                  dtype=tf.int32,
                                  name="segment_ids")
 
@@ -108,35 +105,11 @@ def Convert2BertPb(args):
         saver.restore(sess, pathname)
 
         # frozen_graph = freeze_session(sess, output_names=['bert/encoder/Reshape_3'])
-        frozen_graph = freeze_session(sess, output_names=output_op_names)
+        frozen_graph = freeze_session(sess,
+                                      output_names=['bert/pooler/dense/Tanh'])
         # Save
-        tf.train.write_graph(frozen_graph, ".", args.out_file, as_text=False)
+        tf.train.write_graph(frozen_graph, ".", "tiny_bert.pb", as_text=False)
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Freezing Tensorflow BERT ckpt model to frozen pb model")
-    parser.add_argument('-dir',
-                        default='bert',
-                        type=str,
-                        help="directory of BERT cpkt model")
-    parser.add_argument('-seq_len',
-                        default=768,
-                        type=int,
-                        help="sequence length of BERT model")
-    parser.add_argument(
-        '-output_ops',
-        default='bert/pooler/dense/Tanh',
-        type=str,
-        help="output operator names of BERT model, use comma as splitter")
-    parser.add_argument('-out_file',
-                        default='frozen_bert.pb',
-                        type=str,
-                        help="output filename of pb model")
-
-    args = parser.parse_args()
-
-    if (not os.path.isdir(args.dir)):
-        print(args.dir, "is not a valid directory")
-        exit(-1)
-
-    Convert2BertPb(args)
+    main()

@@ -46,24 +46,24 @@ CastPlugin::CastPlugin(void const* serialData, size_t serialLength) {
 
 CastPlugin::~CastPlugin() { terminate(); }
 
-int CastPlugin::getNbOutputs() const { return 1; }
+int CastPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs CastPlugin::getOutputDimensions(int outputIndex,
                                                     const nvinfer1::DimsExprs* inputs, int nbInputs,
-                                                    nvinfer1::IExprBuilder& exprBuilder) {
+                                                    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   ASSERT(nbInputs == 1)
   return inputs[0];
 }
 
 size_t CastPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                     const nvinfer1::PluginTensorDesc* outputs,
-                                    int nbOutputs) const {
+                                    int nbOutputs) const noexcept {
   return 0;
 }
 
 int CastPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                         const nvinfer1::PluginTensorDesc* outputDesc, const void* const* inputs,
-                        void* const* outputs, void* workspace, cudaStream_t stream) {
+                        void* const* outputs, void* workspace, cudaStream_t stream) noexcept {
   // TODO(Ao Li): 目前暂时只支持向 float 的转换
   ASSERT(output_type_ == nvinfer1::DataType::kFLOAT || output_type_ == nvinfer1::DataType::kHALF);
 
@@ -97,46 +97,47 @@ int CastPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t CastPlugin::getSerializationSize() const {
+size_t CastPlugin::getSerializationSize() const noexcept {
   return serialized_size(data_type_) + serialized_size(output_type_);
 }
 
-void CastPlugin::serialize(void* buffer) const {
+void CastPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, data_type_);
   serialize_value(&buffer, output_type_);
 }
 
 bool CastPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                           int nbInputs, int nbOutputs) {
+                                           int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
   return inOut[pos].format == nvinfer1::TensorFormat::kLINEAR &&
          inOut[1].type == nvinfer1::DataType::kFLOAT;
 }
 
-const char* CastPlugin::getPluginType() const { return CAST_PLUGIN_NAME; }
+const char* CastPlugin::getPluginType() const noexcept { return CAST_PLUGIN_NAME; }
 
-const char* CastPlugin::getPluginVersion() const { return CAST_PLUGIN_VERSION; }
+const char* CastPlugin::getPluginVersion() const noexcept { return CAST_PLUGIN_VERSION; }
 
-void CastPlugin::destroy() { delete this; }
+void CastPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* CastPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* CastPlugin::clone() const noexcept {
   return new CastPlugin{data_type_, output_type_};
 }
 
-void CastPlugin::setPluginNamespace(const char* pluginNamespace) {
+void CastPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* CastPlugin::getPluginNamespace() const { return mPluginNamespace.c_str(); }
+const char* CastPlugin::getPluginNamespace() const noexcept { return mPluginNamespace.c_str(); }
 
 nvinfer1::DataType CastPlugin::getOutputDataType(int index, const nvinfer1::DataType* inputTypes,
-                                                 int nbInputs) const {
+                                                 int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return output_type_;
 }
 
 void CastPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
-                                 const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) {
+                                 const nvinfer1::DynamicPluginTensorDesc* out,
+                                 int nbOutputs) noexcept {
   for (int i = 0; i < nbInputs; i++) {
     for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
       // Do not support dynamic dimensions
@@ -145,9 +146,9 @@ void CastPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, in
   }
 }
 
-int32_t CastPlugin::initialize() { return 0; }
+int32_t CastPlugin::initialize() noexcept { return 0; }
 
-void CastPlugin::terminate() {}
+void CastPlugin::terminate() noexcept {}
 
 CastPluginCreator::CastPluginCreator() {
   mPluginAttributes.emplace_back(
@@ -158,14 +159,14 @@ CastPluginCreator::CastPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* CastPluginCreator::getPluginName() const { return CAST_PLUGIN_NAME; }
+const char* CastPluginCreator::getPluginName() const noexcept { return CAST_PLUGIN_NAME; }
 
-const char* CastPluginCreator::getPluginVersion() const { return CAST_PLUGIN_VERSION; }
+const char* CastPluginCreator::getPluginVersion() const noexcept { return CAST_PLUGIN_VERSION; }
 
-const nvinfer1::PluginFieldCollection* CastPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* CastPluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt* CastPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int data_type{}, output_type{};
   const nvinfer1::PluginField* fields = fc->fields;
   for (int i = 0; i < fc->nbFields; ++i) {
@@ -190,7 +191,7 @@ nvinfer1::IPluginV2DynamicExt* CastPluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt* CastPluginCreator::deserializePlugin(const char* name,
                                                                     const void* serialData,
-                                                                    size_t serialLength) {
+                                                                    size_t serialLength) noexcept {
   auto* obj = new CastPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

@@ -51,12 +51,12 @@ EmbeddingBagPlugin::EmbeddingBagPlugin(void const* serialData, size_t serialLeng
 
 EmbeddingBagPlugin::~EmbeddingBagPlugin() { terminate(); }
 
-int EmbeddingBagPlugin::getNbOutputs() const { return 1; }
+int EmbeddingBagPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs EmbeddingBagPlugin::getOutputDimensions(int outputIndex,
                                                             const nvinfer1::DimsExprs* inputs,
                                                             int nbInputs,
-                                                            nvinfer1::IExprBuilder& exprBuilder) {
+                                                            nvinfer1::IExprBuilder& exprBuilder) noexcept {
   // 单一输入的情形，要求输入是二维Tensor
   if (nbInputs == 1) {
     ASSERT(inputs[0].nbDims == 2);
@@ -93,7 +93,7 @@ nvinfer1::DimsExprs EmbeddingBagPlugin::getOutputDimensions(int outputIndex,
 }
 
 bool EmbeddingBagPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                                   int nbInputs, int nbOutputs) {
+                                                   int nbInputs, int nbOutputs) noexcept {
   // 输入为Int 输出为Float(特征向量)
   ASSERT(inOut && nbInputs <= 2 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 
@@ -108,7 +108,7 @@ bool EmbeddingBagPlugin::supportsFormatCombination(int pos, const nvinfer1::Plug
 
 void EmbeddingBagPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
                                          const nvinfer1::DynamicPluginTensorDesc* out,
-                                         int nbOutputs) {
+                                         int nbOutputs) noexcept {
   if (initialized_) {
     return;
   }
@@ -121,13 +121,13 @@ void EmbeddingBagPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc
 
 size_t EmbeddingBagPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                             const nvinfer1::PluginTensorDesc* outputs,
-                                            int nbOutputs) const {
+                                            int nbOutputs) const noexcept {
   return 0;
 }
 
-int EmbeddingBagPlugin::initialize() { return 0; }
+int EmbeddingBagPlugin::initialize() noexcept { return 0; }
 
-void EmbeddingBagPlugin::terminate() {
+void EmbeddingBagPlugin::terminate() noexcept {
   if (!initialized_) {
     return;
   }
@@ -139,7 +139,7 @@ void EmbeddingBagPlugin::terminate() {
 int EmbeddingBagPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                 const nvinfer1::PluginTensorDesc* outputDesc,
                                 const void* const* inputs, void* const* outputs, void* workspace,
-                                cudaStream_t stream) {
+                                cudaStream_t stream) noexcept {
   if (inputDesc[0].type == nvinfer1::DataType::kINT32) {
     // 如果输入indices本来就是二维，则是batch_size *
     // input_count的格式，每个batch的offset就是input_count*Batch_number
@@ -181,12 +181,12 @@ int EmbeddingBagPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t EmbeddingBagPlugin::getSerializationSize() const {
+size_t EmbeddingBagPlugin::getSerializationSize() const noexcept {
   return serialized_size(dim_) + serialized_size(count_) + serialized_size(data_offset_) +
          serialized_size(op_) + serialized_size(h_data_);
 }
 
-void EmbeddingBagPlugin::serialize(void* buffer) const {
+void EmbeddingBagPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, dim_);
   serialize_value(&buffer, count_);
   serialize_value(&buffer, data_offset_);
@@ -194,25 +194,25 @@ void EmbeddingBagPlugin::serialize(void* buffer) const {
   serialize_value(&buffer, h_data_);
 }
 
-const char* EmbeddingBagPlugin::getPluginType() const { return EMBEDDING_BAG_PLUGIN_NAME; }
+const char* EmbeddingBagPlugin::getPluginType() const noexcept { return EMBEDDING_BAG_PLUGIN_NAME; }
 
-const char* EmbeddingBagPlugin::getPluginVersion() const { return EMBEDDING_BAG_PLUGIN_VERSION; }
+const char* EmbeddingBagPlugin::getPluginVersion() const noexcept { return EMBEDDING_BAG_PLUGIN_VERSION; }
 
-void EmbeddingBagPlugin::destroy() { delete this; }
+void EmbeddingBagPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* EmbeddingBagPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* EmbeddingBagPlugin::clone() const noexcept {
   return new EmbeddingBagPlugin(h_data_.data(), dim_, count_, data_offset_, op_);
 }
 
-void EmbeddingBagPlugin::setPluginNamespace(const char* pluginNamespace) {
+void EmbeddingBagPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* EmbeddingBagPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* EmbeddingBagPlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType EmbeddingBagPlugin::getOutputDataType(int index,
                                                          const nvinfer1::DataType* inputTypes,
-                                                         int nbInputs) const {
+                                                         int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return nvinfer1::DataType::kFLOAT;
 }
@@ -233,16 +233,16 @@ EmbeddingBagPluginCreator::EmbeddingBagPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* EmbeddingBagPluginCreator::getPluginName() const { return EMBEDDING_BAG_PLUGIN_NAME; }
+const char* EmbeddingBagPluginCreator::getPluginName() const noexcept { return EMBEDDING_BAG_PLUGIN_NAME; }
 
-const char* EmbeddingBagPluginCreator::getPluginVersion() const {
+const char* EmbeddingBagPluginCreator::getPluginVersion() const noexcept {
   return EMBEDDING_BAG_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* EmbeddingBagPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* EmbeddingBagPluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int dim;
   int count;
   int offset;
@@ -281,7 +281,7 @@ nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::deserializePlugin(const char* name,
                                                                             const void* serialData,
-                                                                            size_t serialLength) {
+                                                                            size_t serialLength) noexcept {
   auto* obj = new EmbeddingBagPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

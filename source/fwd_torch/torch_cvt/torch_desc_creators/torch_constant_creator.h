@@ -96,15 +96,13 @@ class TLayerDescCreator<TrtConstantDesc> : public ILayerDescCreator {
 
     if (inputs.size() == 5) {
       const c10::Scalar end = module.Get(inputs[0]).toScalar();
-      const c10::ScalarType dtype = module.Get(inputs[1]).toScalarType();
-      return torch::arange(end, dtype);
+      return torch::arange(end);
     }
 
     const c10::Scalar start = module.Get(inputs[0]).toScalar();
     const c10::Scalar end = module.Get(inputs[1]).toScalar();
     const c10::Scalar step = module.Get(inputs[2]).toScalar();
-    const c10::ScalarType dtype = module.Get(inputs[3]).toScalarType();
-    return torch::arange(start, end, step, dtype);
+    return torch::arange(start, end, step);
   }
 };
 

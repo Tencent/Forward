@@ -37,9 +37,9 @@ namespace plugin {
 
 class BaseCreator : public IPluginCreator {
  public:
-  void setPluginNamespace(const char* libNamespace) override { mNamespace = libNamespace; }
+  void setPluginNamespace(const char* libNamespace) noexcept override { mNamespace = libNamespace; }
 
-  const char* getPluginNamespace() const override { return mNamespace.c_str(); }
+  const char* getPluginNamespace() const noexcept override { return mNamespace.c_str(); }
 
  protected:
   std::string mNamespace;

@@ -51,12 +51,11 @@ ReducePlugin::ReducePlugin(void const* serialData, size_t serialLength) {
 
 ReducePlugin::~ReducePlugin() { terminate(); }
 
-int ReducePlugin::getNbOutputs() const { return 1; }
+int ReducePlugin::getNbOutputs() const noexcept { return 1; }
 
-nvinfer1::DimsExprs ReducePlugin::getOutputDimensions(int outputIndex,
-                                                      const nvinfer1::DimsExprs* inputs,
-                                                      int nbInputs,
-                                                      nvinfer1::IExprBuilder& exprBuilder) {
+nvinfer1::DimsExprs ReducePlugin::getOutputDimensions(
+    int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
+    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   ASSERT(nbInputs == 1);
 
   nvinfer1::DimsExprs output;
@@ -89,19 +88,19 @@ nvinfer1::DimsExprs ReducePlugin::getOutputDimensions(int outputIndex,
   return output;
 }
 
-int ReducePlugin::initialize() { return 0; }
+int ReducePlugin::initialize() noexcept { return 0; }
 
-void ReducePlugin::terminate() {}
+void ReducePlugin::terminate() noexcept {}
 
 size_t ReducePlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                       const nvinfer1::PluginTensorDesc* outputs,
-                                      int nbOutputs) const {
+                                      int nbOutputs) const noexcept {
   return 0;
 }
 
 int ReducePlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                           const nvinfer1::PluginTensorDesc* outputDesc, const void* const* inputs,
-                          void* const* outputs, void* workspace, cudaStream_t stream) {
+                          void* const* outputs, void* workspace, cudaStream_t stream) noexcept {
   const auto input_dim = inputDesc[0].dims;
   int64_t M = 1, N = 1, K = 1;
 
@@ -152,12 +151,12 @@ int ReducePlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t ReducePlugin::getSerializationSize() const {
+size_t ReducePlugin::getSerializationSize() const noexcept {
   return serialized_size(reduce_dims_) + serialized_size(keep_dim_) + serialized_size(data_type_) +
          serialized_size(power_);
 }
 
-void ReducePlugin::serialize(void* buffer) const {
+void ReducePlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, reduce_dims_);
   serialize_value(&buffer, keep_dim_);
   serialize_value(&buffer, data_type_);
@@ -165,7 +164,7 @@ void ReducePlugin::serialize(void* buffer) const {
 }
 
 bool ReducePlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                             int nbInputs, int nbOutputs) {
+                                             int nbInputs, int nbOutputs) noexcept {
 #ifdef ENABLE_REDUCE_FLOAT16
   return ((inOut[pos].type == nvinfer1::DataType::kFLOAT ||
            inOut[pos].type == nvinfer1::DataType::kHALF) &&
@@ -176,30 +175,30 @@ bool ReducePlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTens
 #endif
 }
 
-const char* ReducePlugin::getPluginType() const { return REDUCE_PLUGIN_NAME; }
+const char* ReducePlugin::getPluginType() const noexcept { return REDUCE_PLUGIN_NAME; }
 
-const char* ReducePlugin::getPluginVersion() const { return REDUCE_PLUGIN_VERSION; }
+const char* ReducePlugin::getPluginVersion() const noexcept { return REDUCE_PLUGIN_VERSION; }
 
-void ReducePlugin::destroy() { delete this; }
+void ReducePlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* ReducePlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* ReducePlugin::clone() const noexcept {
   return new ReducePlugin{reduce_dims_, keep_dim_, data_type_, power_};
 }
 
-void ReducePlugin::setPluginNamespace(const char* pluginNamespace) {
+void ReducePlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* ReducePlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* ReducePlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType ReducePlugin::getOutputDataType(int index, const nvinfer1::DataType* inputTypes,
-                                                   int nbInputs) const {
+                                                   int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index < 1);
   return inputTypes[0];
 }
 
 void ReducePlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
-                                   const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) {
+                                   const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -222,14 +221,16 @@ ReducePluginCreator::ReducePluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* ReducePluginCreator::getPluginName() const { return REDUCE_PLUGIN_NAME; }
+const char* ReducePluginCreator::getPluginName() const noexcept { return REDUCE_PLUGIN_NAME; }
 
-const char* ReducePluginCreator::getPluginVersion() const { return REDUCE_PLUGIN_VERSION; }
+const char* ReducePluginCreator::getPluginVersion() const noexcept { return REDUCE_PLUGIN_VERSION; }
 
-const nvinfer1::PluginFieldCollection* ReducePluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* ReducePluginCreator::getFieldNames() noexcept {
+  return &mFC;
+}
 
 nvinfer1::IPluginV2DynamicExt* ReducePluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int keep_dim = 0;
   std::vector<int> reduce_dims;
   const nvinfer1::PluginField* fields = fc->fields;
@@ -261,9 +262,8 @@ nvinfer1::IPluginV2DynamicExt* ReducePluginCreator::createPlugin(
   return obj;
 }
 
-nvinfer1::IPluginV2DynamicExt* ReducePluginCreator::deserializePlugin(const char* name,
-                                                                      const void* serialData,
-                                                                      size_t serialLength) {
+nvinfer1::IPluginV2DynamicExt* ReducePluginCreator::deserializePlugin(
+    const char* name, const void* serialData, size_t serialLength) noexcept {
   auto* obj = new ReducePlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

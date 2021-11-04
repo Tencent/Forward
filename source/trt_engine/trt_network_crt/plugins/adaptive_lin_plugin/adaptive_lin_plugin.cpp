@@ -54,18 +54,18 @@ AdaptiveLINPlugin::AdaptiveLINPlugin(void const *serialData, size_t serialLength
 
 AdaptiveLINPlugin::~AdaptiveLINPlugin() { terminate(); }
 
-int AdaptiveLINPlugin::getNbOutputs() const { return 2; }
+int AdaptiveLINPlugin::getNbOutputs() const noexcept { return 2; }
 
 nvinfer1::DimsExprs AdaptiveLINPlugin::getOutputDimensions(int outputIndex,
                                                            const nvinfer1::DimsExprs *inputs,
                                                            int nbInputs,
-                                                           nvinfer1::IExprBuilder &exprBuilder) {
+                                                           nvinfer1::IExprBuilder &exprBuilder) noexcept {
   const nvinfer1::DimsExprs output(inputs[0]);
   return output;
 }
 
 bool AdaptiveLINPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc *inOut,
-                                                  int nbInputs, int nbOutputs) {
+                                                  int nbInputs, int nbOutputs) noexcept {
 #ifdef ENABLE_ADAPTIVE_LIN_FLOAT16
   return ((inOut[pos].type == nvinfer1::DataType::kFLOAT ||
            inOut[pos].type == nvinfer1::DataType::kHALF) &&
@@ -78,7 +78,7 @@ bool AdaptiveLINPlugin::supportsFormatCombination(int pos, const nvinfer1::Plugi
 
 void AdaptiveLINPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc *in, int nbInputs,
                                         const nvinfer1::DynamicPluginTensorDesc *out,
-                                        int nbOutputs) {
+                                        int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -103,13 +103,13 @@ void AdaptiveLINPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc 
 
 size_t AdaptiveLINPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc *inputs, int nbInputs,
                                            const nvinfer1::PluginTensorDesc *outputs,
-                                           int nbOutputs) const {
+                                           int nbOutputs) const noexcept {
   return 0;
 }
 
-int AdaptiveLINPlugin::initialize() { return 0; }
+int AdaptiveLINPlugin::initialize() noexcept { return 0; }
 
-void AdaptiveLINPlugin::terminate() {
+void AdaptiveLINPlugin::terminate() noexcept {
   if (!initialized_) {
     return;
   }
@@ -125,7 +125,7 @@ void AdaptiveLINPlugin::terminate() {
 int AdaptiveLINPlugin::enqueue(const nvinfer1::PluginTensorDesc *inputDesc,
                                const nvinfer1::PluginTensorDesc *outputDesc,
                                const void *const *inputs, void *const *outputs, void *workspace,
-                               cudaStream_t stream) {
+                               cudaStream_t stream) noexcept {
   assert(initialized_);
 
   // input0 : input
@@ -168,37 +168,37 @@ int AdaptiveLINPlugin::enqueue(const nvinfer1::PluginTensorDesc *inputDesc,
   return 0;
 }
 
-size_t AdaptiveLINPlugin::getSerializationSize() const {
+size_t AdaptiveLINPlugin::getSerializationSize() const noexcept {
   return serialized_size(input_dim_) + serialized_size(epsilon_) + serialized_size(data_type_) +
          serialized_size(max_batch_size_);
 }
 
-void AdaptiveLINPlugin::serialize(void *buffer) const {
+void AdaptiveLINPlugin::serialize(void *buffer) const noexcept {
   serialize_value(&buffer, input_dim_);
   serialize_value(&buffer, epsilon_);
   serialize_value(&buffer, data_type_);
   serialize_value(&buffer, max_batch_size_);
 }
 
-const char *AdaptiveLINPlugin::getPluginType() const { return ADAPTIVE_LIN_PLUGIN_NAME; }
+const char *AdaptiveLINPlugin::getPluginType() const noexcept { return ADAPTIVE_LIN_PLUGIN_NAME; }
 
-const char *AdaptiveLINPlugin::getPluginVersion() const { return ADAPTIVE_LIN_PLUGIN_VERSION; }
+const char *AdaptiveLINPlugin::getPluginVersion() const noexcept { return ADAPTIVE_LIN_PLUGIN_VERSION; }
 
-void AdaptiveLINPlugin::destroy() { delete this; }
+void AdaptiveLINPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt *AdaptiveLINPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt *AdaptiveLINPlugin::clone() const noexcept {
   return new AdaptiveLINPlugin(input_dim_, epsilon_, data_type_, max_batch_size_);
 }
 
-void AdaptiveLINPlugin::setPluginNamespace(const char *pluginNamespace) {
+void AdaptiveLINPlugin::setPluginNamespace(const char *pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char *AdaptiveLINPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char *AdaptiveLINPlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType AdaptiveLINPlugin::getOutputDataType(int index,
                                                         const nvinfer1::DataType *inputTypes,
-                                                        int nbInputs) const {
+                                                        int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index < 2);
   return inputTypes[0];
 }
@@ -217,16 +217,16 @@ AdaptiveLINPluginCreator::AdaptiveLINPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char *AdaptiveLINPluginCreator::getPluginName() const { return ADAPTIVE_LIN_PLUGIN_NAME; }
+const char *AdaptiveLINPluginCreator::getPluginName() const noexcept { return ADAPTIVE_LIN_PLUGIN_NAME; }
 
-const char *AdaptiveLINPluginCreator::getPluginVersion() const {
+const char *AdaptiveLINPluginCreator::getPluginVersion() const noexcept {
   return ADAPTIVE_LIN_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection *AdaptiveLINPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection *AdaptiveLINPluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt *AdaptiveLINPluginCreator::createPlugin(
-    const char *name, const nvinfer1::PluginFieldCollection *fc) {
+    const char *name, const nvinfer1::PluginFieldCollection *fc) noexcept {
   nvinfer1::Dims dims;
   float epsilon = 0.0f;
   int data_type = 0;
@@ -260,7 +260,7 @@ nvinfer1::IPluginV2DynamicExt *AdaptiveLINPluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt *AdaptiveLINPluginCreator::deserializePlugin(const char *name,
                                                                            const void *serialData,
-                                                                           size_t serialLength) {
+                                                                           size_t serialLength) noexcept {
   auto *obj = new AdaptiveLINPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

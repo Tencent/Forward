@@ -34,7 +34,7 @@
 #include "trt_engine/trt_network_crt/layer_creators/i_trt_layer_creator.h"
 #include "trt_engine/trt_network_crt/plugins/adaptive_lin_plugin/adaptive_lin_plugin.h"
 #include "trt_engine/trt_network_crt/plugins/normalization_plugin/normalization_plugin.h"
-#include "trt_engine/trt_network_crt/plugins/skip_layer_norm_plugin/skip_layer_norm_plugin.h"
+#include "trt_engine/trt_network_crt/plugins/layer_norm_plugin/layer_norm_plugin.h"
 
 FWD_TRT_NAMESPACE_BEGIN
 
@@ -142,7 +142,7 @@ class TLayerCreator<TrtNormalizationDesc> : public ILayerCreator {
 
     // 创建 Plugin
     nvinfer1::IPluginCreator* creator = getPluginRegistry()->getPluginCreator(
-        fwd::bert::FWD_SKIP_LAYER_NORM_NAME, fwd::bert::FWD_SKIP_LAYER_NORM_VERSION);
+        fwd::trt_::FWD_LAYER_NORM_NAME, fwd::trt_::FWD_LAYER_NORM_VERSION);
 
     std::vector<nvinfer1::PluginField> field_data;
     field_data.emplace_back("ld", &norm_desc->leading_dim, nvinfer1::PluginFieldType::kINT32, 1);

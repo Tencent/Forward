@@ -66,7 +66,7 @@ Step 1: clone the project
 Step 2: download `Tensorflow 1.15.0` (only needed when using Forward with Tensorflow framework under Linux)
 ```bash
 1 cd Forward/source/third_party/tensorflow/
-2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
+2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz
 3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
 ```
 Step 3: create `build` folder

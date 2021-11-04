@@ -66,7 +66,7 @@ Forward 是一款腾讯研发的 GPU 高性能推理加速框架。它提出了�
 步骤二：下载 `Tensorflow 1.15.0`（仅在 Linux 平台使用 Tensorflow 框架推理时需要）
 ```bash
 1 cd Forward/source/third_party/tensorflow/
-2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
+2 wget https://github.com/neargye-forks/tensorflow/releases/download/v1.15.0/libtensorflow-cpu-linux-x86_64-1.15.0.tar.gz
 3 tar -xvf libtensorflow-gpu-linux-x86_64-1.15.0.tar.gz
 ```
 步骤三：创建 `build` 文件夹

@@ -73,22 +73,6 @@
 #include "trt_engine/trt_network_crt/layer_creators/trt_torch_module_creator.h"
 #endif  //  ENABLE_TORCH_PLUGIN
 
-// register BERT-related plugins
-namespace fwd {
-namespace bert {
-REGISTER_TENSORRT_PLUGIN(EmbLayerNormPluginDynamicCreator);
-// REGISTER_TENSORRT_PLUGIN(EmbLayerNormVarSeqlenPluginCreator);
-REGISTER_TENSORRT_PLUGIN(GeluPluginDynamicCreator);
-REGISTER_TENSORRT_PLUGIN(QKVToContextPluginDynamicCreator);
-// REGISTER_TENSORRT_PLUGIN(QKVToContextVarSeqlenPluginCreator);
-// REGISTER_TENSORRT_PLUGIN(QKVToContextInterleavedPluginCreator);
-REGISTER_TENSORRT_PLUGIN(SkipLayerNormPluginDynamicCreator);
-// REGISTER_TENSORRT_PLUGIN(SkipLayerNormVarSeqlenPluginCreator);
-// REGISTER_TENSORRT_PLUGIN(SkipLayerNormInterleavedPluginCreator);
-
-}  // namespace bert
-}  // namespace fwd
-
 FWD_TRT_NAMESPACE_BEGIN
 
 // register common plugins
@@ -99,6 +83,7 @@ REGISTER_TENSORRT_PLUGIN(ConstantPadPluginCreator);
 REGISTER_TENSORRT_PLUGIN(EmbeddingBagPluginCreator);
 REGISTER_TENSORRT_PLUGIN(GridSamplerPluginCreator);
 REGISTER_TENSORRT_PLUGIN(IndexPluginCreator);
+REGISTER_TENSORRT_PLUGIN(LayerNormPluginDynamicCreator);
 REGISTER_TENSORRT_PLUGIN(NormalizationPluginCreator);
 REGISTER_TENSORRT_PLUGIN(NormPluginCreator);
 REGISTER_TENSORRT_PLUGIN(ReducePluginCreator);
@@ -114,6 +99,8 @@ LayerCreatorManager::LayerCreatorManager() {
   // 这里注册时候，按照字母顺序吧，便于查找
 
   using namespace trt_;
+
+  initLibNvInferPlugins(getLogger(), "");
 
   RegisterCreator<TrtActivationDesc>();
   RegisterCreator<TrtAdaptiveLinDesc>();

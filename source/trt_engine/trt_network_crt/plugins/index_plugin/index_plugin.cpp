@@ -75,12 +75,12 @@ IndexPlugin::IndexPlugin(void const* serialData, size_t serialLength) : initiali
 
 IndexPlugin::~IndexPlugin() { terminate(); }
 
-int IndexPlugin::getNbOutputs() const { return 1; }
+int IndexPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs IndexPlugin::getOutputDimensions(int outputIndex,
                                                      const nvinfer1::DimsExprs* inputs,
                                                      int nbInputs,
-                                                     nvinfer1::IExprBuilder& exprBuilder) {
+                                                     nvinfer1::IExprBuilder& exprBuilder) noexcept {
   ASSERT(inputs[0].nbDims == nb_dims_);
 
   nvinfer1::DimsExprs output;
@@ -112,7 +112,7 @@ nvinfer1::DimsExprs IndexPlugin::getOutputDimensions(int outputIndex,
 }
 
 bool IndexPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                            int nbInputs, int nbOutputs) {
+                                            int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 
   return (inOut[pos].type == nvinfer1::DataType::kFLOAT &&
@@ -120,7 +120,7 @@ bool IndexPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTenso
 }
 
 void IndexPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
-                                  const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) {
+                                  const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -145,13 +145,13 @@ void IndexPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, i
 
 size_t IndexPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                      const nvinfer1::PluginTensorDesc* outputs,
-                                     int nbOutputs) const {
+                                     int nbOutputs) const noexcept {
   return 0;
 }
 
-int IndexPlugin::initialize() { return 0; }
+int IndexPlugin::initialize() noexcept { return 0; }
 
-void IndexPlugin::terminate() {
+void IndexPlugin::terminate() noexcept {
   if (!initialized_) {
     return;
   }
@@ -164,7 +164,7 @@ void IndexPlugin::terminate() {
 
 int IndexPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                          const nvinfer1::PluginTensorDesc* outputDesc, const void* const* inputs,
-                         void* const* outputs, void* workspace, cudaStream_t stream) {
+                         void* const* outputs, void* workspace, cudaStream_t stream) noexcept {
   if (inputDesc[0].type == nvinfer1::DataType::kFLOAT) {
     // TODO(Paul Lu): 在enqueue的时候做是担心维度变化，目前还不支持dynamic
     // shape
@@ -185,12 +185,12 @@ int IndexPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t IndexPlugin::getSerializationSize() const {
+size_t IndexPlugin::getSerializationSize() const noexcept {
   return serialized_size(nb_index_) + serialized_size(nb_index_dims_) + serialized_size(nb_dims_) +
          serialized_size(h_pos_) + serialized_size(h_data_);
 }
 
-void IndexPlugin::serialize(void* buffer) const {
+void IndexPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, nb_dims_);
   serialize_value(&buffer, nb_index_dims_);
   serialize_value(&buffer, nb_index_);
@@ -198,24 +198,24 @@ void IndexPlugin::serialize(void* buffer) const {
   serialize_value(&buffer, h_pos_);
 }
 
-const char* IndexPlugin::getPluginType() const { return INDEX_PLUGIN_NAME; }
+const char* IndexPlugin::getPluginType() const noexcept { return INDEX_PLUGIN_NAME; }
 
-const char* IndexPlugin::getPluginVersion() const { return INDEX_PLUGIN_VERSION; }
+const char* IndexPlugin::getPluginVersion() const noexcept { return INDEX_PLUGIN_VERSION; }
 
-void IndexPlugin::destroy() { delete this; }
+void IndexPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* IndexPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* IndexPlugin::clone() const noexcept {
   return new IndexPlugin(h_data_.data(), h_pos_.data(), nb_dims_, nb_index_dims_, nb_index_);
 }
 
-void IndexPlugin::setPluginNamespace(const char* pluginNamespace) {
+void IndexPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* IndexPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* IndexPlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType IndexPlugin::getOutputDataType(int index, const nvinfer1::DataType* inputTypes,
-                                                  int nbInputs) const {
+                                                  int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
@@ -236,14 +236,14 @@ IndexPluginCreator::IndexPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* IndexPluginCreator::getPluginName() const { return INDEX_PLUGIN_NAME; }
+const char* IndexPluginCreator::getPluginName() const noexcept { return INDEX_PLUGIN_NAME; }
 
-const char* IndexPluginCreator::getPluginVersion() const { return INDEX_PLUGIN_VERSION; }
+const char* IndexPluginCreator::getPluginVersion() const noexcept { return INDEX_PLUGIN_VERSION; }
 
-const nvinfer1::PluginFieldCollection* IndexPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* IndexPluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt* IndexPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int nb_dims;
   int nb_index_dims;
   int nb_index;
@@ -282,7 +282,7 @@ nvinfer1::IPluginV2DynamicExt* IndexPluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt* IndexPluginCreator::deserializePlugin(const char* name,
                                                                      const void* serialData,
-                                                                     size_t serialLength) {
+                                                                     size_t serialLength) noexcept {
   auto* obj = new IndexPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

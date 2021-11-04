@@ -230,13 +230,12 @@ static std::string ShapeStrOf(const nvinfer1::Dims& dims) {
 // new_nbDims. If old_nbDims < new_nbDims, for old_nbDims < i < new_nbDims,
 // nvinfer1::Dims.d[i] = 1.
 static nvinfer1::Dims BroadcastDims(const nvinfer1::Dims& record_dims, int nbDims) {
-  auto dims = record_dims;
-  for (int i = record_dims.nbDims - 1; i >= 0; i--) {
-    dims.d[nbDims - record_dims.nbDims + i] = dims.d[i];
-  }
-  for (int i = 0; i < nbDims - record_dims.nbDims; i++) {
+  nvinfer1::Dims dims = record_dims;
+
+  for (int i = record_dims.nbDims; i < nbDims; ++i) {
     dims.d[i] = 1;
   }
+
   dims.nbDims = nbDims;
   return dims;
 }

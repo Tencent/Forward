@@ -49,12 +49,12 @@ ConstantPadPlugin::ConstantPadPlugin(void const* serialData, size_t serialLength
 
 ConstantPadPlugin::~ConstantPadPlugin() { terminate(); }
 
-int ConstantPadPlugin::getNbOutputs() const { return 1; }
+int ConstantPadPlugin::getNbOutputs() const noexcept { return 1; }
 
 nvinfer1::DimsExprs ConstantPadPlugin::getOutputDimensions(int outputIndex,
                                                            const nvinfer1::DimsExprs* inputs,
                                                            int nbInputs,
-                                                           nvinfer1::IExprBuilder& exprBuilder) {
+                                                           nvinfer1::IExprBuilder& exprBuilder) noexcept {
   ASSERT(inputs[0].nbDims == 4 && padding_dims_.size() == 4 ||
          inputs[0].nbDims == 5 && padding_dims_.size() == 6);
 
@@ -77,20 +77,20 @@ nvinfer1::DimsExprs ConstantPadPlugin::getOutputDimensions(int outputIndex,
   return output;
 }
 
-int ConstantPadPlugin::initialize() { return 0; }
+int ConstantPadPlugin::initialize() noexcept { return 0; }
 
-void ConstantPadPlugin::terminate() {}
+void ConstantPadPlugin::terminate() noexcept {}
 
 size_t ConstantPadPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                            const nvinfer1::PluginTensorDesc* outputs,
-                                           int nbOutputs) const {
+                                           int nbOutputs) const noexcept {
   return 0;
 }
 
 int ConstantPadPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                const nvinfer1::PluginTensorDesc* outputDesc,
                                const void* const* inputs, void* const* outputs, void* workspace,
-                               cudaStream_t stream) {
+                               cudaStream_t stream) noexcept {
   nvinfer1::Dims input_dims = inputDesc[0].dims;
 
   if (input_dims.nbDims == 4) {
@@ -138,18 +138,18 @@ int ConstantPadPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t ConstantPadPlugin::getSerializationSize() const {
+size_t ConstantPadPlugin::getSerializationSize() const noexcept {
   return serialized_size(padding_dims_) + serialized_size(constant_) + serialized_size(data_type_);
 }
 
-void ConstantPadPlugin::serialize(void* buffer) const {
+void ConstantPadPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, padding_dims_);
   serialize_value(&buffer, constant_);
   serialize_value(&buffer, data_type_);
 }
 
 bool ConstantPadPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                                  int nbInputs, int nbOutputs) {
+                                                  int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs == 1 && nbOutputs == 1 && pos < (nbInputs + nbOutputs));
 #ifdef ENABLE_CONSTANT_PAD_FLOAT16
   return ((inOut[pos].type == nvinfer1::DataType::kFLOAT ||
@@ -161,32 +161,32 @@ bool ConstantPadPlugin::supportsFormatCombination(int pos, const nvinfer1::Plugi
 #endif
 }
 
-const char* ConstantPadPlugin::getPluginType() const { return CONSTANT_PAD_PLUGIN_NAME; }
+const char* ConstantPadPlugin::getPluginType() const noexcept { return CONSTANT_PAD_PLUGIN_NAME; }
 
-const char* ConstantPadPlugin::getPluginVersion() const { return CONSTANT_PAD_PLUGIN_VERSION; }
+const char* ConstantPadPlugin::getPluginVersion() const noexcept { return CONSTANT_PAD_PLUGIN_VERSION; }
 
-void ConstantPadPlugin::destroy() { delete this; }
+void ConstantPadPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* ConstantPadPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* ConstantPadPlugin::clone() const noexcept {
   return new ConstantPadPlugin{padding_dims_, constant_, data_type_};
 }
 
-void ConstantPadPlugin::setPluginNamespace(const char* pluginNamespace) {
+void ConstantPadPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* ConstantPadPlugin::getPluginNamespace() const { return mPluginNamespace.c_str(); }
+const char* ConstantPadPlugin::getPluginNamespace() const noexcept { return mPluginNamespace.c_str(); }
 
 nvinfer1::DataType ConstantPadPlugin::getOutputDataType(int index,
                                                         const nvinfer1::DataType* inputTypes,
-                                                        int nbInputs) const {
+                                                        int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index == 0);
   return inputTypes[0];
 }
 
 void ConstantPadPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
                                         const nvinfer1::DynamicPluginTensorDesc* out,
-                                        int nbOutputs) {
+                                        int nbOutputs) noexcept {
   // for (int i = 0; i < nbInputs; i++) {
   //   for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
   //     // Do not support dynamic dimensions
@@ -207,16 +207,16 @@ ConstantPadPluginCreator::ConstantPadPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* ConstantPadPluginCreator::getPluginName() const { return CONSTANT_PAD_PLUGIN_NAME; }
+const char* ConstantPadPluginCreator::getPluginName() const noexcept { return CONSTANT_PAD_PLUGIN_NAME; }
 
-const char* ConstantPadPluginCreator::getPluginVersion() const {
+const char* ConstantPadPluginCreator::getPluginVersion() const noexcept {
   return CONSTANT_PAD_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* ConstantPadPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* ConstantPadPluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt* ConstantPadPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   std::vector<int> padding_dims{};
   float constant{};
   int data_type{};
@@ -247,7 +247,7 @@ nvinfer1::IPluginV2DynamicExt* ConstantPadPluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt* ConstantPadPluginCreator::deserializePlugin(const char* name,
                                                                            const void* serialData,
-                                                                           size_t serialLength) {
+                                                                           size_t serialLength) noexcept {
   auto* obj = new ConstantPadPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

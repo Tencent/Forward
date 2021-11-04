@@ -306,6 +306,16 @@ TEST_F(TestTorchNodes, LrnModule) {
   TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
+TEST_F(TestTorchNodes, MatMul) {
+  model_path = model_path + "matmul.pth";
+  const auto mat1 = ::torch::randn({3, 4, 5}, device);
+  const auto mat2 = ::torch::randn({3, 5, 6}, device);
+
+  input_map["x"] = mat1;
+  input_map["y"] = mat2;
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
+}
+
 TEST_F(TestTorchNodes, Norm) {
   model_path = model_path + "norm.pth";
   const auto input = torch::randn({1, 32, 1, 1}, device);

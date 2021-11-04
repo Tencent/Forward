@@ -43,19 +43,19 @@ SplitPlugin::SplitPlugin(void const* serialData, size_t serialLength) : initiali
 
 SplitPlugin::~SplitPlugin() { terminate(); }
 
-int SplitPlugin::getNbOutputs() const { return split_size_.size(); }
+int SplitPlugin::getNbOutputs() const noexcept { return split_size_.size(); }
 
 nvinfer1::DimsExprs SplitPlugin::getOutputDimensions(int outputIndex,
                                                      const nvinfer1::DimsExprs* inputs,
                                                      int nbInputs,
-                                                     nvinfer1::IExprBuilder& exprBuilder) {
+                                                     nvinfer1::IExprBuilder& exprBuilder) noexcept {
   ASSERT(nbInputs == 1);
   nvinfer1::DimsExprs output(inputs[0]);
   output.d[dim_] = exprBuilder.constant(split_size_[outputIndex]);
   return output;
 }
 
-int SplitPlugin::initialize() {
+int SplitPlugin::initialize() noexcept {
   if (initialized_) {
     return 0;
   }
@@ -87,7 +87,7 @@ int SplitPlugin::initialize() {
   return 0;
 }
 
-void SplitPlugin::terminate() {
+void SplitPlugin::terminate() noexcept {
   if (!initialized_) {
     return;
   }
@@ -102,13 +102,13 @@ void SplitPlugin::terminate() {
 
 size_t SplitPlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                      const nvinfer1::PluginTensorDesc* outputs,
-                                     int nbOutputs) const {
+                                     int nbOutputs) const noexcept {
   return 0;
 }
 
 int SplitPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                          const nvinfer1::PluginTensorDesc* outputDesc, const void* const* inputs,
-                         void* const* outputs, void* workspace, cudaStream_t stream) {
+                         void* const* outputs, void* workspace, cudaStream_t stream) noexcept {
   for (size_t i = 0; i < split_size_.size(); ++i) {
     pinned_outputs_[i] = static_cast<float*>(outputs[i]);
   }
@@ -131,18 +131,18 @@ int SplitPlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t SplitPlugin::getSerializationSize() const {
+size_t SplitPlugin::getSerializationSize() const noexcept {
   return serialized_size(dim_) + serialized_size(split_size_) + serialized_size(data_type_);
 }
 
-void SplitPlugin::serialize(void* buffer) const {
+void SplitPlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, dim_);
   serialize_value(&buffer, split_size_);
   serialize_value(&buffer, data_type_);
 }
 
 bool SplitPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                            int nbInputs, int nbOutputs) {
+                                            int nbInputs, int nbOutputs) noexcept {
   //        return (inOut[pos].type == nvinfer1::DataType::kFLOAT
   //            && inOut[pos].format == nvinfer1::TensorFormat::kLINEAR);
   return ((inOut[pos].type == nvinfer1::DataType::kFLOAT ||
@@ -150,30 +150,30 @@ bool SplitPlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTenso
           inOut[pos].format == nvinfer1::TensorFormat::kLINEAR);
 }
 
-const char* SplitPlugin::getPluginType() const { return SPLIT_PLUGIN_NAME; }
+const char* SplitPlugin::getPluginType() const noexcept { return SPLIT_PLUGIN_NAME; }
 
-const char* SplitPlugin::getPluginVersion() const { return SPLIT_PLUGIN_VERSION; }
+const char* SplitPlugin::getPluginVersion() const noexcept { return SPLIT_PLUGIN_VERSION; }
 
-void SplitPlugin::destroy() { delete this; }
+void SplitPlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* SplitPlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* SplitPlugin::clone() const noexcept {
   return new SplitPlugin{dim_, split_size_, data_type_};
 }
 
-void SplitPlugin::setPluginNamespace(const char* pluginNamespace) {
+void SplitPlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* SplitPlugin::getPluginNamespace() const { return mPluginNamespace; }
+const char* SplitPlugin::getPluginNamespace() const noexcept { return mPluginNamespace; }
 
 nvinfer1::DataType SplitPlugin::getOutputDataType(int index, const nvinfer1::DataType* inputTypes,
-                                                  int nbInputs) const {
+                                                  int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index < split_size_.size());
   return inputTypes[0];
 }
 
 void SplitPlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
-                                  const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) {
+                                  const nvinfer1::DynamicPluginTensorDesc* out, int nbOutputs) noexcept {
   for (int i = 0; i < nbInputs; i++) {
     for (int j = 0; j < in[i].desc.dims.nbDims; j++) {
       // Do not support dynamic dimensions
@@ -194,14 +194,14 @@ SplitPluginCreator::SplitPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* SplitPluginCreator::getPluginName() const { return SPLIT_PLUGIN_NAME; }
+const char* SplitPluginCreator::getPluginName() const noexcept { return SPLIT_PLUGIN_NAME; }
 
-const char* SplitPluginCreator::getPluginVersion() const { return SPLIT_PLUGIN_VERSION; }
+const char* SplitPluginCreator::getPluginVersion() const noexcept { return SPLIT_PLUGIN_VERSION; }
 
-const nvinfer1::PluginFieldCollection* SplitPluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* SplitPluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt* SplitPluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int dim = -1;
   std::vector<int> split_size;
   const nvinfer1::PluginField* fields = fc->fields;
@@ -230,7 +230,7 @@ nvinfer1::IPluginV2DynamicExt* SplitPluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt* SplitPluginCreator::deserializePlugin(const char* name,
                                                                      const void* serialData,
-                                                                     size_t serialLength) {
+                                                                     size_t serialLength) noexcept {
   auto* obj = new SplitPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;
