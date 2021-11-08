@@ -46,8 +46,8 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
 
     return kind == c10::aten::flatten || kind == c10::aten::permute ||
            kind == c10::aten::pixel_shuffle || kind == c10::aten::transpose ||
-           kind == c10::aten::view || kind == c10::aten::reshape || kind == c10::aten::unsqueeze ||
-           kind == c10::aten::unsqueeze_ ||
+           kind == c10::aten::view || kind == c10::aten::reshape || kind == c10::aten::squeeze ||
+           kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_ ||
            kind == c10::aten::expand;  // TODO(Ao Li): 暂时在这里处理 expand
   }
 
@@ -66,6 +66,8 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
 
     if (kind == c10::aten::unsqueeze || kind == c10::aten::unsqueeze_)
       return CreateUnSqueeze(node, module, input_values);
+
+    if (kind == c10::aten::squeeze) return CreateSqueeze(node, module, input_values);
 
     return nullptr;
   }
@@ -88,7 +90,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
 
     auto input_shape = torch_::ShapeOf(module.Get(inputs[0]).toTensor());
     const int nbdims = input_shape.size();
-    input_shape[0] = 0;                                            // keep batch dim
+    input_shape[0] = 0;                                            // keep batch dim_idx
     input_shape[nbdims - 3] /= (upscale_factor * upscale_factor);  // C /= upscale_factor^2
     input_shape[nbdims - 2] *= upscale_factor;                     // H *= upscale_factor
     input_shape[nbdims - 1] *= upscale_factor;                     // W *= upscale_factor
@@ -213,7 +215,7 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     const auto inputs = node->inputs();
 
     // Input 0: Tensor input
-    // Input 1: dim
+    // Input 1: dim_idx
     auto dim = module.Get(inputs[1]).toInt();
 
     // 处理输入是常量的情况
@@ -246,6 +248,60 @@ class TLayerDescCreator<TrtShuffleDesc> : public ILayerDescCreator {
     layer_desc->doReshape = true;
     layer_desc->doSecondTrans = false;
     layer_desc->reshapeDimensions = TrtUtils::ToDims(input_shape);
+
+    return layer_desc;
+  }
+
+  std::shared_ptr<TrtLayerDesc> CreateSqueeze(const JitNode* node, const TorchModule& module,
+                                              std::vector<const JitValue*>& input_values) const {
+    const auto inputs = node->inputs();
+
+    // Input 0: Tensor input
+    // Input 1: dim_idx
+    auto dim_idx = module.Get(inputs[1]).toInt();
+
+    // 处理输入是常量的情况
+    if (inputs[0]->node()->kind() == c10::prim::GetAttr ||
+        inputs[0]->node()->kind() == c10::prim::Constant) {
+      auto input = module.Get(inputs[0]).toTensor();
+      input = input.squeeze(dim_idx).contiguous();
+
+      auto layer_desc = std::make_shared<TrtConstantDesc>();
+      layer_desc->weights = torch_::ToFwdWeights(input);
+      layer_desc->dimensions = torch_::DimsOf(input);
+
+      input_values.push_back(nullptr);
+      return layer_desc;
+    }
+
+    // 处理输入不是常量的情况
+    input_values.push_back(inputs[0]);
+
+    auto input_shape = torch_::ShapeOf(module.Get(inputs[0]).toTensor());
+    if (dim_idx < 0) {
+      dim_idx += input_shape.size();
+    }
+    CHECK_LE(dim_idx, input_shape.size());
+    CHECK_EQ(input_shape[dim_idx], 1);    // dim should be 1
+
+    // get new shape
+    std::vector<int64_t> new_shape;
+    for (int i = 0; i < input_shape.size(); ++i) {
+      if (i == dim_idx) continue;
+      new_shape.push_back(input_shape[i]);
+    }
+
+    // permute dim_idx to last_dim
+    std::vector<int> permute{0, 1, 2, 3, 4, 5, 6, 7};
+    permute[dim_idx] = input_shape.size() - 1;
+    permute[input_shape.size() - 1] = dim_idx;
+
+    auto layer_desc = std::make_shared<TrtShuffleDesc>();
+    layer_desc->doFirstTrans = true;
+    layer_desc->firstTranspose = TrtUtils::ToPermutation(permute);
+    layer_desc->doReshape = true;
+    layer_desc->doSecondTrans = false;
+    layer_desc->reshapeDimensions = TrtUtils::ToDims(new_shape);
 
     return layer_desc;
   }

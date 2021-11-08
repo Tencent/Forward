@@ -99,7 +99,7 @@ class TLayerDescCreator<TrtResizeDesc> : public ILayerDescCreator {
 
     // 不使用 scales 是因为在 bilinear2d 结果会有问题
     for (int i = 0; i < scales.size(); ++i) {
-      layer_desc->outputDimensions.d[2 + i] = dummy.size(2) * scales[i];
+      layer_desc->outputDimensions.d[2 + i] = dummy.size(2 + i) * scales[i];
     }
 
     return true;
@@ -109,8 +109,9 @@ class TLayerDescCreator<TrtResizeDesc> : public ILayerDescCreator {
                            TrtResizeDesc* layer_desc) {
     const auto inputs = node->inputs();
     const auto output_size = module.Get(inputs[1]).toIntVector();
-    layer_desc->outputDimensions.d[2] = output_size[0];
-    layer_desc->outputDimensions.d[3] = output_size[1];
+    for (int i = 0; i < output_size.size(); ++i) {
+      layer_desc->outputDimensions.d[2 + i] = output_size[i];
+    }
 
     if (node->kind() == c10::aten::upsample_bilinear2d ||
         node->kind() == c10::aten::upsample_trilinear3d) {

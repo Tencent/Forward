@@ -461,6 +461,22 @@ TEST_F(TestTorchNodes, UpsamplingNearest2dWithScale) {
   TestTorchInference(model_path, input_map, infer_mode, threshold);
 }
 
+TEST_F(TestTorchNodes, UpsamplingTrilinear3dWithSize) {
+  model_path = model_path + "upsampling_trilinear_3d_with_size.pth";
+  const auto input = torch::randn({1, 128, 20, 20, 20}, device);
+
+  input_map["input"] = input;
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
+}
+
+TEST_F(TestTorchNodes, UpsamplingTrilinear3dWithScale) {
+  model_path = model_path + "upsampling_trilinear_3d_with_scale.pth";
+  const auto input = torch::randn({1, 128, 20, 20, 20}, device);
+
+  input_map["input"] = input;
+  TestTorchInference(model_path, input_map, infer_mode, threshold);
+}
+
 TEST_F(TestTorchNodes, Unsqueeze) {
   model_path = model_path + "unsqueeze.pth";
   const auto input = torch::randn({1, 3}, device);

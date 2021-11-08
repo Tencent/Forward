@@ -66,17 +66,12 @@ class TLayerCreator<TrtElementWiseDesc> : public ILayerCreator {
                         "wise::constant::0] layer";
           return {};
         }
+
         inputs[i] = c_layer->getOutput(0);
       }
     }
 
-    // 同步两个向量的维度数量 (目前只用于fp_model)
-    if (inputs[0]->getDimensions().nbDims > inputs[1]->getDimensions().nbDims) {
-      auto reshape_input1 = network->addShuffle(*inputs[1]);
-      reshape_input1->setReshapeDimensions(
-          TrtUtils::BroadcastDims(inputs[1]->getDimensions(), inputs[0]->getDimensions().nbDims));
-      inputs[1] = reshape_input1->getOutput(0);
-    }
+    CHECK_EQ(inputs[0]->getDimensions().nbDims, inputs[1]->getDimensions().nbDims);
 
     nvinfer1::IElementWiseLayer* element_wise =
         network->addElementWise(*inputs[0], *inputs[1], element_wise_desc->operation);
