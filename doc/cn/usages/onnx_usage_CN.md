@@ -55,19 +55,18 @@ torch.onnx.export(model, inputs, 'resnet50.onnx', verbose=True, input_names=inpu
 
 ## 项目构建
 
-``` bash
+```bash
 mkdir build
 cd build
-cmake ..  \ 
--DTensorRT_ROOT=/path/to/TensorRT \ 
--DENABLE_PROFILING=OFF \ 
--DENABLE_DYNAMIC_BATCH=OFF \ 
--DBUILD_PYTHON_LIB=ON \ 
--DPYTHON_EXECUTABLE=/path/to/python3 \ 
--DENABLE_TORCH=OFF \ 
--DENABLE_TENSORFLOW=OFF \ 
--DENABLE_KERAS=OFF \ 
--DENABLE_ONNX=ON
+cmake ..                               \ 
+-DTensorRT_ROOT="path/to/TensorRT"     \ 
+-DENABLE_TENSORFLOW=OFF                \ 
+-DENABLE_TORCH=OFF                     \ 
+-DENABLE_KERAS=OFF                     \ 
+-DENABLE_ONNX=ON                       \ 
+-DENABLE_UNIT_TESTS=ON                 \ 
+-DBUILD_PYTHON_LIB=OFF                 \ 
+-DPYTHON_EXECUTABLE="/path/to/python3"
 
 make -j
 ```

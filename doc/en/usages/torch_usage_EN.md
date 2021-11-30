@@ -83,19 +83,19 @@ TracedModelFactory("arithmetic.pth", traced_model)
 
 ## Build
 
-``` bash
+```bash
 mkdir build
 cd build
-cmake ..  \ 
--DTensorRT_ROOT=/path/to/TensorRT \ 
--DENABLE_PROFILING=OFF \ 
--DENABLE_DYNAMIC_BATCH=OFF \ 
--DBUILD_PYTHON_LIB=ON \ 
--DPYTHON_EXECUTABLE=/path/to/python3 \ 
--DENABLE_TORCH=ON \ 
--DENABLE_TENSORFLOW=OFF \ 
--DENABLE_KERAS=OFF \ 
--DENABLE_ONNX=OFF
+cmake ..                               \ 
+-DTensorRT_ROOT="path/to/TensorRT"     \ 
+-DCMAKE_PREFIX_PATH="path/to/LibTorch" \ 
+-DENABLE_TENSORFLOW=OFF                \ 
+-DENABLE_TORCH=OFF                     \ 
+-DENABLE_KERAS=ON                      \ 
+-DENABLE_ONNX=OFF                      \ 
+-DENABLE_UNIT_TESTS=ON                 \ 
+-DBUILD_PYTHON_LIB=OFF                 \ 
+-DPYTHON_EXECUTABLE="/path/to/python3"
 
 make -j
 ```

@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include "trt_engine/trt_network_crt/trt_creator_manager.h"
 
@@ -66,6 +67,7 @@
 #include "trt_engine/trt_network_crt/layer_creators/trt_slice_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_softmax_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_split_creator.h"
+#include "trt_engine/trt_network_crt/layer_creators/trt_topk_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_unary_creator.h"
 #include "trt_engine/trt_network_crt/layer_creators/trt_upsample_bilinear_creator.h"
 
@@ -142,6 +144,7 @@ LayerCreatorManager::LayerCreatorManager() {
   RegisterCreator<TrtSliceDesc>();
   RegisterCreator<TrtSplitDesc>();
   RegisterCreator<TrtSoftmaxDesc>();
+  RegisterCreator<TrtTopKDesc>();
   RegisterCreator<TrtUnaryDesc>();
   RegisterCreator<TrtUpsampleBilinearDesc>();
 

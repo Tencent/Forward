@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -84,7 +85,13 @@ TEST_F(TestTfNodes, Arithmetic) {
 
   input_map["input1"] = input1.get();
   input_map["input2"] = input2.get();
-  output_names = {"add/add", "subtract/sub", "multiply/mul"};
+  output_names = {"add_1/add",
+                  "subtract_1/sub",
+                  "multiply_1/mul",
+                  "tf_op_layer_Greater_1/Greater_1",
+                  "tf_op_layer_Less_1/Less_1",
+                  "tf_op_layer_Maximum_1/Maximum_1",
+                  "tf_op_layer_Minimum_1/Minimum_1"};
 
   TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
@@ -203,6 +210,18 @@ TEST_F(TestTfNodes, EmbeddingBag) {
   TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }
 
+TEST_F(TestTfNodes, Fill) {
+  filename = filename + "fill.pb";
+
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {128, 16});
+
+  // To clarify, tf.fill has no input, thus dummy input and tf.concat are created.
+  input_map["input"] = input.get();
+  output_names = {"concat/Concat"};
+
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
+}
+
 TEST_F(TestTfNodes, FullyConnected) {
   filename = filename + "dense.pb";
 
@@ -307,6 +326,29 @@ TEST_F(TestTfNodes, Split) {
 
   input_map["input_1"] = input.get();
   output_names = {"activation/Relu", "activation_1/Relu", "activation_2/Relu", "activation_3/Relu"};
+
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
+}
+
+TEST_F(TestTfNodes, TopK) {
+  filename = filename + "topk.pb";
+
+  const int batch_size = 16;
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {batch_size, 128});
+
+  input_map["input"] = input.get();
+  output_names = {"topkv2/TopKV2"};
+
+  TestTFInference(filename, infer_mode, input_map, output_names, threshold);
+}
+
+TEST_F(TestTfNodes, Unary) {
+  filename = filename + "unary.pb";
+
+  const auto input = fwd::tf_::CreateRandomTensor<float>(TF_FLOAT, {128, 16});
+
+  input_map["input"] = input.get();
+  output_names = {"unary/Unary"};
 
   TestTFInference(filename, infer_mode, input_map, output_names, threshold);
 }

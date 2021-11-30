@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -51,12 +52,26 @@ class TLayerDescCreator<TrtSelectDesc> : public ILayerDescCreator {
     LOG(INFO) << "TrtSelectDesc::Create";
 
     if (op.OpType() == "Select") {
-      T_CHECK(op.NumInputs() == 3);
+      const int num_inputs = op.NumInputs();
+      T_CHECK(num_inputs == 3);
 
-      op_inputs.push_back(op.Input(0));  // condition
-      op_inputs.push_back(op.Input(1));  // true
-      op_inputs.push_back(op.Input(2));  // else
-      return std::make_shared<TrtSelectDesc>();
+      auto layer_desc = std::make_shared<TrtSelectDesc>();
+
+      for (int i = 0; i < num_inputs; ++i) {
+        const auto input = op.Input(i);
+        const auto tensor = ToFwdWeights(input.GetConstantTensor());
+
+        if (tensor.Empty()) {
+          op_inputs.push_back(input);
+        } else {
+          layer_desc->inputs[i].inUse = true;
+          layer_desc->inputs[i].data = tensor;
+          layer_desc->inputs[i].dim = DimsOf(input);
+          op_inputs.push_back(Output());
+        }
+      }
+
+      return layer_desc;
     }
 
     return CreateFromPattern(op, graph, op_inputs);
@@ -120,16 +135,16 @@ class TLayerDescCreator<TrtSelectDesc> : public ILayerDescCreator {
       op_inputs.push_back(cast_input);
       op_inputs.push_back(input);
     }
-    layer_desc->falseInput.inUse = true;
-    layer_desc->falseInput.dim = {1, 1};
+    layer_desc->inputs[2].inUse = true;
+    layer_desc->inputs[2].dim = {1, 1};
 
     auto output_type = op.OutputType(0);
     if (output_type == TF_INT32) {
       std::vector<int> zero(1, 0);
-      layer_desc->falseInput.data = FwdWeights(zero);
+      layer_desc->inputs[2].data = FwdWeights(zero);
     } else {
       std::vector<float> zero(1, 0);
-      layer_desc->falseInput.data = FwdWeights(zero);
+      layer_desc->inputs[2].data = FwdWeights(zero);
     }
 
     return layer_desc;
@@ -143,20 +158,20 @@ class TLayerDescCreator<TrtSelectDesc> : public ILayerDescCreator {
     auto output_type = op.OutputType(0);
 
     auto layer_desc = std::make_shared<TrtSelectDesc>();
-    layer_desc->trueInput.inUse = true;
-    layer_desc->falseInput.inUse = true;
-    layer_desc->trueInput.dim = {1, 1};
-    layer_desc->falseInput.dim = {1, 1};
+    layer_desc->inputs[1].inUse = true;
+    layer_desc->inputs[2].inUse = true;
+    layer_desc->inputs[1].dim = {1, 1};
+    layer_desc->inputs[2].dim = {1, 1};
     if (output_type == TF_INT32) {
       std::vector<int> one(1, 1);
       std::vector<int> zero(1, 0);
-      layer_desc->trueInput.data = FwdWeights(one);
-      layer_desc->falseInput.data = FwdWeights(zero);
+      layer_desc->inputs[1].data = FwdWeights(one);
+      layer_desc->inputs[2].data = FwdWeights(zero);
     } else {
       std::vector<float> one(1, 1);
       std::vector<float> zero(1, 0);
-      layer_desc->trueInput.data = FwdWeights(one);
-      layer_desc->falseInput.data = FwdWeights(zero);
+      layer_desc->inputs[1].data = FwdWeights(one);
+      layer_desc->inputs[2].data = FwdWeights(zero);
     }
     op_inputs.push_back(input);
 

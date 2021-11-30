@@ -16,14 +16,16 @@ fi
 
 cd build
 make clean
-cmake .. -DENABLE_PROFILING=OFF \ 
-         -DBUILD_PYTHON_LIB=OFF \ 
-         -DENABLE_TORCH=OFF \ 
-         -DENABLE_TENSORFLOW=OFF \ 
-         -DENABLE_KERAS=OFF \ 
-         -DENABLE_ONNX=OFF \ 
-         -DENABLE_RNN=OFF \ 
-         -DENABLE_UNIT_TESTS=OFF \ 
+cmake .. -DTensorRT_ROOT="path/to/TensorRT"     \ 
+         -DCMAKE_PREFIX_PATH="path/to/LibTorch" \ 
+         -DENABLE_TENSORFLOW=OFF                \ 
+         -DENABLE_TORCH=OFF                     \ 
+         -DENABLE_KERAS=OFF                     \ 
+         -DENABLE_ONNX=OFF                      \ 
+         -DBUILD_PYTHON_LIB=OFF                 \ 
+         -DENABLE_RNN=OFF                       \ 
+         -DENABLE_INFER_TESTS=OFF               \ 
+         -DENABLE_UNIT_TESTS=OFF                \ 
          -DPYTHON_EXECUTABLE=$(which python3)
 
 make -j

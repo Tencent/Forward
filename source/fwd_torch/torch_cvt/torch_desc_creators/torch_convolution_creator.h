@@ -100,7 +100,7 @@ class TorchConvolutionCreator : public ILayerDescCreator {
     auto layer_desc = std::make_shared<TLayerDesc>();
 
     const auto& weights_value = module.Get(inputs[1]);
-    at::Tensor weights = weights_value.toTensor();
+    at::Tensor weights = weights_value.toTensor().contiguous();
 
     // dim=4 <=> (De)Conv_2d; dim=5 <=> (De)Conv_3d
     CHECK_GE(weights.ndimension(), 4);

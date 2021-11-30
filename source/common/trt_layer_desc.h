@@ -97,7 +97,7 @@ struct ConstantInput {
 /// 以下是各节点的描述类，按照项目组自定义、Trt定义、复合操作三类排序
 /// 每类别中节点按照字母顺序排序
 /// Trt定义中尚未实现的节点包括：Constant, Gather, Identity, RaggedSoftMax,
-/// Scale, Shape, TopK
+/// Scale, Shape
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////
@@ -518,7 +518,7 @@ struct TrtScaleDesc : TrtLayerDesc {
 struct TrtSelectDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Select)
 
-  ConstantInput trueInput, falseInput;
+  ConstantInput inputs[3];  // condition, true, false
 };
 
 struct TrtShuffleDesc : TrtLayerDesc {
@@ -557,21 +557,22 @@ struct TrtSoftmaxDesc : TrtLayerDesc {
   uint32_t axes;
 };
 
-// TODO(yuanzexi): to be implemented
-// struct TrtTopKDesc : TrtLayerDesc
-// {
-//     TRT_LAYER_DESC(TopK)
+struct TrtTopKDesc : TrtLayerDesc {
+  TRT_LAYER_DESC(TopK)
 
-//     nvinfer1::TopKOperation operation;
-//     nvinfer1::k k;
-//     uint32_t reduceAxes;
-// };
+  nvinfer1::TopKOperation operation;
+  int32_t k;
+  uint32_t reduceAxes;
+};
 
 struct TrtUnaryDesc : TrtLayerDesc {
   TRT_LAYER_DESC(Unary)
 
   ConstantInput input;
   nvinfer1::UnaryOperation operation;
+
+  bool is_combined_operation{false};
+  std::vector<nvinfer1::UnaryOperation> combined_operations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

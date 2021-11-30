@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -63,12 +64,31 @@ float RandomFloat();
  */
 int RandomInt();
 
+inline size_t GetElementSize(TF_DataType type) {
+  switch (type) {
+    case TF_INT64:
+      return 8;
+    case TF_INT32:
+      return 4;
+    case TF_INT16:
+      return 2;
+    case TF_INT8:
+      return 1;
+    case TF_FLOAT:
+      return 4;
+    case TF_HALF:
+      return 2;
+    default:
+      return 0;
+  }
+}
+
 std::shared_ptr<TF_Tensor> CreateEmptyTensor(TF_DataType data_type,
                                              const std::vector<int64_t>& dims);
 
 /**
  * \brief 将 vector 数据封装成一个 TF_Tensor
- * \tparam T 数值类型
+ * \param T 数值类型
  * \param data_type TF 数值类型
  * \param dims TF_Tensor 维度
  * \param data Vector 数据
@@ -91,8 +111,31 @@ std::shared_ptr<TF_Tensor> CreateTensor(TF_DataType data_type, const std::vector
 }
 
 /**
+ * \brief 将 scalar 数据封装成一个 TF_Tensor
+ * \param data_type TF 数值类型
+ * \param dims TF_Tensor 维度
+ * \param value 数值
+ * \return std::shared_ptr<TF_Tensor>
+ */
+template <typename T>
+std::shared_ptr<TF_Tensor> CreateConstantTensor(TF_DataType data_type,
+                                                const std::vector<int64_t>& dims, T value) {
+  std::shared_ptr<TF_Tensor> tensor = CreateEmptyTensor(data_type, dims);
+
+  auto tensor_data = TF_TensorData(tensor.get());
+  if (tensor_data == nullptr) return nullptr;
+
+  // TODO(yzx): 根据 data_type 创建，暂时默认全是 float
+  const std::size_t data_len = TF_TensorByteSize(tensor.get());
+  const std::vector<T> data(data_len / GetElementSize(data_type), value);
+  memcpy(tensor_data, data.data(), data_len);
+
+  return tensor;
+}
+
+/**
  * \brief 随机创建一个 TF_Tensor
- * \tparam T 数值类型
+ * \param T 数值类型
  * \param data_type TF 数值类型
  * \param dims TF_Tensor 维度
  * \return std::shared_ptr<TF_Tensor>
@@ -139,25 +182,6 @@ inline std::vector<int64_t> GetTensorShape(const TF_Tensor* tensor) {
     shape.push_back(TF_Dim(tensor, i));
   }
   return shape;
-}
-
-inline size_t GetElementSize(TF_DataType type) {
-  switch (type) {
-    case TF_INT64:
-      return 8;
-    case TF_INT32:
-      return 4;
-    case TF_INT16:
-      return 2;
-    case TF_INT8:
-      return 1;
-    case TF_FLOAT:
-      return 4;
-    case TF_HALF:
-      return 2;
-    default:
-      return 0;
-  }
 }
 
 /**
@@ -209,7 +233,7 @@ inline nvinfer1::Dims DimsOf(const Operation& op) { return DimsOf(Output(op.Grap
 
 /**
  * \brief 从 TF_Tensor 中取出数据转换为 Vector 存储
- * \tparam T 数值类型
+ * \param T 数值类型
  * \param tensor TF_Tensor
  * \return Vector<T>
  */
@@ -218,13 +242,24 @@ std::vector<T> GetTensorData(const TF_Tensor* tensor) {
   if (tensor == nullptr) {
     return {};
   }
-  auto data = static_cast<T*>(TF_TensorData(tensor));
-  auto size = TF_TensorByteSize(tensor) / TF_DataTypeSize(TF_TensorType(tensor));
-  if (data == nullptr || size <= 0) {
-    return {};
+
+  const auto size = TF_TensorByteSize(tensor) / TF_DataTypeSize(TF_TensorType(tensor));
+  if (size <= 0) return {};
+
+  // Special case: TF_Bool is the C API typedef for unsigned char.
+  if (TF_TensorType(tensor) == TF_BOOL) {
+    const auto data = static_cast<unsigned char*>(TF_TensorData(tensor));
+    if (data == nullptr) {
+      return {};
+    }
+    return std::vector<T>(data, data + size);
   }
 
-  return {data, data + size};
+  const auto data = static_cast<T*>(TF_TensorData(tensor));
+  if (data == nullptr) {
+    return {};
+  }
+  return std::vector<T>(data, data + size);
 }
 
 template <typename T>
@@ -284,7 +319,7 @@ std::shared_ptr<TF_Tensor> CastTensor(const TF_Tensor* tensor, TF_DataType dest_
 
 /**
  * \brief 从 Vector<TF_Tensor*> 中取出数据转换为 嵌套 Vector 存储
- * \tparam T 数值类型
+ * \param T 数值类型
  * \param tensors Vector<TF_Tensor*>
  * \return Vector<Vector<T>>
  */
@@ -300,7 +335,7 @@ std::vector<std::vector<T>> GetTensorsData(const std::vector<TF_Tensor*>& tensor
 
 /**
  * \brief 从 Vector<shared_ptr<TF_Tensor>> 中取出数据转换为 嵌套 Vector 存储
- * \tparam T 数值类型
+ * \param T 数值类型
  * \param tensors Vector<shared_ptr<TF_Tensor>>
  * \return Vector<Vector<T>>
  */

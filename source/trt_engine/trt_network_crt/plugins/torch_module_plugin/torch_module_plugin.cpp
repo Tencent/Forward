@@ -72,12 +72,12 @@ TorchModulePlugin::TorchModulePlugin(void const* serialData, size_t serialLength
 
 TorchModulePlugin::~TorchModulePlugin() { terminate(); }
 
-int TorchModulePlugin::getNbOutputs() const { return out_dims_.size(); }
+int TorchModulePlugin::getNbOutputs() const noexcept { return out_dims_.size(); }
 
 nvinfer1::DimsExprs TorchModulePlugin::getOutputDimensions(int outputIndex,
                                                            const nvinfer1::DimsExprs* inputs,
                                                            int nbInputs,
-                                                           nvinfer1::IExprBuilder& exprBuilder) {
+                                                           nvinfer1::IExprBuilder& exprBuilder) noexcept {
   nvinfer1::DimsExprs out_dim(inputs[0]);
   nvinfer1::Dims const_out_dim_ref = out_dims_[outputIndex];
   out_dim.nbDims = const_out_dim_ref.nbDims;
@@ -90,14 +90,14 @@ nvinfer1::DimsExprs TorchModulePlugin::getOutputDimensions(int outputIndex,
 
 size_t TorchModulePlugin::getWorkspaceSize(const nvinfer1::PluginTensorDesc* inputs, int nbInputs,
                                            const nvinfer1::PluginTensorDesc* outputs,
-                                           int nbOutputs) const {
+                                           int nbOutputs) const noexcept {
   return 0;
 }
 
 int TorchModulePlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
                                const nvinfer1::PluginTensorDesc* outputDesc,
                                const void* const* inputs, void* const* outputs, void* workspace,
-                               cudaStream_t stream) {
+                               cudaStream_t stream) noexcept {
   auto options = c10::TensorOptions().layout(::torch::kStrided).requires_grad(false);
   // prepare CPU or GPU inputs
   std::vector<c10::IValue> torch_inputs;
@@ -159,12 +159,12 @@ int TorchModulePlugin::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   return 0;
 }
 
-size_t TorchModulePlugin::getSerializationSize() const {
+size_t TorchModulePlugin::getSerializationSize() const noexcept {
   return serialized_size(data_type_) + serialized_size(node_ids_) + serialized_size(in_types_) +
          serialized_size(out_types_) + serialized_size(out_dims_);
 }
 
-void TorchModulePlugin::serialize(void* buffer) const {
+void TorchModulePlugin::serialize(void* buffer) const noexcept {
   serialize_value(&buffer, data_type_);
   serialize_value(&buffer, node_ids_);
   serialize_value(&buffer, in_types_);
@@ -173,30 +173,30 @@ void TorchModulePlugin::serialize(void* buffer) const {
 }
 
 bool TorchModulePlugin::supportsFormatCombination(int pos, const nvinfer1::PluginTensorDesc* inOut,
-                                                  int nbInputs, int nbOutputs) {
+                                                  int nbInputs, int nbOutputs) noexcept {
   ASSERT(inOut && nbInputs > 0 && nbOutputs > 0 && pos < (nbInputs + nbOutputs));
   return inOut[pos].format == nvinfer1::TensorFormat::kLINEAR;
 }
 
-const char* TorchModulePlugin::getPluginType() const { return TORCH_MODULE_PLUGIN_NAME; }
+const char* TorchModulePlugin::getPluginType() const noexcept { return TORCH_MODULE_PLUGIN_NAME; }
 
-const char* TorchModulePlugin::getPluginVersion() const { return TORCH_MODULE_PLUGIN_VERSION; }
+const char* TorchModulePlugin::getPluginVersion() const noexcept { return TORCH_MODULE_PLUGIN_VERSION; }
 
-void TorchModulePlugin::destroy() { delete this; }
+void TorchModulePlugin::destroy() noexcept { delete this; }
 
-nvinfer1::IPluginV2DynamicExt* TorchModulePlugin::clone() const {
+nvinfer1::IPluginV2DynamicExt* TorchModulePlugin::clone() const noexcept {
   return new TorchModulePlugin{data_type_, node_ids_, in_types_, out_types_, out_dims_};
 }
 
-void TorchModulePlugin::setPluginNamespace(const char* pluginNamespace) {
+void TorchModulePlugin::setPluginNamespace(const char* pluginNamespace) noexcept {
   mPluginNamespace = pluginNamespace;
 }
 
-const char* TorchModulePlugin::getPluginNamespace() const { return mPluginNamespace.c_str(); }
+const char* TorchModulePlugin::getPluginNamespace() const noexcept { return mPluginNamespace.c_str(); }
 
 nvinfer1::DataType TorchModulePlugin::getOutputDataType(int index,
                                                         const nvinfer1::DataType* inputTypes,
-                                                        int nbInputs) const {
+                                                        int nbInputs) const noexcept {
   ASSERT(inputTypes && nbInputs > 0 && index >= 0 && index < out_types_.size());
   // output data type should be the same with input
   auto dtype = static_cast<nvinfer1::DataType>(out_types_[index]);
@@ -209,7 +209,7 @@ nvinfer1::DataType TorchModulePlugin::getOutputDataType(int index,
 
 void TorchModulePlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc* in, int nbInputs,
                                         const nvinfer1::DynamicPluginTensorDesc* out,
-                                        int nbOutputs) {
+                                        int nbOutputs) noexcept {
   ASSERT(data_type_ == nvinfer1::DataType::kFLOAT || data_type_ == nvinfer1::DataType::kHALF);
   // load original module to obtain nodes' meta data
   std::string path(TORCH_MODULE_PLUGIN_MODULE_PATH);
@@ -256,9 +256,9 @@ void TorchModulePlugin::configurePlugin(const nvinfer1::DynamicPluginTensorDesc*
 #endif  // TORCH_HAS_CUDA
 }
 
-int32_t TorchModulePlugin::initialize() { return 0; }
+int32_t TorchModulePlugin::initialize() noexcept { return 0; }
 
-void TorchModulePlugin::terminate() {}
+void TorchModulePlugin::terminate() noexcept {}
 
 TorchModulePluginCreator::TorchModulePluginCreator() {
   mPluginAttributes.emplace_back(
@@ -271,16 +271,16 @@ TorchModulePluginCreator::TorchModulePluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* TorchModulePluginCreator::getPluginName() const { return TORCH_MODULE_PLUGIN_NAME; }
+const char* TorchModulePluginCreator::getPluginName() const noexcept { return TORCH_MODULE_PLUGIN_NAME; }
 
-const char* TorchModulePluginCreator::getPluginVersion() const {
+const char* TorchModulePluginCreator::getPluginVersion() const noexcept {
   return TORCH_MODULE_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* TorchModulePluginCreator::getFieldNames() { return &mFC; }
+const nvinfer1::PluginFieldCollection* TorchModulePluginCreator::getFieldNames() noexcept { return &mFC; }
 
 nvinfer1::IPluginV2DynamicExt* TorchModulePluginCreator::createPlugin(
-    const char* name, const nvinfer1::PluginFieldCollection* fc) {
+    const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
   int data_type{};
   std::vector<int> node_ids;
   std::vector<int> in_types;
@@ -324,7 +324,7 @@ nvinfer1::IPluginV2DynamicExt* TorchModulePluginCreator::createPlugin(
 
 nvinfer1::IPluginV2DynamicExt* TorchModulePluginCreator::deserializePlugin(const char* name,
                                                                            const void* serialData,
-                                                                           size_t serialLength) {
+                                                                           size_t serialLength) noexcept {
   auto* obj = new TorchModulePlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

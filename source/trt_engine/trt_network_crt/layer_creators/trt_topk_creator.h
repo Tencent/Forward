@@ -21,78 +21,44 @@
 //
 // Authors: Aster JIAN (asterjian@qq.com)
 //          Yzx (yzxyzxyzx777@outlook.com)
-//          Ao LI (346950981@qq.com)
-//          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
-#include <vector>
+#include <string>
 
 #include "trt_engine/trt_network_crt/layer_creators/i_trt_layer_creator.h"
 
 FWD_TRT_NAMESPACE_BEGIN
 
 /**
- * \brief TRT 一元操作层创建器
+ * \brief TRT TopK 层创建器
  */
 template <>
-class TLayerCreator<TrtUnaryDesc> : public ILayerCreator {
+class TLayerCreator<TrtTopKDesc> : public ILayerCreator {
  public:
   ITensorVector CreateLayer(nvinfer1::INetworkDefinition* network, const TrtLayerDesc* layer_desc,
                             const ITensorVector& input_tensors) override {
-    LOG(INFO) << "TrtUnaryDesc::CreateLayer";
-    const auto unary_desc = dynamic_cast<const TrtUnaryDesc*>(layer_desc);
-    T_CHECK(unary_desc);
+    LOG(INFO) << "TrtTopKDesc::CreateLayer";
+    const auto topk_desc = dynamic_cast<const TrtTopKDesc*>(layer_desc);
+    T_CHECK(topk_desc);
 
-    nvinfer1::ITensor* input;
-    if (unary_desc->input.inUse) {
-      input = network->addConstant(unary_desc->input.dim, unary_desc->input.data)->getOutput(0);
-    } else {
-      input = input_tensors[0];
-    }
+    auto& input = *input_tensors[0];
 
-    if (!unary_desc->is_combined_operation) {
-      return CreateSingleUnaryLayer(network, unary_desc->operation, input);
-    } else {
-      return CreateMultiUnaryLayers(network, unary_desc, input);
-    }
-  }
+    nvinfer1::ITopKLayer* topk =
+        network->addTopK(input, topk_desc->operation, topk_desc->k, topk_desc->reduceAxes);
 
- private:
-  ITensorVector CreateSingleUnaryLayer(nvinfer1::INetworkDefinition* network,
-                                       const nvinfer1::UnaryOperation operation,
-                                       nvinfer1::ITensor* input) {
-    nvinfer1::IUnaryLayer* unary = network->addUnary(*input, operation);
-    unary->setName((std::to_string(network->getNbLayers()) + std::string(" [Unary]")).c_str());
-
-    if (unary == nullptr) {
-      LOG(ERROR) << "Create Network: Fail to create [unary] layer.";
+    if (topk == nullptr) {
+      LOG(ERROR) << "Create Network: Fail to create [topk] layer.";
       return {};
     }
 
-    return {unary->getOutput(0)};
-  }
+    topk->setOperation(topk_desc->operation);
+    topk->setK(topk_desc->k);
+    topk->setReduceAxes(topk_desc->reduceAxes);
+    topk->setName((std::to_string(network->getNbLayers()) + std::string(" [TopK]")).c_str());
 
-  // To handle ops like tf.math.rsqrt, which consists two stacked operations: SQRT and RECIP.
-  // For the above case: SQRT should be performed before RECIP, thus RECIP is considered as a
-  // combined operation.
-  //
-  // In general case, if an op includes unary operations A, B, and C in order, A is
-  // stored in unary_desc->operation, B and C are stored in unary_desc->combined_operations, and
-  // should be traversed and added reversely, as the network is built from the output to the
-  // input.
-  ITensorVector CreateMultiUnaryLayers(nvinfer1::INetworkDefinition* network,
-                                       const TrtUnaryDesc* unary_desc, nvinfer1::ITensor* input) {
-    const auto combined_ops = unary_desc->combined_operations;
-    nvinfer1::IUnaryLayer* unary = network->addUnary(*input, combined_ops.back());
-    unary->setName((std::to_string(network->getNbLayers()) + std::string(" [Unary]")).c_str());
-
-    for (auto it = combined_ops.crbegin() + 1; it != combined_ops.crend(); ++it) {
-      unary = network->addUnary(*(unary->getOutput(0)), *it);
-      unary->setName((std::to_string(network->getNbLayers()) + std::string(" [Unary]")).c_str());
-    }
-
-    return CreateSingleUnaryLayer(network, unary_desc->operation, unary->getOutput(0));
+    return {topk->getOutput(0), topk->getOutput(1)};
   }
 };
 
