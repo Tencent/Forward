@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include "fwd_tf/tf_cvt/tf_desc_manager.h"
 
@@ -31,6 +32,7 @@
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_bert_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_clamp_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_concatenation_creator.h"
+#include "fwd_tf/tf_cvt/tf_desc_creators/tf_constant_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_convolution_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_dense_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_element_wise_creator.h"
@@ -47,6 +49,8 @@
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_slice_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_softmax_creator.h"
 #include "fwd_tf/tf_cvt/tf_desc_creators/tf_split_creator.h"
+#include "fwd_tf/tf_cvt/tf_desc_creators/tf_topk_creator.h"
+#include "fwd_tf/tf_cvt/tf_desc_creators/tf_unary_creator.h"
 
 FWD_TF_NAMESPACE_BEGIN
 
@@ -77,6 +81,9 @@ TfDescManager::TfDescManager() {
 
   // 这种简单的模式就放在下面
   RegisterCreator<TrtNoopDesc>();
+  RegisterCreator<TrtTopKDesc>();
+  RegisterCreator<TrtConstantDesc>();
+  RegisterCreator<TrtUnaryDesc>();
 }
 
 ILayerDescCreator* TfDescManager::FindDescCreator(const Operation& op) {

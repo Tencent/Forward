@@ -70,9 +70,9 @@ __device__ __forceinline__ half operator-(half a, int b) {
 
 __device__ __forceinline__ float operator*(float a, half b) { return a * __half2float(b); }
 
-__device__ __forceinline__ float round(float a) { return round(a); }
+__device__ __forceinline__ float round(float a) { return ::roundf(a); }
 
-__device__ __forceinline__ float round(const half &a) { return round(__half2float(a)); }
+__device__ __forceinline__ float round(const half &a) { return ::roundf(__half2float(a)); }
 
 #include <cfloat>
 

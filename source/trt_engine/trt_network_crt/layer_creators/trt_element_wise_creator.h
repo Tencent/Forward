@@ -23,18 +23,19 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
+#include <algorithm>
 #include <string>
-#include <vector>
 
 #include "trt_engine/trt_network_crt/layer_creators/i_trt_layer_creator.h"
 
 FWD_TRT_NAMESPACE_BEGIN
 
 /**
- * \brief 构造ElementWise操作, 包括张量逐点加减乘除和张量与常数值的计算操作
+ * \brief 构造 ElementWise 操作, 包括张量逐点 加、减、乘、除、 比大小 和 张量与常数值的计算 操作
  */
 template <>
 class TLayerCreator<TrtElementWiseDesc> : public ILayerCreator {
@@ -79,8 +80,38 @@ class TLayerCreator<TrtElementWiseDesc> : public ILayerCreator {
       LOG(ERROR) << "Create Network: Fail to create [element wise] layer";
       return {};
     }
+
+    element_wise->setName(
+        (std::to_string(network->getNbLayers()) + std::string(" [ElementWise]")).c_str());
+
+    if (element_wise_desc->operation == nvinfer1::ElementWiseOperation::kGREATER ||
+        element_wise_desc->operation == nvinfer1::ElementWiseOperation::kLESS) {
+      return HandleBooleanOutput(network, element_wise);
+    }
+
     return {element_wise->getOutput(0)};
   };
+
+ private:
+  ITensorVector HandleBooleanOutput(nvinfer1::INetworkDefinition* network,
+                                    nvinfer1::IElementWiseLayer* element_wise) {
+    // We need to handle kBOOL data type as Forward only allows kFloat computations.
+    // For nvinfer1::IIdentityLayer, the only valid tranformations supported are: (kFLOAT -> kHALF),
+    // (kFLOAT -> kINT8), (kHALF -> kFLOAT) and (kINT8 -> kFLOAT).
+    element_wise->getOutput(0)->setType(nvinfer1::DataType::kINT8);
+
+    nvinfer1::IIdentityLayer* identity = network->addIdentity(*(element_wise->getOutput(0)));
+    if (!identity) {
+      LOG(ERROR) << "Create Network: Fail to create [identity] layer";
+      return {};
+    }
+
+    identity->setOutputType(0, element_wise->getInput(0)->getType());
+    identity->setName(
+        (std::to_string(network->getNbLayers()) + std::string(" [Identity]")).c_str());
+
+    return {identity->getOutput(0)};
+  }
 };
 
 FWD_TRT_NAMESPACE_END

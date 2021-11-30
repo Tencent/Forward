@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #include "trt_engine/trt_network_crt/plugins/embedding_bag_plugin/embedding_bag_plugin.h"
 
@@ -53,10 +54,9 @@ EmbeddingBagPlugin::~EmbeddingBagPlugin() { terminate(); }
 
 int EmbeddingBagPlugin::getNbOutputs() const noexcept { return 1; }
 
-nvinfer1::DimsExprs EmbeddingBagPlugin::getOutputDimensions(int outputIndex,
-                                                            const nvinfer1::DimsExprs* inputs,
-                                                            int nbInputs,
-                                                            nvinfer1::IExprBuilder& exprBuilder) noexcept {
+nvinfer1::DimsExprs EmbeddingBagPlugin::getOutputDimensions(
+    int outputIndex, const nvinfer1::DimsExprs* inputs, int nbInputs,
+    nvinfer1::IExprBuilder& exprBuilder) noexcept {
   // 单一输入的情形，要求输入是二维Tensor
   if (nbInputs == 1) {
     ASSERT(inputs[0].nbDims == 2);
@@ -66,8 +66,15 @@ nvinfer1::DimsExprs EmbeddingBagPlugin::getOutputDimensions(int outputIndex,
       return output;
     } else {
       nvinfer1::DimsExprs output = inputs[0];
-      output.nbDims += 1;
-      output.d[2] = exprBuilder.constant(dim_);
+      // This is the workaround to handle tf.gather op. In the case with one signle input with
+      // dimensions [1, 3], its output would be reshaped to [1, 3, 1] given dim_ == 1. I'm not clear
+      // why there's a special branch for 'ReduceOperation::GATHER' to do so, but that output shape
+      // should have been the same as the input shape. To minimize the impact, I only try to extend
+      // to the third dimension if dim_ > 1, while it shouldn't be that way either.
+      if (dim_ > 1) {
+        output.nbDims += 1;
+        output.d[2] = exprBuilder.constant(dim_);
+      }
       return output;
     }
   }
@@ -196,7 +203,9 @@ void EmbeddingBagPlugin::serialize(void* buffer) const noexcept {
 
 const char* EmbeddingBagPlugin::getPluginType() const noexcept { return EMBEDDING_BAG_PLUGIN_NAME; }
 
-const char* EmbeddingBagPlugin::getPluginVersion() const noexcept { return EMBEDDING_BAG_PLUGIN_VERSION; }
+const char* EmbeddingBagPlugin::getPluginVersion() const noexcept {
+  return EMBEDDING_BAG_PLUGIN_VERSION;
+}
 
 void EmbeddingBagPlugin::destroy() noexcept { delete this; }
 
@@ -233,13 +242,17 @@ EmbeddingBagPluginCreator::EmbeddingBagPluginCreator() {
   mFC.fields = mPluginAttributes.data();
 }
 
-const char* EmbeddingBagPluginCreator::getPluginName() const noexcept { return EMBEDDING_BAG_PLUGIN_NAME; }
+const char* EmbeddingBagPluginCreator::getPluginName() const noexcept {
+  return EMBEDDING_BAG_PLUGIN_NAME;
+}
 
 const char* EmbeddingBagPluginCreator::getPluginVersion() const noexcept {
   return EMBEDDING_BAG_PLUGIN_VERSION;
 }
 
-const nvinfer1::PluginFieldCollection* EmbeddingBagPluginCreator::getFieldNames() noexcept { return &mFC; }
+const nvinfer1::PluginFieldCollection* EmbeddingBagPluginCreator::getFieldNames() noexcept {
+  return &mFC;
+}
 
 nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::createPlugin(
     const char* name, const nvinfer1::PluginFieldCollection* fc) noexcept {
@@ -279,9 +292,8 @@ nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::createPlugin(
   return obj;
 }
 
-nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::deserializePlugin(const char* name,
-                                                                            const void* serialData,
-                                                                            size_t serialLength) noexcept {
+nvinfer1::IPluginV2DynamicExt* EmbeddingBagPluginCreator::deserializePlugin(
+    const char* name, const void* serialData, size_t serialLength) noexcept {
   auto* obj = new EmbeddingBagPlugin{serialData, serialLength};
   obj->setPluginNamespace(mNamespace.c_str());
   return obj;

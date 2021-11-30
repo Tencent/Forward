@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -55,12 +56,10 @@ class TLayerCreator<TrtFullyConnectedDesc> : public ILayerCreator {
     if (dims.nbDims <= 3) {
       add_dim = true;
       const auto shuffle = network->addShuffle(*input);
-#ifdef USE_DYNAMIC_BATCH
       dims.d[0] = 0;
       const int ld =
           fully_connected_desc->kernelWeights.Count() / fully_connected_desc->nbOutputChannels;
       dims.d[dims.nbDims - 1] = ld;
-#endif
       dims.d[dims.nbDims++] = 1;
       dims.d[dims.nbDims++] = 1;
       shuffle->setReshapeDimensions(dims);

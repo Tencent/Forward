@@ -8,9 +8,9 @@
   - [Dynamic batch inputs](#dynamic-batch-inputs)
     - [CMake options](#cmake-options)
     - [Setting](#setting)
-  - [C++ Example](#cpp-example)
-    - [C++ INT8 Example](#cpp-int8-example)
-    - [C++ BERT INT8 Example](#cpp-bert-int8-example)
+  - [Cpp Example](#cpp-example)
+    - [Cpp INT8 Example](#cpp-int8-example)
+    - [Cpp BERT INT8 Example](#cpp-bert-int8-example)
   - [Python Example](#python-example)
     - [Python INT8 Example](#python-int8-example)
     - [Python BERT-INT8 Example](#python-bert-int8-example)
@@ -30,16 +30,15 @@
 ```bash
 mkdir build
 cd build
-cmake .. \ 
--DTensorRT_ROOT=/path/to/TensorRT \ 
--DENABLE_PROFILING=OFF \ 
--DENABLE_DYNAMIC_BATCH=OFF \ 
--DBUILD_PYTHON_LIB=ON \ 
--DPYTHON_EXECUTABLE=/path/to/python3 \ 
--DENABLE_TORCH=OFF \ 
--DENABLE_TENSORFLOW=ON \ 
--DENABLE_KERAS=OFF \ 
--DENABLE_ONNX=OFF
+cmake ..                               \ 
+-DTensorRT_ROOT="path/to/TensorRT"     \ 
+-DENABLE_TENSORFLOW=ON                 \ 
+-DENABLE_TORCH=OFF                     \ 
+-DENABLE_KERAS=OFF                     \ 
+-DENABLE_ONNX=OFF                      \ 
+-DENABLE_UNIT_TESTS=ON                 \ 
+-DBUILD_PYTHON_LIB=OFF                 \ 
+-DPYTHON_EXECUTABLE="/path/to/python3"
 
 make -j
 ```

@@ -5,8 +5,8 @@
 - [Forward-Keras](#forward-keras)
   - [Prerequisites](#prerequisites)
   - [Build](#build)
-  - [C++ Example](#cpp-example)
-    - [C++ INT8 Example](#cpp-int8-example)
+  - [Cpp Example](#cpp-example)
+    - [Cpp INT8 Example](#cpp-int8-example)
   - [Python Example](#python-example)
     - [Python INT8 Example](#python-int8-example)
 
@@ -25,16 +25,15 @@
 ```bash
 mkdir build
 cd build
-cmake .. \ 
--DTensorRT_ROOT=/path/to/TensorRT \ 
--DENABLE_PROFILING=OFF \ 
--DENABLE_DYNAMIC_BATCH=OFF \ 
--DBUILD_PYTHON_LIB=ON \ 
--DPYTHON_EXECUTABLE=/path/to/python3 \ 
--DENABLE_TORCH=OFF \ 
--DENABLE_TENSORFLOW=OFF \ 
--DENABLE_KERAS=ON \ 
--DENABLE_ONNX=OFF
+cmake ..                               \ 
+-DTensorRT_ROOT="path/to/TensorRT"     \ 
+-DENABLE_TENSORFLOW=OFF                \ 
+-DENABLE_TORCH=OFF                     \ 
+-DENABLE_KERAS=ON                      \ 
+-DENABLE_ONNX=OFF                      \ 
+-DENABLE_UNIT_TESTS=ON                 \ 
+-DBUILD_PYTHON_LIB=OFF                 \ 
+-DPYTHON_EXECUTABLE="/path/to/python3"
 
 make -j
 ```

@@ -23,6 +23,7 @@
 //          Yzx (yzxyzxyzx777@outlook.com)
 //          Ao LI (346950981@qq.com)
 //          Paul LU (lujq96@gmail.com)
+//          Zhaoyi LUO (luozy63@gmail.com)
 
 #pragma once
 
@@ -35,6 +36,7 @@
 #include "fwd_tf/tf_cvt/tf_utils.h"
 
 FWD_TF_NAMESPACE_BEGIN
+
 // ElementWise Description Creator
 template <>
 class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
@@ -104,6 +106,8 @@ class TLayerDescCreator<TrtElementWiseDesc> : public ILayerDescCreator {
     {"RealDiv", nvinfer1::ElementWiseOperation::kDIV},  // 5
     {"Pow", nvinfer1::ElementWiseOperation::kPOW},      // 6
     {"Square", nvinfer1::ElementWiseOperation::kPROD},  // 1
+    {"Maximum", nvinfer1::ElementWiseOperation::kMAX},  // 2
+    {"Minimum", nvinfer1::ElementWiseOperation::kMIN},  // 3
 #if NV_TENSORRT_MAJOR >= 7
     {"Greater", nvinfer1::ElementWiseOperation::kGREATER},  // 12
     {"Less", nvinfer1::ElementWiseOperation::kLESS},        // 13
