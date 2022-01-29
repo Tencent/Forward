@@ -90,8 +90,8 @@ cmake ..                               \
 -DTensorRT_ROOT="path/to/TensorRT"     \ 
 -DCMAKE_PREFIX_PATH="path/to/LibTorch" \ 
 -DENABLE_TENSORFLOW=OFF                \ 
--DENABLE_TORCH=OFF                     \ 
--DENABLE_KERAS=ON                      \ 
+-DENABLE_TORCH=ON                      \ 
+-DENABLE_KERAS=OFF                     \ 
 -DENABLE_ONNX=OFF                      \ 
 -DENABLE_UNIT_TESTS=ON                 \ 
 -DBUILD_PYTHON_LIB=OFF                 \ 
